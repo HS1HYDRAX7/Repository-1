@@ -1,0 +1,227 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Azizanzz0/Scripts/refs/heads/main/Crouching.txt"))()
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+
+local player = Players.LocalPlayer
+local cam = workspace.CurrentCamera
+
+local blurEffect = Instance.new("BlurEffect")
+blurEffect.Size = 0
+blurEffect.Parent = Lighting
+
+local walkSpeed = 10
+local cframeSprintSpeed = 10
+local maxStamina = 700
+local staminaDrainRate = 20
+local staminaRegenRate = 70
+local fovSprint = 85
+local fovNormal = 70
+local fovExhausted = 50
+local fadeSpeed = 10
+local flashInterval = 0.3
+local sprintButtonYOffset = 60
+
+local stamina = maxStamina
+local sprinting = false
+local isFlashing = false
+local isExhausted = false
+local isShaking = false
+local isCameraShaking = false
+local hue = 0
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "SprintSystem"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local staminaBackground = Instance.new("Frame")
+staminaBackground.Size = UDim2.new(0.3, 0, 0.05, 0)
+staminaBackground.Position = UDim2.new(0.05, 0, 0.9, 0)
+staminaBackground.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+staminaBackground.BackgroundTransparency = 1
+staminaBackground.BorderSizePixel = 0
+staminaBackground.Parent = gui
+
+local bgCorner = Instance.new("UICorner")
+bgCorner.CornerRadius = UDim.new(0.5, 0)
+bgCorner.Parent = staminaBackground
+
+local staminaFill = Instance.new("Frame")
+staminaFill.Size = UDim2.new(1, 0, 1, 0)
+staminaFill.BackgroundTransparency = 1
+staminaFill.BorderSizePixel = 0
+staminaFill.Parent = staminaBackground
+
+local fillCorner = Instance.new("UICorner")
+fillCorner.CornerRadius = UDim.new(0.5, 0)
+fillCorner.Parent = staminaFill
+
+local sprintBtn = Instance.new("ImageButton")
+sprintBtn.AnchorPoint = Vector2.new(0.5, 1)
+sprintBtn.BackgroundTransparency = 1
+sprintBtn.Image = "rbxassetid://89190879948216"
+sprintBtn.Parent = gui
+
+local breathSound = Instance.new("Sound")
+breathSound.SoundId = "rbxassetid://6814463121"
+breathSound.Volume = 1
+breathSound.Looped = true
+
+local function changeFOV(v)
+	TweenService:Create(cam, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {FieldOfView = v}):Play()
+end
+
+local function startFlash()
+	if isFlashing then return end
+	isFlashing = true
+	task.spawn(function()
+		while isFlashing do
+			staminaFill.BackgroundTransparency = 0
+			task.wait(flashInterval)
+			staminaFill.BackgroundTransparency = 1
+			task.wait(flashInterval)
+		end
+	end)
+end
+
+local function stopFlash()
+	isFlashing = false
+end
+
+local function shakeUI()
+	if isShaking then return end
+	isShaking = true
+	task.spawn(function()
+		while isShaking do
+			staminaBackground.Position = UDim2.new(0.05, math.random(-5,5), 0.9, math.random(-2,2))
+			task.wait(0.05)
+		end
+	end)
+end
+
+local function stopShakeUI()
+	isShaking = false
+	staminaBackground.Position = UDim2.new(0.05, 0, 0.9, 0)
+end
+
+local function shakeCamera(h)
+	if isCameraShaking then return end
+	isCameraShaking = true
+	task.spawn(function()
+		while isCameraShaking do
+			h.CameraOffset = Vector3.new(math.random(-2,2)*0.1, math.random(-2,2)*0.1, 0)
+			task.wait(0.05)
+		end
+	end)
+end
+
+local function stopShakeCamera(h)
+	isCameraShaking = false
+	h.CameraOffset = Vector3.zero
+end
+
+sprintBtn.MouseButton1Down:Connect(function()
+	if stamina > 0 and not isExhausted then
+		sprinting = true
+		sprintBtn.Image = "rbxassetid://96892467644525"
+	end
+end)
+
+sprintBtn.MouseButton1Up:Connect(function()
+	sprinting = false
+	sprintBtn.Image = "rbxassetid://89190879948216"
+end)
+
+local humanoid
+local hrp
+
+local function setupCharacter(char)
+	humanoid = char:WaitForChild("Humanoid")
+	hrp = char:WaitForChild("HumanoidRootPart")
+
+	for _,v in ipairs(hrp:GetChildren()) do
+		if v:IsA("Sound") then
+			v.Volume = 0
+		end
+	end
+
+	breathSound.Parent = hrp
+
+	stamina = maxStamina
+	isExhausted = false
+	sprinting = false
+	humanoid.WalkSpeed = walkSpeed
+
+	stopFlash()
+	stopShakeUI()
+	stopShakeCamera(humanoid)
+
+	changeFOV(fovNormal)
+	blurEffect.Size = 0
+end
+
+if player.Character then
+	setupCharacter(player.Character)
+end
+
+player.CharacterAdded:Connect(setupCharacter)
+
+RunService.RenderStepped:Connect(function(dt)
+	hue = (hue + dt * 0.2) % 1
+	staminaFill.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
+
+	local jumpBtn = player.PlayerGui:FindFirstChild("TouchGui")
+		and player.PlayerGui.TouchGui:FindFirstChild("TouchControlFrame")
+		and player.PlayerGui.TouchGui.TouchControlFrame:FindFirstChild("JumpButton")
+
+	if jumpBtn then
+		sprintBtn.Size = jumpBtn.Size
+		local p,s = jumpBtn.AbsolutePosition, jumpBtn.AbsoluteSize
+		sprintBtn.Position = UDim2.fromOffset(p.X + s.X/2, p.Y - s.Y + sprintButtonYOffset)
+	end
+
+	if not humanoid or not hrp then return end
+
+	local moving = humanoid.MoveDirection.Magnitude > 0.1
+
+	if sprinting and moving and not isExhausted then
+		local dir = cam.CFrame.LookVector
+		hrp.CFrame = hrp.CFrame + Vector3.new(dir.X, 0, dir.Z).Unit * cframeSprintSpeed * dt
+		stamina = math.max(0, stamina - staminaDrainRate * dt)
+	else
+		stamina = math.min(maxStamina, stamina + staminaRegenRate * dt)
+	end
+
+	staminaFill.Size = UDim2.new(stamina / maxStamina, 0, 1, 0)
+
+	if stamina <= 0 and not isExhausted then
+		isExhausted = true
+		sprinting = false
+		startFlash()
+		shakeUI()
+		shakeCamera(humanoid)
+		changeFOV(fovExhausted)
+		TweenService:Create(blurEffect, TweenInfo.new(0.4), {Size = 20}):Play()
+	end
+
+	if isExhausted and stamina >= maxStamina * 0.5 then
+		isExhausted = false
+		stopFlash()
+		stopShakeUI()
+		stopShakeCamera(humanoid)
+		changeFOV(fovNormal)
+		TweenService:Create(blurEffect, TweenInfo.new(0.6), {Size = 0}):Play()
+	end
+
+	local visible = stamina < maxStamina
+	local t = visible and 0 or 1
+	staminaBackground.BackgroundTransparency += (t - staminaBackground.BackgroundTransparency) * dt * fadeSpeed
+	staminaFill.BackgroundTransparency += (t - staminaFill.BackgroundTransparency) * dt * fadeSpeed
+
+	cam.FieldOfView = isExhausted and fovExhausted or (sprinting and fovSprint or fovNormal)
+end)
+
+cam.FieldOfView = fovNormal
