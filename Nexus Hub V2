@@ -1,4 +1,4 @@
-local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/source.lua"))()
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/WindUI.lua"))()
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -10,15 +10,22 @@ local DEFAULT_GRAVITY = workspace.Gravity
 
 local Window = WindUI:CreateWindow({
 	Title = "Nexus Hub v2.2.0.1",
-	SubTitle = "by Hydra",
+	Subtitle = "by Hydra",
+	Icon = "rocket",
 	Theme = "Dark",
-	Size = UDim2.fromOffset(520,420)
+	Border = true,
+	ToggleKey = Enum.KeyCode.RightShift
 })
 
-local PlayerTab = Window:CreateTab("Player","user")
-local ForsakenTab = Window:CreateTab("Forsaken","skull")
-local OthersTab = Window:CreateTab("Others","layers")
-local InfoTab = Window:CreateTab("Info","info")
+local PlayerSection = Window:Section({ Title = "Player", Icon = "user", Border = true })
+local ForsakenSection = Window:Section({ Title = "Forsaken", Icon = "skull", Border = true })
+local OthersSection = Window:Section({ Title = "Others", Icon = "layers", Border = true })
+local InfoSection = Window:Section({ Title = "Info", Icon = "info", Border = true })
+
+local PlayerTab = PlayerSection:Tab({ Title = "Movement" })
+local ForsakenTab = ForsakenSection:Tab({ Title = "Main" })
+local OthersTab = OthersSection:Tab({ Title = "Utilities" })
+local InfoTab = InfoSection:Tab({ Title = "Credits" })
 
 local playerEnabled=false
 local noclipEnabled=false
@@ -58,27 +65,43 @@ LocalPlayer.CharacterAdded:Connect(function(c)
 	if noclipEnabled then task.wait(0.25) applyNoclip(c) end
 end)
 
-PlayerTab:Toggle("Enable",false,function(v)
-	playerEnabled=v
-	if not v then workspace.Gravity=DEFAULT_GRAVITY end
-end)
+PlayerTab:Toggle({
+	Title="Enable",
+	Value=false,
+	Callback=function(v)
+		playerEnabled=v
+		if not v then workspace.Gravity=DEFAULT_GRAVITY end
+	end
+})
 
-PlayerTab:Slider("CFrame Speed",1,70,1,1,function(v)
-	cframeSpeed=v
-end)
+PlayerTab:Slider({
+	Title="CFrame Speed",
+	Step=1,
+	Value={Min=1,Max=70,Default=1},
+	Callback=function(v) cframeSpeed=v end
+})
 
-PlayerTab:Slider("Gravity",0,300,196,1,function(v)
-	gravity=v
-end)
+PlayerTab:Slider({
+	Title="Gravity",
+	Step=1,
+	Value={Min=0,Max=300,Default=196},
+	Callback=function(v) gravity=v end
+})
 
-PlayerTab:Toggle("Noclip",false,function(v)
-	noclipEnabled=v
-	if v then applyNoclip(LocalPlayer.Character) else removeNoclip() end
-end)
+PlayerTab:Toggle({
+	Title="Noclip",
+	Value=false,
+	Callback=function(v)
+		noclipEnabled=v
+		if v then applyNoclip(LocalPlayer.Character) else removeNoclip() end
+	end
+})
 
-PlayerTab:Toggle("Infinite Jump",false,function(v)
-	infJump=v
-end)
+PlayerTab:Toggle({
+	Title="Infinite Jump",
+	Value=false,
+	Callback=function(v) infJump=v end
+})
 
 UserInputService.JumpRequest:Connect(function()
 	if infJump and LocalPlayer.Character then
@@ -112,20 +135,24 @@ local staminaModule
 
 local function clearESP()
 	for _,o in ipairs(workspace:GetDescendants()) do
-		if o:IsA("Highlight") or o:IsA("BillboardGui") then
-			if string.find(o.Name,"Nexus") then o:Destroy() end
+		if (o:IsA("Highlight") or o:IsA("BillboardGui")) and string.find(o.Name,"Nexus") then
+			o:Destroy()
 		end
 	end
 end
 
 local function addHL(inst,color)
-	local h=inst:FindFirstChild("NexusHL") or Instance.new("Highlight",inst)
-	h.Name="NexusHL"
-	h.Adornee=inst
+	local h=inst:FindFirstChild("NexusHL")
+	if not h then
+		h=Instance.new("Highlight")
+		h.Name="NexusHL"
+		h.Adornee=inst
+		h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
+		h.Parent=inst
+	end
 	h.FillColor=color
 	h.OutlineColor=color
 	h.FillTransparency=0.45
-	h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
 end
 
 local function updatePlayerESP()
@@ -142,26 +169,33 @@ local function updatePlayerESP()
 	end
 end
 
-ForsakenTab:Toggle("Infinite Stamina",false,function(v)
-	infStamina=v
-	if staminaConn then staminaConn:Disconnect() staminaConn=nil end
-	if v then
-		local sprint=ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting")
-		staminaModule=require(sprint)
-		staminaConn=RunService.Heartbeat:Connect(function()
-			staminaModule.Stamina=staminaModule.MaxStamina or 999
-		end)
+ForsakenTab:Toggle({
+	Title="Infinite Stamina",
+	Value=false,
+	Callback=function(v)
+		infStamina=v
+		if staminaConn then staminaConn:Disconnect() staminaConn=nil end
+		if v then
+			local sprint=ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting")
+			staminaModule=require(sprint)
+			staminaConn=RunService.Heartbeat:Connect(function()
+				staminaModule.Stamina=staminaModule.MaxStamina or 999
+			end)
+		end
 	end
-end)
+})
 
-ForsakenTab:Toggle("ESP Killers",false,function(v) espKiller=v if not v then clearESP() end end)
-ForsakenTab:Toggle("ESP Survivors",false,function(v) espSurvivor=v if not v then clearESP() end end)
-ForsakenTab:Toggle("ESP Generators",false,function(v) espGen=v if not v then clearESP() end end)
-ForsakenTab:Toggle("Auto Generator",false,function(v) autoGen=v end)
+ForsakenTab:Toggle({ Title="ESP Killers", Value=false, Callback=function(v) espKiller=v if not v then clearESP() end end })
+ForsakenTab:Toggle({ Title="ESP Survivors", Value=false, Callback=function(v) espSurvivor=v if not v then clearESP() end end })
+ForsakenTab:Toggle({ Title="ESP Generators", Value=false, Callback=function(v) espGen=v if not v then clearESP() end end })
+ForsakenTab:Toggle({ Title="Auto Generator", Value=false, Callback=function(v) autoGen=v end })
 
-ForsakenTab:Slider("Gen Speed",1,10,5,1,function(v)
-	genDelay=v
-end)
+ForsakenTab:Slider({
+	Title="Gen Speed",
+	Step=1,
+	Value={Min=1,Max=10,Default=5},
+	Callback=function(v) genDelay=v end
+})
 
 task.spawn(function()
 	while task.wait(0.5) do
@@ -189,15 +223,19 @@ task.spawn(function()
 	end
 end)
 
-OthersTab:Button("Infinite Yield With AI",function()
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/BokX1/InfiniteYieldWithAI/refs/heads/main/InfiniteYieldWithAI.Lua"))()
-end)
+OthersTab:Button({
+	Title="Infinite Yield With AI",
+	Justify="Center",
+	Callback=function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/BokX1/InfiniteYieldWithAI/refs/heads/main/InfiniteYieldWithAI.Lua"))()
+	end
+})
 
-local clock=InfoTab:Label("Clock: --:--:--")
+local clockLabel = InfoTab:Paragraph({ Title="Clock", Desc="--:--:--" })
 task.spawn(function()
 	while task.wait(1) do
-		clock:Set("Clock: "..os.date("%H:%M:%S"))
+		clockLabel:Set("Desc",""..os.date("%H:%M:%S"))
 	end
 end)
 
-InfoTab:Paragraph("Creators","Hydra (Owner)")
+InfoTab:Paragraph({ Title="Creators", Desc="Hydra (Owner)" })
