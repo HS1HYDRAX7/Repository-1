@@ -1,10 +1,4 @@
--- Nexus Hub v2.3.0 ☄️
--- WindUI estável • Sliders funcionais • Infinite Jump, Noclip e Info corrigidos
--- Keybind: HNXS
-
-local WindUI = loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"
-))()
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -29,13 +23,11 @@ local LocalPlayer = Players.LocalPlayer
 local FONT = Font.new("rbxassetid://12187370928")
 local DEFAULT_GRAVITY = workspace.Gravity
 
--- ===== STATE =====
 local playerEnabled = false
 local noclipEnabled = false
 local infJump = false
 local cframeSpeed = 1
 local gravity = 196
-local infStamina = false
 
 local espKiller = false
 local espSurvivor = false
@@ -43,8 +35,10 @@ local espGen = false
 local autoGen = false
 local genDelay = 5
 local genBusy = false
+local infStamina = false
+local staminaConn
+local staminaModule
 
--- ===== NOCLIP (FORÇADO EM HEARTBEAT) =====
 RunService.Heartbeat:Connect(function()
     if noclipEnabled and LocalPlayer.Character then
         for _, p in ipairs(LocalPlayer.Character:GetDescendants()) do
@@ -55,7 +49,6 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- ===== INFINITE JUMP (COMPATÍVEL COM FORSAKEN) =====
 RunService.Heartbeat:Connect(function()
     if infJump and LocalPlayer.Character then
         local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
@@ -65,15 +58,14 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
--- ===== ESP =====
 local function clearESP()
     for _, v in ipairs(workspace:GetDescendants()) do
         if v:IsA("Highlight") and v.Name == "NexusHL" then v:Destroy() end
         if v:IsA("BillboardGui") and v.Name:find("Nexus") then v:Destroy() end
     end
-end
+end)
 
-local function highlight(obj, color)
+local function addHighlight(obj, color)
     local h = obj:FindFirstChild("NexusHL") or Instance.new("Highlight", obj)
     h.Name = "NexusHL"
     h.Adornee = obj
@@ -81,72 +73,66 @@ local function highlight(obj, color)
     h.FillTransparency = 0.45
     h.FillColor = color
     h.OutlineColor = color
-end
+end)
 
-local function nameESP(char, color)
+local function addName(char, color)
     if char:FindFirstChild("NexusName") then return end
     local hrp = char:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
-
     local bb = Instance.new("BillboardGui", char)
     bb.Name = "NexusName"
     bb.Adornee = hrp
     bb.Size = UDim2.fromOffset(120, 16)
     bb.StudsOffset = Vector3.new(0, -3, 0)
     bb.AlwaysOnTop = true
-
     local tl = Instance.new("TextLabel", bb)
-    tl.Size = UDim2.fromScale(1, 1)
+    tl.Size = UDim2.fromScale(1,1)
     tl.BackgroundTransparency = 1
     tl.FontFace = FONT
     tl.TextSize = 11
     tl.TextStrokeTransparency = 0.3
     tl.TextColor3 = color
     tl.Text = char.Name
-end
+end)
 
 local function updatePlayerESP()
     local wp = workspace:FindFirstChild("Players")
     if not wp then return end
     local killers = wp:FindFirstChild("Killers")
     local survivors = wp:FindFirstChild("Survivors")
-
     for _, plr in ipairs(Players:GetPlayers()) do
         if plr ~= LocalPlayer and plr.Character then
-            if killers and espKiller and plr.Character.Parent == killers then
-                highlight(plr.Character, Color3.fromRGB(255, 0, 0))
-                nameESP(plr.Character, Color3.fromRGB(255, 80, 80))
+            if espKiller and killers and plr.Character.Parent == killers then
+                addHighlight(plr.Character, Color3.fromRGB(255,0,0))
+                addName(plr.Character, Color3.fromRGB(255,80,80))
             end
-            if survivors and espSurvivor and plr.Character.Parent == survivors then
-                highlight(plr.Character, Color3.fromRGB(0, 255, 0))
-                nameESP(plr.Character, Color3.fromRGB(80, 255, 80))
+            if espSurvivor and survivors and plr.Character.Parent == survivors then
+                addHighlight(plr.Character, Color3.fromRGB(0,255,0))
+                addName(plr.Character, Color3.fromRGB(80,255,80))
             end
         end
     end
-end
+end)
 
--- ===== GENERATORS =====
 local function updateGenESP()
     if not espGen then return end
     local m = workspace:FindFirstChild("Map")
     m = m and m:FindFirstChild("Ingame")
     m = m and m:FindFirstChild("Map")
     if not m then return end
-
     for _, g in ipairs(m:GetChildren()) do
         if g.Name == "Generator" then
             local p = g:FindFirstChild("Progress")
-            local val = p and math.clamp(math.floor(p.Value / 100), 0, 100) or 0
-            highlight(g, val >= 100 and Color3.fromRGB(0,120,0) or Color3.fromRGB(255,255,0))
+            local val = p and math.clamp(math.floor(p.Value/100),0,100) or 0
+            addHighlight(g, val>=100 and Color3.fromRGB(0,120,0) or Color3.fromRGB(255,255,0))
         end
     end
-end
+end)
 
--- ===== UI =====
 local Window = WindUI:CreateWindow({
-    Title = "Nexus Hub v2.3.0 ☄️",
+    Title = "Nexus Hub ☄️",
     Subtitle = "by Hydra",
-    Size = UDim2.fromOffset(600, 450),
+    Size = UDim2.fromOffset(600,450),
     Keybind = "HNXS"
 })
 
@@ -154,116 +140,73 @@ local PlayerTab = Window:Tab({ Title = "Player" })
 local ForsakenTab = Window:Tab({ Title = "Forsaken" })
 local InfoTab = Window:Tab({ Title = "Information" })
 
--- ===== PLAYER TAB =====
 local PS = PlayerTab:Section({ Title = "Player Settings" })
 
-PS:Toggle({
-    Title = "Enable",
-    Callback = function(v)
-        playerEnabled = v
-        if not v then workspace.Gravity = DEFAULT_GRAVITY end
-    end
-})
+PS:Toggle({ Title="Enable", Callback=function(v) playerEnabled=v if not v then workspace.Gravity=DEFAULT_GRAVITY end end })
 
--- SLIDERS FIXADOS (Min = 0 evita bug do WindUI)
-PS:Slider({
-    Title = "CFrame Speed",
-    Min = 0,
-    Max = 70,
-    Default = 1,
-    Callback = function(v)
-        cframeSpeed = math.max(v, 1)
-    end
-})
+PS:Slider({ Title="CFrame Speed", Min=0, Max=70, Default=1, Callback=function(v) cframeSpeed=math.max(v,1) end })
 
-PS:Slider({
-    Title = "Gravity",
-    Min = 0,
-    Max = 300,
-    Default = 196,
-    Callback = function(v)
-        gravity = v
-    end
-})
+PS:Slider({ Title="Gravity", Min=0, Max=300, Default=196, Callback=function(v) gravity=v end })
 
-PS:Toggle({
-    Title = "Noclip",
-    Callback = function(v)
-        noclipEnabled = v
-    end
-})
+PS:Toggle({ Title="Noclip", Callback=function(v) noclipEnabled=v end })
 
-PS:Toggle({
-    Title = "Infinite Jump",
-    Callback = function(v)
-        infJump = v
-    end
-})
+PS:Toggle({ Title="Infinite Jump", Callback=function(v) infJump=v end })
 
--- ===== FORSAKEN =====
 local FS = ForsakenTab:Section({ Title = "Forsaken Hacks" })
 
 FS:Toggle({
-    Title = "Infinite Stamina",
-    Callback = function(v)
-        infStamina = v
+    Title="Infinite Stamina",
+    Callback=function(v)
+        infStamina=v
+        if staminaConn then staminaConn:Disconnect() staminaConn=nil end
+        if v then
+            local sprint = ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting")
+            staminaModule=require(sprint)
+            staminaConn=RunService.Heartbeat:Connect(function()
+                if infStamina then
+                    staminaModule.Stamina=staminaModule.MaxStamina or 999
+                end
+            end)
+        end
     end
 })
 
-FS:Toggle({ Title = "ESP Killers", Callback = function(v) espKiller = v if not v then clearESP() end end })
-FS:Toggle({ Title = "ESP Survivors", Callback = function(v) espSurvivor = v if not v then clearESP() end end })
-FS:Toggle({ Title = "ESP Generators", Callback = function(v) espGen = v if not v then clearESP() end end })
-FS:Toggle({ Title = "Auto Generator", Callback = function(v) autoGen = v end })
+FS:Toggle({ Title="ESP Killers", Callback=function(v) espKiller=v if not v then clearESP() end end })
+FS:Toggle({ Title="ESP Survivors", Callback=function(v) espSurvivor=v if not v then clearESP() end end })
+FS:Toggle({ Title="ESP Generators", Callback=function(v) espGen=v if not v then clearESP() end end })
+FS:Toggle({ Title="Auto Generator", Callback=function(v) autoGen=v end })
 
-FS:Slider({
-    Title = "Gen Speed",
-    Min = 0,
-    Max = 10,
-    Default = 5,
-    Callback = function(v)
-        genDelay = math.max(v, 1)
-    end
-})
+FS:Slider({ Title="Gen Speed", Min=0, Max=10, Default=5, Callback=function(v) genDelay=math.max(v,1) end })
 
--- ===== INFO TAB (RENDER GARANTIDO) =====
-task.delay(0.2, function()
-    local IS = InfoTab:Section({ Title = "Information" })
-    local clock = IS:Label({ Title = "Clock: --:--:--" })
-
+task.delay(0.2,function()
+    local IS = InfoTab:Section({ Title="Information" })
+    local clock = IS:Label({ Title="Clock: --:--:--" })
     task.spawn(function()
         while task.wait(1) do
-            clock:Set({ Title = "Clock: " .. os.date("%H:%M:%S") })
+            clock:Set({ Title="Clock: "..os.date("%H:%M:%S") })
         end
     end)
-
-    local creator = IS:Paragraph({
-        Title = "Creators",
-        Content = "Hydra (Owner)"
-    })
-
-    local h = 0
+    local creator = IS:Paragraph({ Title="Creators", Content="Hydra (Owner)" })
+    local h=0
     RunService.RenderStepped:Connect(function()
-        h = (h + 1) % 360
-        creator:Set({ ContentColor = Color3.fromHSV(h / 360, 1, 1) })
+        h=(h+1)%360
+        creator:Set({ ContentColor=Color3.fromHSV(h/360,1,1) })
     end)
 end)
 
--- ===== MOVIMENTO =====
 RunService.Heartbeat:Connect(function()
     if not playerEnabled then return end
-    local char = LocalPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    local char=LocalPlayer.Character
+    local hrp=char and char:FindFirstChild("HumanoidRootPart")
+    local hum=char and char:FindFirstChildOfClass("Humanoid")
     if not hrp or not hum then return end
-
-    workspace.Gravity = gravity
-    local d = hum.MoveDirection
-    if d.Magnitude > 0 then
-        hrp.CFrame = hrp.CFrame + d * (cframeSpeed * 0.08)
+    workspace.Gravity=gravity
+    local d=hum.MoveDirection
+    if d.Magnitude>0 then
+        hrp.CFrame=hrp.CFrame+d*(cframeSpeed*0.08)
     end
 end)
 
--- ===== LOOPS =====
 task.spawn(function()
     while task.wait(0.5) do
         updatePlayerESP()
@@ -274,25 +217,25 @@ end)
 task.spawn(function()
     while task.wait(1) do
         if autoGen and not genBusy then
-            genBusy = true
-            local m = workspace:FindFirstChild("Map")
-            m = m and m:FindFirstChild("Ingame")
-            m = m and m:FindFirstChild("Map")
+            genBusy=true
+            local m=workspace:FindFirstChild("Map")
+            m=m and m:FindFirstChild("Ingame")
+            m=m and m:FindFirstChild("Map")
             if m then
                 for _, g in ipairs(m:GetChildren()) do
-                    if g.Name == "Generator" and g:FindFirstChild("Remotes") then
+                    if g.Name=="Generator" and g:FindFirstChild("Remotes") then
                         pcall(function() g.Remotes.RE:FireServer() end)
                         task.wait(genDelay)
                     end
                 end
             end
-            genBusy = false
+            genBusy=false
         end
     end
 end)
 
 WindUI:Notify({
-    Title = "Nexus Hub carregado",
-    Content = "Versão estável • Todos os sistemas corrigidos",
-    Duration = 6
+    Title="Nexus Hub carregado",
+    Content="Script recriado do zero",
+    Duration=6
 })
