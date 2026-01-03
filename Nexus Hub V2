@@ -1,0 +1,409 @@
+local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/main/source.lua"))()
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextChatService = game:GetService("TextChatService")
+local StarterGui = game:GetService("StarterGui")
+
+pcall(function()
+	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true)
+end)
+
+local chatConfig = TextChatService:WaitForChild("ChatWindowConfiguration")
+
+RunService.RenderStepped:Connect(function()
+	chatConfig.Enabled = true
+	chatConfig.ChatWindowVisible = true
+	chatConfig.ChatWindowActive = true
+	chatConfig.ChatInputBarConfiguration.Enabled = true
+end)
+
+local LocalPlayer = Players.LocalPlayer
+local FONT = Font.new("rbxassetid://12187370928")
+local DEFAULT_GRAVITY = workspace.Gravity
+
+local Window = Luna:CreateWindow({
+	Name = "Nexus Hub v2.2.0.1 ☄️",
+	Subtitle = "by Hydra",
+	LoadingEnabled = true,
+	LoadingTitle = "Nexus Hub V2 ☄️",
+	LoadingSubtitle = "Loading systems...",
+	ConfigSettings = { RootFolder = nil, ConfigFolder = "NexusHub" }
+})
+
+local PlayerTab = Window:CreateTab({ Name="Player", Icon="person", ImageSource="Material", ShowTitle=true })
+local ForsakenTab = Window:CreateTab({ Name="Forsaken", Icon="description", ImageSource="Material", ShowTitle=true })
+local OthersTab = Window:CreateTab({ Name="Others", Icon="auto_awesome", ImageSource="Material", ShowTitle=true })
+local InfoTab = Window:CreateTab({ Name="Information", Icon="info", ImageSource="Material", ShowTitle=true })
+
+local playerEnabled=false
+local noclipEnabled=false
+local infJump=false
+local cframeSpeed=1
+local gravity=196.2
+local noclipConn
+local originalCollisions={}
+
+local function applyNoclip(character)
+	if noclipConn then noclipConn:Disconnect() end
+	if not character then return end
+	originalCollisions={}
+	for _,p in ipairs(character:GetDescendants()) do
+		if p:IsA("BasePart") then
+			originalCollisions[p]=p.CanCollide
+			p.CanCollide=false
+		end
+	end
+	noclipConn=RunService.Stepped:Connect(function()
+		if not noclipEnabled then return end
+		if not character.Parent then return end
+		for _,p in ipairs(character:GetDescendants()) do
+			if p:IsA("BasePart") then
+				p.CanCollide=false
+			end
+		end
+	end)
+end
+
+local function removeNoclip()
+	if noclipConn then
+		noclipConn:Disconnect()
+		noclipConn=nil
+	end
+	for p,v in pairs(originalCollisions) do
+		if p and p.Parent then
+			p.CanCollide=v
+		end
+	end
+	originalCollisions={}
+end
+
+LocalPlayer.CharacterAdded:Connect(function(c)
+	if noclipEnabled then
+		task.wait(0.25)
+		applyNoclip(c)
+	end
+end)
+
+PlayerTab:CreateToggle({
+	Name="Enable",
+	CurrentValue=false,
+	Callback=function(v)
+		playerEnabled=v
+		if not v then
+			workspace.Gravity=DEFAULT_GRAVITY
+		end
+	end
+})
+
+PlayerTab:CreateSlider({
+	Name="CFrame Speed",
+	Range={1,70},
+	Increment=1,
+	CurrentValue=1,
+	Callback=function(v)
+		cframeSpeed=v
+	end
+})
+
+PlayerTab:CreateSlider({
+	Name="Gravity",
+	Range={0,300},
+	Increment=1,
+	CurrentValue=196,
+	Callback=function(v)
+		gravity=v
+	end
+})
+
+PlayerTab:CreateToggle({
+	Name="Noclip",
+	CurrentValue=false,
+	Callback=function(v)
+		noclipEnabled=v
+		if v then
+			applyNoclip(LocalPlayer.Character)
+		else
+			removeNoclip()
+		end
+	end
+})
+
+PlayerTab:CreateToggle({
+	Name="Infinite Jump",
+	CurrentValue=false,
+	Callback=function(v)
+		infJump=v
+	end
+})
+
+UserInputService.JumpRequest:Connect(function()
+	if infJump and LocalPlayer.Character then
+		local hum=LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+		if hum then
+			hum:ChangeState(Enum.HumanoidStateType.Jumping)
+		end
+	end
+end)
+
+RunService.Heartbeat:Connect(function()
+	if not playerEnabled then return end
+	local char=LocalPlayer.Character
+	local hrp=char and char:FindFirstChild("HumanoidRootPart")
+	local hum=char and char:FindFirstChildOfClass("Humanoid")
+	if not hrp or not hum then return end
+	workspace.Gravity=gravity
+	local dir=hum.MoveDirection
+	if dir.Magnitude>0 then
+		hrp.CFrame=hrp.CFrame+(dir*(cframeSpeed*0.08))
+	end
+end)
+
+local espSurvivor=false
+local espKiller=false
+local espGen=false
+local autoGen=false
+local genDelay=5
+local genBusy=false
+local infStamina=false
+local staminaConn
+local staminaModule
+
+local function clearAllESP()
+	for _,obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Highlight") and obj.Name=="NexusHL" then
+			obj:Destroy()
+		elseif obj:IsA("BillboardGui") and (obj.Name=="NexusName" or obj.Name=="NexusGen") then
+			obj:Destroy()
+		end
+	end
+end
+
+local function addHighlight(inst,color)
+	local hl=inst:FindFirstChild("NexusHL")
+	if not hl then
+		hl=Instance.new("Highlight")
+		hl.Name="NexusHL"
+		hl.Adornee=inst
+		hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
+		hl.Parent=inst
+	end
+	hl.FillColor=color
+	hl.OutlineColor=color
+	hl.FillTransparency=0.45
+end
+
+local function addNameESP(char,text,color)
+	if char:FindFirstChild("NexusName") then return end
+	local hrp=char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+	local bb=Instance.new("BillboardGui")
+	bb.Name="NexusName"
+	bb.Adornee=hrp
+	bb.Size=UDim2.fromOffset(120,16)
+	bb.StudsOffset=Vector3.new(0,-3,0)
+	bb.AlwaysOnTop=true
+	bb.Parent=char
+	local tl=Instance.new("TextLabel")
+	tl.Size=UDim2.fromScale(1,1)
+	tl.BackgroundTransparency=1
+	tl.Text=text
+	tl.FontFace=FONT
+	tl.TextSize=11
+	tl.TextColor3=color
+	tl.TextStrokeTransparency=0.3
+	tl.Parent=bb
+end
+
+local function updatePlayerESP()
+	local wp=workspace:FindFirstChild("Players")
+	if not wp then return end
+	local killers=wp:FindFirstChild("Killers")
+	local survivors=wp:FindFirstChild("Survivors")
+	for _,plr in ipairs(Players:GetPlayers()) do
+		if plr~=LocalPlayer and plr.Character then
+			if killers and plr.Character.Parent==killers and espKiller then
+				addHighlight(plr.Character,Color3.fromRGB(255,0,0))
+				addNameESP(plr.Character,plr.Name,Color3.fromRGB(255,80,80))
+			elseif survivors and plr.Character.Parent==survivors and espSurvivor then
+				addHighlight(plr.Character,Color3.fromRGB(0,255,0))
+				addNameESP(plr.Character,plr.Name,Color3.fromRGB(80,255,80))
+			end
+		end
+	end
+end
+
+local DARK_GREEN=Color3.fromRGB(0,120,0)
+local YELLOW=Color3.fromRGB(255,255,0)
+
+local function normalizeProgress(v)
+	if v>=10000 then
+		return math.clamp(math.floor(v/100),0,100)
+	elseif v>100 then
+		return math.clamp(math.floor(v),0,100)
+	end
+	return math.clamp(math.floor(v),0,100)
+end
+
+local function updateGenESP()
+	if not espGen then return end
+	local map=workspace:FindFirstChild("Map")
+	local ing=map and map:FindFirstChild("Ingame")
+	local m=ing and ing:FindFirstChild("Map")
+	if not m then return end
+	for _,g in ipairs(m:GetChildren()) do
+		if g.Name=="Generator" then
+			local prog=g:FindFirstChild("Progress")
+			local percent=prog and normalizeProgress(prog.Value) or 0
+			addHighlight(g,percent>=100 and DARK_GREEN or YELLOW)
+			if not g:FindFirstChild("NexusGen") then
+				local bb=Instance.new("BillboardGui")
+				bb.Name="NexusGen"
+				bb.Adornee=g
+				bb.Size=UDim2.fromOffset(150,18)
+				bb.StudsOffset=Vector3.new(0,3,0)
+				bb.AlwaysOnTop=true
+				bb.Parent=g
+				local tl=Instance.new("TextLabel")
+				tl.Name="TextLabel"
+				tl.Size=UDim2.fromScale(1,1)
+				tl.BackgroundTransparency=1
+				tl.FontFace=FONT
+				tl.TextStrokeTransparency=0.3
+				tl.Parent=bb
+			end
+			local tl=g.NexusGen:FindFirstChild("TextLabel")
+			if tl then
+				tl.Text=percent>=100 and "Generator repaired" or (percent.."%")
+				tl.TextColor3=percent>=100 and DARK_GREEN or YELLOW
+			end
+		end
+	end
+end
+
+ForsakenTab:CreateToggle({
+	Name="Infinite Stamina",
+	CurrentValue=false,
+	Callback=function(v)
+		infStamina=v
+		if staminaConn then
+			staminaConn:Disconnect()
+			staminaConn=nil
+		end
+		if v then
+			local sprint=ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting")
+			staminaModule=require(sprint)
+			staminaConn=RunService.Heartbeat:Connect(function()
+				if infStamina then
+					staminaModule.Stamina=staminaModule.MaxStamina or 999
+				end
+			end)
+		end
+	end
+})
+
+ForsakenTab:CreateToggle({
+	Name="ESP Killers",
+	CurrentValue=false,
+	Callback=function(v)
+		espKiller=v
+		if not v then
+			clearAllESP()
+		end
+	end
+})
+
+ForsakenTab:CreateToggle({
+	Name="ESP Survivors",
+	CurrentValue=false,
+	Callback=function(v)
+		espSurvivor=v
+		if not v then
+			clearAllESP()
+		end
+	end
+})
+
+ForsakenTab:CreateToggle({
+	Name="ESP Generators",
+	CurrentValue=false,
+	Callback=function(v)
+		espGen=v
+		if not v then
+			clearAllESP()
+		end
+	end
+})
+
+ForsakenTab:CreateToggle({
+	Name="Auto Generator",
+	CurrentValue=false,
+	Callback=function(v)
+		autoGen=v
+	end
+})
+
+ForsakenTab:CreateSlider({
+	Name="Gen Speed",
+	Range={1,10},
+	Increment=1,
+	CurrentValue=5,
+	Callback=function(v)
+		genDelay=v
+	end
+})
+
+task.spawn(function()
+	while task.wait(0.5) do
+		updatePlayerESP()
+		updateGenESP()
+	end
+end)
+
+task.spawn(function()
+	while task.wait(1) do
+		if autoGen and not genBusy then
+			genBusy=true
+			local map=workspace:FindFirstChild("Map")
+			local ing=map and map:FindFirstChild("Ingame")
+			local m=ing and ing:FindFirstChild("Map")
+			if m then
+				for _,g in ipairs(m:GetChildren()) do
+					if g.Name=="Generator" and g:FindFirstChild("Remotes") then
+						pcall(function()
+							g.Remotes.RE:FireServer()
+						end)
+						task.wait(genDelay)
+					end
+				end
+			end
+			genBusy=false
+		end
+	end
+end)
+
+OthersTab:CreateButton({
+	Name="Infinite Yield With AI",
+	Callback=function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/BokX1/InfiniteYieldWithAI/refs/heads/main/InfiniteYieldWithAI.Lua"))()
+	end
+})
+
+local clockLabel=InfoTab:CreateLabel({ Text="Clock: --:--:--", Style=1 })
+task.spawn(function()
+	while task.wait(1) do
+		clockLabel:Set("Clock: "..os.date("%H:%M:%S"))
+	end
+end)
+
+local creditText=InfoTab:CreateParagraph({ Title="Creators", Text="Hydra (Owner)" })
+local hue=0
+RunService.RenderStepped:Connect(function()
+	hue=(hue+1)%360
+	local c=Color3.fromHSV(hue/360,1,1)
+	if creditText.TextLabel then
+		creditText.TextLabel.TextColor3=c
+	end
+end)
