@@ -13,10 +13,14 @@ blurEffect.Size = 0
 blurEffect.Parent = Lighting
 
 local walkSpeed = 10
-local cframeSprintSpeed = 10
+local sprintSpeed = 32
+local accelRate = 25
+local decelRate = 20
+
 local maxStamina = 700
 local staminaDrainRate = 20
 local staminaRegenRate = 70
+
 local fovSprint = 85
 local fovNormal = 70
 local fovExhausted = 50
@@ -30,6 +34,7 @@ local isFlashing = false
 local isExhausted = false
 local isShaking = false
 local isCameraShaking = false
+local currentWalkSpeed = walkSpeed
 local hue = 0
 
 local gui = Instance.new("ScreenGui")
@@ -136,11 +141,10 @@ sprintBtn.MouseButton1Up:Connect(function()
 end)
 
 local humanoid
-local hrp
 
 local function setupCharacter(char)
 	humanoid = char:WaitForChild("Humanoid")
-	hrp = char:WaitForChild("HumanoidRootPart")
+	local hrp = char:WaitForChild("HumanoidRootPart")
 
 	for _,v in ipairs(hrp:GetChildren()) do
 		if v:IsA("Sound") then
@@ -153,6 +157,7 @@ local function setupCharacter(char)
 	stamina = maxStamina
 	isExhausted = false
 	sprinting = false
+	currentWalkSpeed = walkSpeed
 	humanoid.WalkSpeed = walkSpeed
 
 	stopFlash()
@@ -170,7 +175,7 @@ end
 player.CharacterAdded:Connect(setupCharacter)
 
 RunService.RenderStepped:Connect(function(dt)
-	hue = (hue + dt * 0.2) % 1
+	hue = (hue + dt * 0.25) % 1
 	staminaFill.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
 
 	local jumpBtn = player.PlayerGui:FindFirstChild("TouchGui")
@@ -183,13 +188,26 @@ RunService.RenderStepped:Connect(function(dt)
 		sprintBtn.Position = UDim2.fromOffset(p.X + s.X/2, p.Y - s.Y + sprintButtonYOffset)
 	end
 
-	if not humanoid or not hrp then return end
+	if not humanoid then return end
 
 	local moving = humanoid.MoveDirection.Magnitude > 0.1
 
+	if isExhausted or stamina <= 0 then
+		sprinting = false
+	end
+
+	local targetSpeed = (sprinting and moving and not isExhausted) and sprintSpeed or walkSpeed
+	local rate = currentWalkSpeed < targetSpeed and accelRate or decelRate
+
+	if currentWalkSpeed < targetSpeed then
+		currentWalkSpeed = math.min(currentWalkSpeed + rate * dt, targetSpeed)
+	elseif currentWalkSpeed > targetSpeed then
+		currentWalkSpeed = math.max(currentWalkSpeed - rate * dt, targetSpeed)
+	end
+
+	humanoid.WalkSpeed = currentWalkSpeed
+
 	if sprinting and moving and not isExhausted then
-		local dir = cam.CFrame.LookVector
-		hrp.CFrame = hrp.CFrame + Vector3.new(dir.X, 0, dir.Z).Unit * cframeSprintSpeed * dt
 		stamina = math.max(0, stamina - staminaDrainRate * dt)
 	else
 		stamina = math.min(maxStamina, stamina + staminaRegenRate * dt)
@@ -199,7 +217,6 @@ RunService.RenderStepped:Connect(function(dt)
 
 	if stamina <= 0 and not isExhausted then
 		isExhausted = true
-		sprinting = false
 		startFlash()
 		shakeUI()
 		shakeCamera(humanoid)
@@ -221,7 +238,7 @@ RunService.RenderStepped:Connect(function(dt)
 	staminaBackground.BackgroundTransparency += (t - staminaBackground.BackgroundTransparency) * dt * fadeSpeed
 	staminaFill.BackgroundTransparency += (t - staminaFill.BackgroundTransparency) * dt * fadeSpeed
 
-	cam.FieldOfView = isExhausted and fovExhausted or (sprinting and fovSprint or fovNormal)
+	cam.FieldOfView = isExhausted and fovExhausted or (fovNormal + (fovSprint - fovNormal) * math.clamp((currentWalkSpeed - walkSpeed) / (sprintSpeed - walkSpeed), 0, 1))
 end)
 
 cam.FieldOfView = fovNormal
