@@ -1,5 +1,3 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Azizanzz0/Scripts/refs/heads/main/Crouching.txt"))()
-
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -12,15 +10,13 @@ local blurEffect = Instance.new("BlurEffect")
 blurEffect.Size = 0
 blurEffect.Parent = Lighting
 
-local walkSpeed = 10
-local sprintSpeed = 32
-local accelRate = 25
-local decelRate = 20
-
+local walkSpeed = 22
+local sprintSpeed = 37
+local accelRate = 20
+local decelRate = 15
 local maxStamina = 700
 local staminaDrainRate = 20
 local staminaRegenRate = 70
-
 local fovSprint = 85
 local fovNormal = 70
 local fovExhausted = 50
@@ -74,6 +70,18 @@ local breathSound = Instance.new("Sound")
 breathSound.SoundId = "rbxassetid://6814463121"
 breathSound.Volume = 1
 breathSound.Looped = true
+
+local sprintSound = Instance.new("Sound")
+sprintSound.SoundId = "rbxassetid://142665235"
+sprintSound.Volume = 0
+sprintSound.Looped = true
+
+local walkSound = Instance.new("Sound")
+walkSound.SoundId = "rbxassetid://2812419402"
+walkSound.Volume = 0
+walkSound.Looped = true
+
+local fadeRate = 5
 
 local function changeFOV(v)
 	TweenService:Create(cam, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {FieldOfView = v}):Play()
@@ -153,6 +161,8 @@ local function setupCharacter(char)
 	end
 
 	breathSound.Parent = hrp
+	sprintSound.Parent = hrp
+	walkSound.Parent = hrp
 
 	stamina = maxStamina
 	isExhausted = false
@@ -175,7 +185,7 @@ end
 player.CharacterAdded:Connect(setupCharacter)
 
 RunService.RenderStepped:Connect(function(dt)
-	hue = (hue + dt * 0.25) % 1
+	hue = (hue + dt * 0.2) % 1
 	staminaFill.BackgroundColor3 = Color3.fromHSV(hue, 1, 1)
 
 	local jumpBtn = player.PlayerGui:FindFirstChild("TouchGui")
@@ -191,24 +201,17 @@ RunService.RenderStepped:Connect(function(dt)
 	if not humanoid then return end
 
 	local moving = humanoid.MoveDirection.Magnitude > 0.1
-
-	if isExhausted or stamina <= 0 then
-		sprinting = false
-	end
+	if isExhausted or stamina <= 0 then sprinting = false end
 
 	local targetSpeed = (sprinting and moving and not isExhausted) and sprintSpeed or walkSpeed
 	local rate = currentWalkSpeed < targetSpeed and accelRate or decelRate
-
-	if currentWalkSpeed < targetSpeed then
-		currentWalkSpeed = math.min(currentWalkSpeed + rate * dt, targetSpeed)
-	elseif currentWalkSpeed > targetSpeed then
-		currentWalkSpeed = math.max(currentWalkSpeed - rate * dt, targetSpeed)
-	end
-
+	currentWalkSpeed = math.clamp(currentWalkSpeed + rate * dt * math.sign(targetSpeed - currentWalkSpeed), walkSpeed, sprintSpeed)
 	humanoid.WalkSpeed = currentWalkSpeed
 
+	local frac = math.clamp((currentWalkSpeed - walkSpeed) / (sprintSpeed - walkSpeed), 0, 1)
+
 	if sprinting and moving and not isExhausted then
-		stamina = math.max(0, stamina - staminaDrainRate * dt)
+		stamina = math.max(0, stamina - staminaDrainRate * frac * dt)
 	else
 		stamina = math.min(maxStamina, stamina + staminaRegenRate * dt)
 	end
@@ -238,7 +241,7 @@ RunService.RenderStepped:Connect(function(dt)
 	staminaBackground.BackgroundTransparency += (t - staminaBackground.BackgroundTransparency) * dt * fadeSpeed
 	staminaFill.BackgroundTransparency += (t - staminaFill.BackgroundTransparency) * dt * fadeSpeed
 
-	cam.FieldOfView = isExhausted and fovExhausted or (fovNormal + (fovSprint - fovNormal) * math.clamp((currentWalkSpeed - walkSpeed) / (sprintSpeed - walkSpeed), 0, 1))
+	cam.FieldOfView = isExhausted and fovExhausted or (fovNormal + (fovSprint - fovNormal) * frac)
 end)
 
 cam.FieldOfView = fovNormal
