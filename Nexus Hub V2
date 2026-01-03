@@ -1,6 +1,3 @@
--- Nexus Hub v2.2.0.1 ☄️ - WindUI (Corrigido e Atualizado)
--- Sliders funcionando 100%, nomes originais mantidos, Chat Spy removido, Keybind: HNXS
-
 local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
 
 local Players = game:GetService("Players")
@@ -10,7 +7,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TextChatService = game:GetService("TextChatService")
 local StarterGui = game:GetService("StarterGui")
 
--- Força o chat novo sempre visível
 pcall(function()
     StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true)
 end)
@@ -27,7 +23,6 @@ local LocalPlayer = Players.LocalPlayer
 local FONT = Font.new("rbxassetid://12187370928")
 local DEFAULT_GRAVITY = workspace.Gravity
 
--- Variáveis
 local playerEnabled = false
 local noclipEnabled = false
 local infJump = false
@@ -46,7 +41,6 @@ local infStamina = false
 local staminaConn
 local staminaModule
 
--- === Funções Noclip ===
 local function applyNoclip(character)
     if noclipConn then noclipConn:Disconnect() end
     if not character then return end
@@ -60,7 +54,9 @@ local function applyNoclip(character)
     noclipConn = RunService.Stepped:Connect(function()
         if not noclipEnabled or not character.Parent then return end
         for _, p in ipairs(character:GetDescendants()) do
-            if p:IsA("BasePart") then p.CanCollide = false end
+            if p:IsA("BasePart") then
+                p.CanCollide = false
+            end
         end
     end)
 end
@@ -68,20 +64,28 @@ end
 local function removeNoclip()
     if noclipConn then noclipConn:Disconnect() noclipConn = nil end
     for p, v in pairs(originalCollisions) do
-        if p and p.Parent then p.CanCollide = v end
+        if p and p.Parent then
+            p.CanCollide = v
+        end
     end
     originalCollisions = {}
 end
 
 LocalPlayer.CharacterAdded:Connect(function(c)
-    if noclipEnabled then task.wait(0.25) applyNoclip(c) end
+    if noclipEnabled then
+        task.wait(0.25)
+        applyNoclip(c)
+    end
 end)
 
--- === Funções ESP ===
 local function clearAllESP()
     for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("Highlight") and obj.Name == "NexusHL" then obj:Destroy() end
-        if obj:IsA("BillboardGui") and (obj.Name == "NexusName" or obj.Name == "NexusGen") then obj:Destroy() end
+        if obj:IsA("Highlight") and obj.Name == "NexusHL" then
+            obj:Destroy()
+        end
+        if obj:IsA("BillboardGui") and (obj.Name == "NexusName" or obj.Name == "NexusGen") then
+            obj:Destroy()
+        end
     end
 end
 
@@ -111,6 +115,7 @@ local function addNameESP(char, text, color)
     bb.AlwaysOnTop = true
     bb.Parent = char
     local tl = Instance.new("TextLabel")
+    tl.Name = "Label"
     tl.Size = UDim2.fromScale(1, 1)
     tl.BackgroundTransparency = 1
     tl.Text = text
@@ -144,8 +149,9 @@ local DARK_GREEN = Color3.fromRGB(0, 120, 0)
 local YELLOW = Color3.fromRGB(255, 255, 0)
 
 local function normalizeProgress(v)
-    if v >= 10000 then return math.clamp(math.floor(v / 100), 0, 100) end
-    if v > 100 then return math.clamp(math.floor(v), 0, 100) end
+    if v >= 10000 then
+        return math.clamp(math.floor(v / 100), 0, 100)
+    end
     return math.clamp(math.floor(v), 0, 100)
 end
 
@@ -169,35 +175,36 @@ local function updateGenESP()
                 bb.AlwaysOnTop = true
                 bb.Parent = g
                 local tl = Instance.new("TextLabel")
+                tl.Name = "Label"
                 tl.Size = UDim2.fromScale(1, 1)
                 tl.BackgroundTransparency = 1
                 tl.FontFace = FONT
                 tl.TextStrokeTransparency = 0.3
                 tl.Parent = bb
             end
-            g.NexusGen.TextLabel.Text = percent >= 100 and "Generator repaired" or (percent .. "%")
-            g.NexusGen.TextLabel.TextColor3 = percent >= 100 and DARK_GREEN or YELLOW
+            local label = g.NexusGen:FindFirstChild("Label")
+            if label then
+                label.Text = percent >= 100 and "Generator repaired" or (percent .. "%")
+                label.TextColor3 = percent >= 100 and DARK_GREEN or YELLOW
+            end
         end
     end
 end
 
--- === Window WindUI com Keybind personalizado: HNXS ===
 local Window = WindUI:CreateWindow({
     Title = "Nexus Hub v2.2.0.1 ☄️",
     Subtitle = "by Hydra",
     Size = UDim2.fromOffset(600, 450),
-    Keybind = "HNXS"  -- Abre/fecha com a sequência H + N + X + S
+    Keybind = "HNXS"
 })
 
 Window:Tag({ Title = "v2.2.0.1", Icon = "rocket" })
 
--- Tabs
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "solar:user-bold" })
 local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "solar:shield-bold" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "solar:settings-bold" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "solar:info-bold" })
 
--- === Player Tab (nomes originais mantidos) ===
 local PlayerSection = PlayerTab:Section({ Title = "Player Settings" })
 
 PlayerSection:Toggle({
@@ -205,7 +212,9 @@ PlayerSection:Toggle({
     Default = false,
     Callback = function(v)
         playerEnabled = v
-        if not v then workspace.Gravity = DEFAULT_GRAVITY end
+        if not v then
+            workspace.Gravity = DEFAULT_GRAVITY
+        end
     end
 })
 
@@ -236,7 +245,11 @@ PlayerSection:Toggle({
     Default = false,
     Callback = function(v)
         noclipEnabled = v
-        if v then applyNoclip(LocalPlayer.Character) else removeNoclip() end
+        if v then
+            applyNoclip(LocalPlayer.Character)
+        else
+            removeNoclip()
+        end
     end
 })
 
@@ -248,7 +261,6 @@ PlayerSection:Toggle({
     end
 })
 
--- === Forsaken Tab ===
 local ForsakenSection = ForsakenTab:Section({ Title = "Forsaken Hacks" })
 
 ForsakenSection:Toggle({
@@ -261,7 +273,9 @@ ForsakenSection:Toggle({
             local sprint = ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting")
             staminaModule = require(sprint)
             staminaConn = RunService.Heartbeat:Connect(function()
-                if infStamina then staminaModule.Stamina = staminaModule.MaxStamina or 999 end
+                if infStamina then
+                    staminaModule.Stamina = staminaModule.MaxStamina or 999
+                end
             end)
         end
     end
@@ -313,7 +327,6 @@ ForsakenSection:Slider({
     end
 })
 
--- === Others Tab (Chat Spy removido) ===
 local OthersSection = OthersTab:Section({ Title = "Extras" })
 
 OthersSection:Button({
@@ -323,7 +336,6 @@ OthersSection:Button({
     end
 })
 
--- === Info Tab ===
 local InfoSection = InfoTab:Section({ Title = "Information" })
 
 local clockLabel = InfoSection:Label({ Title = "Clock: --:--:--" })
@@ -339,19 +351,18 @@ local creatorParagraph = InfoSection:Paragraph({
     Content = "Hydra (Owner)"
 })
 
--- Efeito rainbow no texto do creator
 local hue = 0
 RunService.RenderStepped:Connect(function()
     hue = (hue + 1) % 360
-    local color = Color3.fromHSV(hue / 360, 1, 1)
-    creatorParagraph:Set({ ContentColor = color })
+    creatorParagraph:Set({ ContentColor = Color3.fromHSV(hue / 360, 1, 1) })
 end)
 
--- === Loops principais ===
 UserInputService.JumpRequest:Connect(function()
     if infJump and LocalPlayer.Character then
         local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+        if hum then
+            hum:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
     end
 end)
 
@@ -385,7 +396,9 @@ task.spawn(function()
             if m then
                 for _, g in ipairs(m:GetChildren()) do
                     if g.Name == "Generator" and g:FindFirstChild("Remotes") then
-                        pcall(function() g.Remotes.RE:FireServer() end)
+                        pcall(function()
+                            g.Remotes.RE:FireServer()
+                        end)
                         task.wait(genDelay)
                     end
                 end
@@ -395,7 +408,6 @@ task.spawn(function()
     end
 end)
 
--- Notificação final
 WindUI:Notify({
     Title = "Nexus Hub carregado!",
     Content = "WindUI atualizada • Keybind: HNXS",
