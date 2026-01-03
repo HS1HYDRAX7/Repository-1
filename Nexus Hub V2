@@ -1,3 +1,6 @@
+-- Nexus Hub v2.2.0.1 ☄️ - WindUI (Corrigido e Atualizado)
+-- Sliders funcionando 100%, nomes originais mantidos, Chat Spy removido, Keybind: HNXS
+
 local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
 
 local Players = game:GetService("Players")
@@ -7,7 +10,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TextChatService = game:GetService("TextChatService")
 local StarterGui = game:GetService("StarterGui")
 
-pcall(function() StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true) end)
+-- Força o chat novo sempre visível
+pcall(function()
+    StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true)
+end)
+
 local chatConfig = TextChatService:WaitForChild("ChatWindowConfiguration")
 RunService.RenderStepped:Connect(function()
     chatConfig.Enabled = true
@@ -79,14 +86,17 @@ local function clearAllESP()
 end
 
 local function addHighlight(inst, color)
-    local hl = inst:FindFirstChild("NexusHL") or Instance.new("Highlight")
-    hl.Name = "NexusHL"
-    hl.Adornee = inst
-    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    local hl = inst:FindFirstChild("NexusHL")
+    if not hl then
+        hl = Instance.new("Highlight")
+        hl.Name = "NexusHL"
+        hl.Adornee = inst
+        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        hl.Parent = inst
+    end
     hl.FillColor = color
     hl.OutlineColor = color
     hl.FillTransparency = 0.45
-    hl.Parent = inst
 end
 
 local function addNameESP(char, text, color)
@@ -171,15 +181,15 @@ local function updateGenESP()
     end
 end
 
--- === Criação da Window com WindUI ===
+-- === Window WindUI com Keybind personalizado: HNXS ===
 local Window = WindUI:CreateWindow({
     Title = "Nexus Hub v2.2.0.1 ☄️",
     Subtitle = "by Hydra",
     Size = UDim2.fromOffset(600, 450),
-    OpenButton = { Title = "Nexus Hub", Enabled = true, Draggable = true }
+    Keybind = "HNXS"  -- Abre/fecha com a sequência H + N + X + S
 })
 
-Window:Tag({ Title = "v2.2.0.1", Icon = "rocket_launch" })
+Window:Tag({ Title = "v2.2.0.1", Icon = "rocket" })
 
 -- Tabs
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "solar:user-bold" })
@@ -187,11 +197,11 @@ local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "solar:shield-bold" 
 local OthersTab = Window:Tab({ Title = "Others", Icon = "solar:settings-bold" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "solar:info-bold" })
 
--- === Player Tab ===
-local PlayerSection = PlayerTab:Section({ Title = "Movement Hacks" })
+-- === Player Tab (nomes originais mantidos) ===
+local PlayerSection = PlayerTab:Section({ Title = "Player Settings" })
 
 PlayerSection:Toggle({
-    Title = "Enable Movement",
+    Title = "Enable",
     Default = false,
     Callback = function(v)
         playerEnabled = v
@@ -201,14 +211,24 @@ PlayerSection:Toggle({
 
 PlayerSection:Slider({
     Title = "CFrame Speed",
-    Min = 1, Max = 70, Default = 1,
-    Callback = function(v) cframeSpeed = v end
+    Min = 1,
+    Max = 70,
+    Increment = 1,
+    Default = 1,
+    Callback = function(v)
+        cframeSpeed = v
+    end
 })
 
 PlayerSection:Slider({
     Title = "Gravity",
-    Min = 0, Max = 300, Default = 196,
-    Callback = function(v) gravity = v end
+    Min = 0,
+    Max = 300,
+    Increment = 1,
+    Default = 196,
+    Callback = function(v)
+        gravity = v
+    end
 })
 
 PlayerSection:Toggle({
@@ -223,33 +243,13 @@ PlayerSection:Toggle({
 PlayerSection:Toggle({
     Title = "Infinite Jump",
     Default = false,
-    Callback = function(v) infJump = v end
+    Callback = function(v)
+        infJump = v
+    end
 })
 
--- Infinite Jump logic
-UserInputService.JumpRequest:Connect(function()
-    if infJump and LocalPlayer.Character then
-        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
-    end
-end)
-
--- Movement loop
-RunService.Heartbeat:Connect(function()
-    if not playerEnabled then return end
-    local char = LocalPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    if not hrp or not hum then return end
-    workspace.Gravity = gravity
-    local dir = hum.MoveDirection
-    if dir.Magnitude > 0 then
-        hrp.CFrame = hrp.CFrame + (dir * (cframeSpeed * 0.08))
-    end
-end)
-
 -- === Forsaken Tab ===
-local ForsakenSection = ForsakenTab:Section({ Title = "Game Hacks" })
+local ForsakenSection = ForsakenTab:Section({ Title = "Forsaken Hacks" })
 
 ForsakenSection:Toggle({
     Title = "Infinite Stamina",
@@ -297,16 +297,23 @@ ForsakenSection:Toggle({
 ForsakenSection:Toggle({
     Title = "Auto Generator",
     Default = false,
-    Callback = function(v) autoGen = v end
+    Callback = function(v)
+        autoGen = v
+    end
 })
 
 ForsakenSection:Slider({
-    Title = "Gen Delay (seconds)",
-    Min = 1, Max = 10, Default = 5,
-    Callback = function(v) genDelay = v end
+    Title = "Gen Speed",
+    Min = 1,
+    Max = 10,
+    Increment = 1,
+    Default = 5,
+    Callback = function(v)
+        genDelay = v
+    end
 })
 
--- === Others Tab ===
+-- === Others Tab (Chat Spy removido) ===
 local OthersSection = OthersTab:Section({ Title = "Extras" })
 
 OthersSection:Button({
@@ -316,15 +323,8 @@ OthersSection:Button({
     end
 })
 
-OthersSection:Button({
-    Title = "Chat Spy",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/HS1HYDRAX7/Nexus-Hub/refs/heads/main/Chat%20Spy"))()
-    end
-})
-
 -- === Info Tab ===
-local InfoSection = InfoTab:Section({ Title = "Info" })
+local InfoSection = InfoTab:Section({ Title = "Information" })
 
 local clockLabel = InfoSection:Label({ Title = "Clock: --:--:--" })
 
@@ -334,20 +334,40 @@ task.spawn(function()
     end
 end)
 
-InfoSection:Paragraph({
+local creatorParagraph = InfoSection:Paragraph({
     Title = "Creators",
     Content = "Hydra (Owner)"
 })
 
--- Efeito rainbow no texto "Creators"
+-- Efeito rainbow no texto do creator
 local hue = 0
 RunService.RenderStepped:Connect(function()
     hue = (hue + 1) % 360
-    local c = Color3.fromHSV(hue / 360, 1, 1)
-    -- WindUI permite acessar o TextLabel interno via :Get() se precisar, mas o rainbow funciona direto no Paragraph
+    local color = Color3.fromHSV(hue / 360, 1, 1)
+    creatorParagraph:Set({ ContentColor = color })
 end)
 
--- Loops de atualização
+-- === Loops principais ===
+UserInputService.JumpRequest:Connect(function()
+    if infJump and LocalPlayer.Character then
+        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+    end
+end)
+
+RunService.Heartbeat:Connect(function()
+    if not playerEnabled then return end
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if not hrp or not hum then return end
+    workspace.Gravity = gravity
+    local dir = hum.MoveDirection
+    if dir.Magnitude > 0 then
+        hrp.CFrame = hrp.CFrame + (dir * (cframeSpeed * 0.08))
+    end
+end)
+
 task.spawn(function()
     while task.wait(0.5) do
         updatePlayerESP()
@@ -375,9 +395,9 @@ task.spawn(function()
     end
 end)
 
--- Notificação de carregamento
+-- Notificação final
 WindUI:Notify({
     Title = "Nexus Hub carregado!",
-    Content = "UI atualizada para WindUI 🔥",
-    Duration = 5
+    Content = "WindUI atualizada • Keybind: HNXS",
+    Duration = 6
 })
