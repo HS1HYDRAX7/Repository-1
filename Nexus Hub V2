@@ -1,42 +1,68 @@
-local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/main/source.lua"))()
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TextChatService = game:GetService("TextChatService")
-local StarterGui = game:GetService("StarterGui")
+pcall(function()
+	for _,v in pairs(getgc(true)) do
+		if type(v)=="table" and rawget(v,"Notify") then
+			v.Notify=function() end
+		end
+	end
+end)
 
 pcall(function()
-	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true)
+	getgenv().notify=function() end
 end)
 
-local chatConfig = TextChatService:WaitForChild("ChatWindowConfiguration")
+local Luna=loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/main/source.lua"))()
+
+pcall(function()
+	if Luna and Luna.Notifications then
+		Luna.Notifications.Notify=function() end
+	end
+end)
+
+pcall(function()
+	for _,v in pairs(getgc(true)) do
+		if type(v)=="table" and rawget(v,"Close") and rawget(v,"Notify") then
+			v.Notify=function() end
+		end
+	end
+end)
+
+local Players=game:GetService("Players")
+local RunService=game:GetService("RunService")
+local UserInputService=game:GetService("UserInputService")
+local ReplicatedStorage=game:GetService("ReplicatedStorage")
+local TextChatService=game:GetService("TextChatService")
+local StarterGui=game:GetService("StarterGui")
+
+pcall(function()
+	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat,true)
+end)
+
+local chatConfig=TextChatService:WaitForChild("ChatWindowConfiguration")
 
 RunService.RenderStepped:Connect(function()
-	chatConfig.Enabled = true
-	chatConfig.ChatWindowVisible = true
-	chatConfig.ChatWindowActive = true
-	chatConfig.ChatInputBarConfiguration.Enabled = true
+	chatConfig.Enabled=true
+	chatConfig.ChatWindowVisible=true
+	chatConfig.ChatWindowActive=true
+	chatConfig.ChatInputBarConfiguration.Enabled=true
 end)
 
-local LocalPlayer = Players.LocalPlayer
-local FONT = Font.new("rbxassetid://12187370928")
-local DEFAULT_GRAVITY = workspace.Gravity
+local LocalPlayer=Players.LocalPlayer
+local FONT=Font.new("rbxassetid://12187370928")
+local DEFAULT_GRAVITY=workspace.Gravity
 
-local Window = Luna:CreateWindow({
-	Name = "Nexus Hub v2.2.0.1 ☄️",
-	Subtitle = "by Hydra",
-	LoadingEnabled = true,
-	LoadingTitle = "Nexus Hub V2 ☄️",
-	LoadingSubtitle = "Loading systems...",
-	ConfigSettings = { RootFolder = nil, ConfigFolder = "NexusHub" }
+local Window=Luna:CreateWindow({
+	Name="Nexus Hub v2.2.0.1",
+	Subtitle="by Hydra",
+	LoadingEnabled=true,
+	LoadingTitle="Nexus Hub V2",
+	LoadingSubtitle="Loading systems...",
+	ConfigSettings={RootFolder=nil,ConfigFolder="NexusHub"}
 })
 
-local PlayerTab = Window:CreateTab({ Name="Player", Icon="person", ImageSource="Material", ShowTitle=true })
-local ForsakenTab = Window:CreateTab({ Name="Forsaken", Icon="description", ImageSource="Material", ShowTitle=true })
-local OthersTab = Window:CreateTab({ Name="Others", Icon="auto_awesome", ImageSource="Material", ShowTitle=true })
-local InfoTab = Window:CreateTab({ Name="Information", Icon="info", ImageSource="Material", ShowTitle=true })
+local PlayerTab=Window:CreateTab({Name="Player",Icon="person",ImageSource="Material",ShowTitle=true})
+local ForsakenTab=Window:CreateTab({Name="Forsaken",Icon="description",ImageSource="Material",ShowTitle=true})
+local OthersTab=Window:CreateTab({Name="Others",Icon="auto_awesome",ImageSource="Material",ShowTitle=true})
+local InfoTab=Window:CreateTab({Name="Information",Icon="info",ImageSource="Material",ShowTitle=true})
 
 local playerEnabled=false
 local noclipEnabled=false
@@ -304,56 +330,11 @@ ForsakenTab:CreateToggle({
 	end
 })
 
-ForsakenTab:CreateToggle({
-	Name="ESP Killers",
-	CurrentValue=false,
-	Callback=function(v)
-		espKiller=v
-		if not v then
-			clearAllESP()
-		end
-	end
-})
-
-ForsakenTab:CreateToggle({
-	Name="ESP Survivors",
-	CurrentValue=false,
-	Callback=function(v)
-		espSurvivor=v
-		if not v then
-			clearAllESP()
-		end
-	end
-})
-
-ForsakenTab:CreateToggle({
-	Name="ESP Generators",
-	CurrentValue=false,
-	Callback=function(v)
-		espGen=v
-		if not v then
-			clearAllESP()
-		end
-	end
-})
-
-ForsakenTab:CreateToggle({
-	Name="Auto Generator",
-	CurrentValue=false,
-	Callback=function(v)
-		autoGen=v
-	end
-})
-
-ForsakenTab:CreateSlider({
-	Name="Gen Speed",
-	Range={1,10},
-	Increment=1,
-	CurrentValue=5,
-	Callback=function(v)
-		genDelay=v
-	end
-})
+ForsakenTab:CreateToggle({Name="ESP Killers",CurrentValue=false,Callback=function(v)espKiller=v if not v then clearAllESP() end end})
+ForsakenTab:CreateToggle({Name="ESP Survivors",CurrentValue=false,Callback=function(v)espSurvivor=v if not v then clearAllESP() end end})
+ForsakenTab:CreateToggle({Name="ESP Generators",CurrentValue=false,Callback=function(v)espGen=v if not v then clearAllESP() end end})
+ForsakenTab:CreateToggle({Name="Auto Generator",CurrentValue=false,Callback=function(v)autoGen=v end})
+ForsakenTab:CreateSlider({Name="Gen Speed",Range={1,10},Increment=1,CurrentValue=5,Callback=function(v)genDelay=v end})
 
 task.spawn(function()
 	while task.wait(0.5) do
@@ -391,14 +372,14 @@ OthersTab:CreateButton({
 	end
 })
 
-local clockLabel=InfoTab:CreateLabel({ Text="Clock: --:--:--", Style=1 })
+local clockLabel=InfoTab:CreateLabel({Text="Clock: --:--:--",Style=1})
 task.spawn(function()
 	while task.wait(1) do
 		clockLabel:Set("Clock: "..os.date("%H:%M:%S"))
 	end
 end)
 
-local creditText=InfoTab:CreateParagraph({ Title="Creators", Text="Hydra (Owner)" })
+local creditText=InfoTab:CreateParagraph({Title="Creators",Text="Hydra (Owner)"})
 local hue=0
 RunService.RenderStepped:Connect(function()
 	hue=(hue+1)%360
