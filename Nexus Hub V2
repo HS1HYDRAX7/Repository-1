@@ -1,4 +1,7 @@
-local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/WindUI.lua"))()
+local ok, WindUI = pcall(function()
+	return loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/WindUI.lua"))()
+end)
+if not ok or not WindUI then return end
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -17,28 +20,28 @@ local Window = WindUI:CreateWindow({
 	ToggleKey = Enum.KeyCode.RightShift
 })
 
-local PlayerSection = Window:Section({ Title = "Player", Icon = "user", Border = true })
-local ForsakenSection = Window:Section({ Title = "Forsaken", Icon = "skull", Border = true })
-local OthersSection = Window:Section({ Title = "Others", Icon = "layers", Border = true })
-local InfoSection = Window:Section({ Title = "Info", Icon = "info", Border = true })
+local PlayerSection = Window:Section({ Title="Player", Border=true })
+local ForsakenSection = Window:Section({ Title="Forsaken", Border=true })
+local OthersSection = Window:Section({ Title="Others", Border=true })
+local InfoSection = Window:Section({ Title="Info", Border=true })
 
-local PlayerTab = PlayerSection:Tab({ Title = "Movement" })
-local ForsakenTab = ForsakenSection:Tab({ Title = "Main" })
-local OthersTab = OthersSection:Tab({ Title = "Utilities" })
-local InfoTab = InfoSection:Tab({ Title = "Credits" })
+local PlayerTab = PlayerSection:Tab({ Title="Movement" })
+local ForsakenTab = ForsakenSection:Tab({ Title="Main" })
+local OthersTab = OthersSection:Tab({ Title="Utilities" })
+local InfoTab = InfoSection:Tab({ Title="Credits" })
 
 local playerEnabled=false
 local noclipEnabled=false
 local infJump=false
 local cframeSpeed=1
-local gravity=196.2
+local gravity=196
 local noclipConn
 local originalCollisions={}
 
 local function applyNoclip(char)
 	if noclipConn then noclipConn:Disconnect() end
 	if not char then return end
-	originalCollisions={}
+	table.clear(originalCollisions)
 	for _,p in ipairs(char:GetDescendants()) do
 		if p:IsA("BasePart") then
 			originalCollisions[p]=p.CanCollide
@@ -58,7 +61,7 @@ local function removeNoclip()
 	for p,v in pairs(originalCollisions) do
 		if p and p.Parent then p.CanCollide=v end
 	end
-	originalCollisions={}
+	table.clear(originalCollisions)
 end
 
 LocalPlayer.CharacterAdded:Connect(function(c)
@@ -123,51 +126,9 @@ RunService.Heartbeat:Connect(function()
 	end
 end)
 
-local espKiller=false
-local espSurvivor=false
-local espGen=false
-local autoGen=false
-local genDelay=5
-local genBusy=false
 local infStamina=false
 local staminaConn
 local staminaModule
-
-local function clearESP()
-	for _,o in ipairs(workspace:GetDescendants()) do
-		if (o:IsA("Highlight") or o:IsA("BillboardGui")) and string.find(o.Name,"Nexus") then
-			o:Destroy()
-		end
-	end
-end
-
-local function addHL(inst,color)
-	local h=inst:FindFirstChild("NexusHL")
-	if not h then
-		h=Instance.new("Highlight")
-		h.Name="NexusHL"
-		h.Adornee=inst
-		h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
-		h.Parent=inst
-	end
-	h.FillColor=color
-	h.OutlineColor=color
-	h.FillTransparency=0.45
-end
-
-local function updatePlayerESP()
-	local wp=workspace:FindFirstChild("Players")
-	if not wp then return end
-	for _,plr in ipairs(Players:GetPlayers()) do
-		if plr~=LocalPlayer and plr.Character then
-			if espKiller and plr.Character.Parent==wp:FindFirstChild("Killers") then
-				addHL(plr.Character,Color3.fromRGB(255,0,0))
-			elseif espSurvivor and plr.Character.Parent==wp:FindFirstChild("Survivors") then
-				addHL(plr.Character,Color3.fromRGB(0,255,0))
-			end
-		end
-	end
-end
 
 ForsakenTab:Toggle({
 	Title="Infinite Stamina",
@@ -179,63 +140,33 @@ ForsakenTab:Toggle({
 			local sprint=ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting")
 			staminaModule=require(sprint)
 			staminaConn=RunService.Heartbeat:Connect(function()
-				staminaModule.Stamina=staminaModule.MaxStamina or 999
+				if staminaModule then
+					staminaModule.Stamina=staminaModule.MaxStamina or 999
+				end
 			end)
 		end
 	end
 })
 
-ForsakenTab:Toggle({ Title="ESP Killers", Value=false, Callback=function(v) espKiller=v if not v then clearESP() end end })
-ForsakenTab:Toggle({ Title="ESP Survivors", Value=false, Callback=function(v) espSurvivor=v if not v then clearESP() end end })
-ForsakenTab:Toggle({ Title="ESP Generators", Value=false, Callback=function(v) espGen=v if not v then clearESP() end end })
-ForsakenTab:Toggle({ Title="Auto Generator", Value=false, Callback=function(v) autoGen=v end })
-
-ForsakenTab:Slider({
-	Title="Gen Speed",
-	Step=1,
-	Value={Min=1,Max=10,Default=5},
-	Callback=function(v) genDelay=v end
-})
-
-task.spawn(function()
-	while task.wait(0.5) do
-		updatePlayerESP()
-	end
-end)
-
-task.spawn(function()
-	while task.wait(1) do
-		if autoGen and not genBusy then
-			genBusy=true
-			local map=workspace:FindFirstChild("Map")
-			local ing=map and map:FindFirstChild("Ingame")
-			local m=ing and ing:FindFirstChild("Map")
-			if m then
-				for _,g in ipairs(m:GetChildren()) do
-					if g.Name=="Generator" and g:FindFirstChild("Remotes") then
-						pcall(function() g.Remotes.RE:FireServer() end)
-						task.wait(genDelay)
-					end
-				end
-			end
-			genBusy=false
-		end
-	end
-end)
-
 OthersTab:Button({
 	Title="Infinite Yield With AI",
 	Justify="Center",
 	Callback=function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/BokX1/InfiniteYieldWithAI/refs/heads/main/InfiniteYieldWithAI.Lua"))()
+		pcall(function()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/BokX1/InfiniteYieldWithAI/refs/heads/main/InfiniteYieldWithAI.Lua"))()
+		end)
 	end
 })
 
-local clockLabel = InfoTab:Paragraph({ Title="Clock", Desc="--:--:--" })
+local clockPara = InfoTab:Paragraph({ Title="Clock", Desc="--:--:--" })
 task.spawn(function()
 	while task.wait(1) do
-		clockLabel:Set("Desc",""..os.date("%H:%M:%S"))
+		clockPara:Set("Desc", os.date("%H:%M:%S"))
 	end
 end)
 
 InfoTab:Paragraph({ Title="Creators", Desc="Hydra (Owner)" })
+
+pcall(function()
+	WindUI:Notify({ Title="Nexus Hub", Desc="Loaded successfully", Icon="check" })
+end)
