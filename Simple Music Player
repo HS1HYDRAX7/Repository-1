@@ -48,7 +48,7 @@ close.TextScaled = true
 close.Parent = frame
 close.MouseButton1Click:Connect(closeGui)
 
-local box = Instance.new("")
+local box = Instance.new("TextBox")
 box.PlaceholderText = "Music ID"
 box.Size = UDim2.fromScale(0.9,0.12)
 box.Position = UDim2.fromScale(0.05,0.15)
