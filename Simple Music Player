@@ -1,7 +1,6 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
-local SoundService = game:GetService("SoundService")
 
 local player = Players.LocalPlayer
 
@@ -49,7 +48,7 @@ close.TextScaled = true
 close.Parent = frame
 close.MouseButton1Click:Connect(closeGui)
 
-local box = Instance.new("TextBox")
+local box = Instance.new("")
 box.PlaceholderText = "Music ID"
 box.Size = UDim2.fromScale(0.9,0.12)
 box.Position = UDim2.fromScale(0.05,0.15)
@@ -95,7 +94,7 @@ barFill.Parent = barBg
 Instance.new("UICorner", barFill)
 
 local credits = Instance.new("TextLabel")
-credits.Text = "Made by Hydra"
+credits.Text = "By 📑Hydra📑"
 credits.Size = UDim2.fromScale(1,0.1)
 credits.Position = UDim2.fromScale(0,0.85)
 credits.BackgroundTransparency = 1
@@ -104,53 +103,21 @@ credits.TextColor3 = Color3.fromRGB(160,160,160)
 credits.Parent = frame
 
 local sound = Instance.new("Sound")
-sound.Volume = 2
-sound.PlaybackSpeed = 1
+sound.Volume = 2        -- volume ajustado
+sound.PlaybackSpeed = 1 -- velocidade ajustada
 sound.Parent = gui
 
 local currentId
-
--- Detecta ambiente fechado (simples: verifica teto acima do Head)
-local function isClosedEnvironment()
-	local head = player.Character and player.Character:FindFirstChild("Head")
-	if head then
-		local ray = Ray.new(head.Position, Vector3.new(0,10,0))
-		local part = workspace:FindPartOnRay(ray, player.Character)
-		if part then
-			return true
-		end
-	end
-	return false
-end
-
 play.MouseButton1Click:Connect(function()
 	local id = tonumber(box.Text)
-	if not id then return end
-
-	if id ~= currentId then
+	if id and id ~= currentId then
 		currentId = id
 		sound.SoundId = "rbxassetid://" .. id
-		sound:Stop()
-
-		for _, child in ipairs(sound:GetChildren()) do
-			if child:IsA("SoundEffect") then
-				child:Destroy()
-			end
-		end
-
-		if isClosedEnvironment() then
-			local reverb = Instance.new("ReverbSoundEffect")
-			reverb.Level = 0.7
-			reverb.DecayTime = 2
-			reverb.Parent = sound
-		end
-
 		sound:Play()
 	elseif not sound.IsPlaying then
 		sound:Resume()
 	end
 end)
-
 pause.MouseButton1Click:Connect(function()
 	if sound.IsPlaying then sound:Pause() end
 end)
