@@ -3,15 +3,14 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
 
-local gui, frame, box, play, pause, back, forward, barBg, barFill, credits, sound
-gui = Instance.new("ScreenGui")
+-- GUI
+local gui = Instance.new("ScreenGui")
 gui.ResetOnSpawn = false
 gui.Enabled = false
 gui.Parent = player.PlayerGui
 
-frame = Instance.new("Frame")
+local frame = Instance.new("Frame")
 frame.Size = UDim2.fromScale(0.5,0.55)
 frame.Position = UDim2.fromScale(0.5,0.5)
 frame.AnchorPoint = Vector2.new(0.5,0.5)
@@ -49,7 +48,7 @@ close.TextScaled = true
 close.Parent = frame
 close.MouseButton1Click:Connect(closeGui)
 
-box = Instance.new("TextBox")
+local box = Instance.new("TextBox")
 box.PlaceholderText = "Music ID"
 box.Size = UDim2.fromScale(0.9,0.12)
 box.Position = UDim2.fromScale(0.05,0.15)
@@ -77,24 +76,24 @@ local function makeButton(text, pos)
 	return b
 end
 
-play = makeButton("▶️", UDim2.fromScale(0.05,0.32))
-pause = makeButton("⏸️", UDim2.fromScale(0.55,0.32))
-back = makeButton("⏪", UDim2.fromScale(0.05,0.62))
-forward = makeButton("⏩", UDim2.fromScale(0.55,0.62))
+local play = makeButton("▶️", UDim2.fromScale(0.05,0.32))
+local pause = makeButton("⏸️", UDim2.fromScale(0.55,0.32))
+local back = makeButton("⏪", UDim2.fromScale(0.05,0.62))
+local forward = makeButton("⏩", UDim2.fromScale(0.55,0.62))
 
-barBg = Instance.new("Frame")
+local barBg = Instance.new("Frame")
 barBg.Size = UDim2.fromScale(0.9,0.06)
 barBg.Position = UDim2.fromScale(0.05,0.52)
 barBg.BackgroundColor3 = Color3.fromRGB(45,45,45)
 barBg.Parent = frame
 Instance.new("UICorner", barBg)
 
-barFill = Instance.new("Frame")
+local barFill = Instance.new("Frame")
 barFill.Size = UDim2.fromScale(0,1)
 barFill.Parent = barBg
 Instance.new("UICorner", barFill)
 
-credits = Instance.new("TextLabel")
+local credits = Instance.new("TextLabel")
 credits.Text = "Made by Hydra"
 credits.Size = UDim2.fromScale(1,0.1)
 credits.Position = UDim2.fromScale(0,0.85)
@@ -103,7 +102,7 @@ credits.TextScaled = true
 credits.TextColor3 = Color3.fromRGB(160,160,160)
 credits.Parent = frame
 
-sound = Instance.new("Sound")
+local sound = Instance.new("Sound")
 sound.Volume = 5
 sound.PlaybackSpeed = 0.9
 sound.Parent = gui
@@ -133,22 +132,20 @@ back.MouseButton1Click:Connect(function()
 	end
 end)
 
+-- Bola + Anel
 local ball, ringParts = nil, {}
 local renderConn
 
 local function getHead(char)
 	if not char then return nil end
-	local head = char:FindFirstChild("Head")
-	if head then return head end
-	local humanoid = char:FindFirstChildOfClass("Humanoid")
-	if humanoid then
-		head = char:FindFirstChild("Head") or char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
-	end
-	return head
+	return char:FindFirstChild("Head") or char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
 end
 
 local function spawnBall(char)
 	if not char then return end
+	local head = getHead(char)
+	if not head then return end
+
 	if ball then ball:Destroy() end
 	for _, p in ipairs(ringParts) do p:Destroy() end
 	ringParts = {}
@@ -164,31 +161,26 @@ local function spawnBall(char)
 
 	local click = Instance.new("ClickDetector")
 	click.Parent = ball
-	click.MouseClick:Connect(function()
-		gui.Enabled = true
-	end)
+	click.MouseClick:Connect(openGui)
 
-	local RING_COUNT = 36
-	local RING_RADIUS = 4.5
-	for i = 1, RING_COUNT do
+	local RING_COUNT = 48
+	local RING_RADIUS = 5
+	for i = 1,RING_COUNT do
 		local p = Instance.new("Part")
-		p.Size = Vector3.new(0.3,0.1,0.7)
+		p.Size = Vector3.new(0.25,0.1,0.7)
 		p.Anchored = true
 		p.CanCollide = false
 		p.Material = Enum.Material.Neon
 		p.Parent = workspace
-		table.insert(ringParts, p)
+		table.insert(ringParts,p)
 	end
 
-	local t, hue, ringRot = 0, 0, 0
+	local t, hue, ringRot = 0,0,0
 	renderConn = RunService.RenderStepped:Connect(function(dt)
-		if not char or not char.Parent then return end
-		local head = getHead(char)
-		if not head then return end
-
+		if not ball or not head.Parent then return end
 		t += dt
 		hue = (hue + dt * 0.6) % 1
-		ringRot += dt
+		ringRot += dt*1.2
 
 		local color = Color3.fromHSV(hue,1,1)
 		ball.Color = color
