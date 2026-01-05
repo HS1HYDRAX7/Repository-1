@@ -1,0 +1,195 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+local ball = Instance.new("Part")
+ball.Shape = Enum.PartType.Ball
+ball.Size = Vector3.new(1.2,1.2,1.2)
+ball.Material = Enum.Material.Neon
+ball.Anchored = true
+ball.CanCollide = false
+ball.Parent = workspace
+
+local click = Instance.new("ClickDetector")
+click.Parent = ball
+
+local ringParts = {}
+local RING_COUNT = 36
+local RING_RADIUS = 4.5
+
+for i = 1, RING_COUNT do
+	local p = Instance.new("Part")
+	p.Size = Vector3.new(0.3,0.1,0.7)
+	p.Anchored = true
+	p.CanCollide = false
+	p.Material = Enum.Material.Neon
+	p.Parent = workspace
+	table.insert(ringParts, p)
+end
+
+local gui = Instance.new("ScreenGui")
+gui.ResetOnSpawn = false
+gui.Enabled = false
+gui.Parent = player.PlayerGui
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.fromScale(0.5,0.55)
+frame.Position = UDim2.fromScale(0.5,0.5)
+frame.AnchorPoint = Vector2.new(0.5,0.5)
+frame.BackgroundColor3 = Color3.fromRGB(18,18,18)
+frame.BackgroundTransparency = 1
+frame.Parent = gui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,26)
+
+local function openGui()
+	gui.Enabled = true
+	frame.Size = UDim2.fromScale(0.3,0.3)
+	frame.BackgroundTransparency = 1
+	TweenService:Create(frame, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+		Size = UDim2.fromScale(0.5,0.55),
+		BackgroundTransparency = 0
+	}):Play()
+end
+
+local function closeGui()
+	TweenService:Create(frame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+		Size = UDim2.fromScale(0.3,0.3),
+		BackgroundTransparency = 1
+	}):Play()
+	task.delay(0.25, function()
+		gui.Enabled = false
+	end)
+end
+
+local close = Instance.new("TextButton")
+close.Text = "❌"
+close.Size = UDim2.fromScale(0.1,0.1)
+close.Position = UDim2.fromScale(0.88,0.02)
+close.BackgroundTransparency = 1
+close.TextScaled = true
+close.Parent = frame
+
+local box = Instance.new("TextBox")
+box.PlaceholderText = "ID da música"
+box.Size = UDim2.fromScale(0.9,0.12)
+box.Position = UDim2.fromScale(0.05,0.15)
+box.BackgroundColor3 = Color3.fromRGB(30,30,30)
+box.TextColor3 = Color3.new(1,1,1)
+box.ClearTextOnFocus = false
+box.Parent = frame
+Instance.new("UICorner", box).CornerRadius = UDim.new(0,16)
+
+local function makeButton(text, pos)
+	local b = Instance.new("TextButton")
+	b.Text = text
+	b.Size = UDim2.fromScale(0.4,0.14)
+	b.Position = pos
+	b.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	b.TextScaled = true
+	b.Parent = frame
+	Instance.new("UICorner", b)
+	b.MouseEnter:Connect(function()
+		TweenService:Create(b, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(60,60,60)}):Play()
+	end)
+	b.MouseLeave:Connect(function()
+		TweenService:Create(b, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(40,40,40)}):Play()
+	end)
+	return b
+end
+
+local play = makeButton("▶️", UDim2.fromScale(0.05,0.32))
+local pause = makeButton("⏸️", UDim2.fromScale(0.55,0.32))
+
+local barBg = Instance.new("Frame")
+barBg.Size = UDim2.fromScale(0.9,0.06)
+barBg.Position = UDim2.fromScale(0.05,0.52)
+barBg.BackgroundColor3 = Color3.fromRGB(45,45,45)
+barBg.Parent = frame
+Instance.new("UICorner", barBg)
+
+local barFill = Instance.new("Frame")
+barFill.Size = UDim2.fromScale(0,1)
+barFill.Parent = barBg
+Instance.new("UICorner", barFill)
+
+local back = makeButton("⏪", UDim2.fromScale(0.05,0.62))
+local forward = makeButton("⏩", UDim2.fromScale(0.55,0.62))
+
+local credits = Instance.new("TextLabel")
+credits.Text = "Made by Hydra"
+credits.Size = UDim2.fromScale(1,0.1)
+credits.Position = UDim2.fromScale(0,0.85)
+credits.BackgroundTransparency = 1
+credits.TextScaled = true
+credits.TextColor3 = Color3.fromRGB(160,160,160)
+credits.Parent = frame
+
+local sound = Instance.new("Sound")
+sound.Volume = 5
+sound.PlaybackSpeed = 0.9
+sound.Parent = gui
+
+local currentId
+
+play.MouseButton1Click:Connect(function()
+	local id = tonumber(box.Text)
+	if id and id ~= currentId then
+		currentId = id
+		sound.SoundId = "rbxassetid://" .. id
+		sound:Play()
+	elseif not sound.IsPlaying then
+		sound:Resume()
+	end
+end)
+
+pause.MouseButton1Click:Connect(function()
+	if sound.IsPlaying then
+		sound:Pause()
+	end
+end)
+
+forward.MouseButton1Click:Connect(function()
+	if sound.TimeLength > 0 then
+		sound.TimePosition = math.clamp(sound.TimePosition + 10, 0, sound.TimeLength)
+	end
+end)
+
+back.MouseButton1Click:Connect(function()
+	if sound.TimeLength > 0 then
+		sound.TimePosition = math.clamp(sound.TimePosition - 10, 0, sound.TimeLength)
+	end
+end)
+
+click.MouseClick:Connect(openGui)
+close.MouseButton1Click:Connect(closeGui)
+
+local t = 0
+local hue = 0
+local ringRot = 0
+
+RunService.RenderStepped:Connect(function(dt)
+	t += dt
+	hue = (hue + dt * 0.6) % 1
+	ringRot += dt
+
+	local color = Color3.fromHSV(hue,1,1)
+	ball.Color = color
+	barFill.BackgroundColor3 = color
+
+	local base = hrp.CFrame * CFrame.new(0,5 + math.sin(t*3)*0.4,0)
+	ball.CFrame = base
+
+	for i,p in ipairs(ringParts) do
+		local a = (i/RING_COUNT)*math.pi*2 + ringRot
+		p.CFrame = base * CFrame.new(math.cos(a)*RING_RADIUS,0,math.sin(a)*RING_RADIUS)
+		p.Color = color
+	end
+
+	if sound.TimeLength > 0 then
+		barFill.Size = UDim2.fromScale(sound.TimePosition / sound.TimeLength,1)
+	end
+end)
