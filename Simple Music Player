@@ -4,52 +4,56 @@ local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 
---[ GUI Principal ]--
-local gui = Instance.new("ScreenGui")
-gui.ResetOnSpawn = false
-gui.Enabled = false
-gui.Parent = player.PlayerGui
+-- GUI Principal
+local guiMain = Instance.new("ScreenGui")
+guiMain.ResetOnSpawn = false
+guiMain.Enabled = false
+guiMain.Parent = player.PlayerGui
 
-local frame = Instance.new("Frame")
-frame.Size = UDim2.fromScale(0.5,0.55)
-frame.Position = UDim2.fromScale(0.5,0.5)
-frame.AnchorPoint = Vector2.new(0.5,0.5)
-frame.BackgroundColor3 = Color3.fromRGB(18,18,18)
-frame.BackgroundTransparency = 1
-frame.Parent = gui
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0,26)
+local frameMain = Instance.new("Frame")
+frameMain.Size = UDim2.fromScale(0.5,0.55)
+frameMain.Position = UDim2.fromScale(0.5,0.5)
+frameMain.AnchorPoint = Vector2.new(0.5,0.5)
+frameMain.BackgroundColor3 = Color3.fromRGB(18,18,18)
+frameMain.BackgroundTransparency = 1
+frameMain.Parent = guiMain
+Instance.new("UICorner", frameMain).CornerRadius = UDim.new(0,26)
 
-local function openGui()
+-- GUI de Modificações
+local guiSettings = Instance.new("ScreenGui")
+guiSettings.ResetOnSpawn = false
+guiSettings.Enabled = false
+guiSettings.Parent = player.PlayerGui
+
+local frameSettings = Instance.new("Frame")
+frameSettings.Size = UDim2.fromScale(0.5,0.5)
+frameSettings.Position = UDim2.fromScale(0.5,0.5)
+frameSettings.AnchorPoint = Vector2.new(0.5,0.5)
+frameSettings.BackgroundColor3 = Color3.fromRGB(18,18,18)
+frameSettings.BackgroundTransparency = 1
+frameSettings.Parent = guiSettings
+Instance.new("UICorner", frameSettings).CornerRadius = UDim.new(0,26)
+
+local function openGui(gui)
 	gui.Enabled = true
-	frame.Size = UDim2.fromScale(0.3,0.3)
-	frame.BackgroundTransparency = 1
-	TweenService:Create(frame, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-		Size = UDim2.fromScale(0.5,0.55),
-		BackgroundTransparency = 0
-	}):Play()
+	TweenService:Create(frameMain, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
+end
+local function closeGui(gui)
+	TweenService:Create(frameMain, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {BackgroundTransparency = 1}):Play()
+	task.delay(0.25,function() gui.Enabled=false end)
 end
 
-local function closeGui()
-	TweenService:Create(frame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-		Size = UDim2.fromScale(0.3,0.3),
-		BackgroundTransparency = 1
-	}):Play()
-	task.delay(0.25, function()
-		gui.Enabled = false
-	end)
-end
+-- Fechar principal
+local closeMain = Instance.new("TextButton")
+closeMain.Text = "❌"
+closeMain.Size = UDim2.fromScale(0.1,0.1)
+closeMain.Position = UDim2.fromScale(0.88,0.02)
+closeMain.BackgroundTransparency = 1
+closeMain.TextScaled = true
+closeMain.Parent = frameMain
+closeMain.MouseButton1Click:Connect(function() guiMain.Enabled=false end)
 
--- Close button principal
-local close = Instance.new("TextButton")
-close.Text = "❌"
-close.Size = UDim2.fromScale(0.1,0.1)
-close.Position = UDim2.fromScale(0.88,0.02)
-close.BackgroundTransparency = 1
-close.TextScaled = true
-close.Parent = frame
-close.MouseButton1Click:Connect(closeGui)
-
--- Textbox de Music ID
+-- Music ID textbox
 local box = Instance.new("TextBox")
 box.PlaceholderText = "Music ID"
 box.Size = UDim2.fromScale(0.9,0.12)
@@ -57,39 +61,39 @@ box.Position = UDim2.fromScale(0.05,0.15)
 box.BackgroundColor3 = Color3.fromRGB(30,30,30)
 box.TextColor3 = Color3.new(1,1,1)
 box.ClearTextOnFocus = false
-box.Parent = frame
+box.Parent = frameMain
 Instance.new("UICorner", box).CornerRadius = UDim.new(0,16)
 
-local function makeButton(text, pos)
+-- Função criar botão
+local function makeButton(text,pos,parent)
 	local b = Instance.new("TextButton")
 	b.Text = text
 	b.Size = UDim2.fromScale(0.4,0.14)
 	b.Position = pos
 	b.BackgroundColor3 = Color3.fromRGB(40,40,40)
 	b.TextScaled = true
-	b.Parent = frame
-	Instance.new("UICorner", b)
+	b.Parent = parent
+	Instance.new("UICorner",b)
 	b.MouseEnter:Connect(function()
-		TweenService:Create(b, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(60,60,60)}):Play()
+		TweenService:Create(b,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(60,60,60)}):Play()
 	end)
 	b.MouseLeave:Connect(function()
-		TweenService:Create(b, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(40,40,40)}):Play()
+		TweenService:Create(b,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(40,40,40)}):Play()
 	end)
 	return b
 end
 
--- Botões principais
-local play = makeButton("▶️", UDim2.fromScale(0.05,0.32))
-local pause = makeButton("⏸️", UDim2.fromScale(0.55,0.32))
-local back = makeButton("⏪", UDim2.fromScale(0.05,0.62))
-local forward = makeButton("⏩", UDim2.fromScale(0.55,0.62))
+local play = makeButton("▶️",UDim2.fromScale(0.05,0.32),frameMain)
+local pause = makeButton("⏸️",UDim2.fromScale(0.55,0.32),frameMain)
+local back = makeButton("⏪",UDim2.fromScale(0.05,0.62),frameMain)
+local forward = makeButton("⏩",UDim2.fromScale(0.55,0.62),frameMain)
 
 -- Barra de progresso
 local barBg = Instance.new("Frame")
 barBg.Size = UDim2.fromScale(0.9,0.06)
 barBg.Position = UDim2.fromScale(0.05,0.52)
 barBg.BackgroundColor3 = Color3.fromRGB(45,45,45)
-barBg.Parent = frame
+barBg.Parent = frameMain
 Instance.new("UICorner", barBg)
 
 local barFill = Instance.new("Frame")
@@ -97,36 +101,24 @@ barFill.Size = UDim2.fromScale(0,1)
 barFill.Parent = barBg
 Instance.new("UICorner", barFill)
 
--- Credits + Engrenagem
-local credits = Instance.new("TextLabel")
-credits.Text = "Made by Hydra"
-credits.Size = UDim2.fromScale(0.8,0.1)
+-- Créditos + engrenagem
+local credits = Instance.new("TextButton")
+credits.Text = "Made by Hydra ⚙️"
+credits.Size = UDim2.fromScale(1,0.1)
 credits.Position = UDim2.fromScale(0,0.85)
 credits.BackgroundTransparency = 1
 credits.TextScaled = true
 credits.TextColor3 = Color3.fromRGB(160,160,160)
-credits.Parent = frame
-
-local settingsBtn = Instance.new("TextButton")
-settingsBtn.Text = "⚙️"
-settingsBtn.Size = UDim2.fromScale(0.18,0.1)
-settingsBtn.Position = UDim2.fromScale(0.82,0.85)
-settingsBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-settingsBtn.TextScaled = true
-settingsBtn.Parent = frame
-Instance.new("UICorner", settingsBtn)
-settingsBtn.MouseEnter:Connect(function()
-	TweenService:Create(settingsBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(60,60,60)}):Play()
-end)
-settingsBtn.MouseLeave:Connect(function()
-	TweenService:Create(settingsBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(40,40,40)}):Play()
+credits.Parent = frameMain
+credits.MouseButton1Click:Connect(function()
+	guiSettings.Enabled=true
 end)
 
--- Sound
+-- Som
 local sound = Instance.new("Sound")
 sound.Volume = 1
 sound.PlaybackSpeed = 1
-sound.Parent = gui
+sound.Parent = guiMain
 
 local currentId
 play.MouseButton1Click:Connect(function()
@@ -143,155 +135,17 @@ pause.MouseButton1Click:Connect(function()
 	if sound.IsPlaying then sound:Pause() end
 end)
 forward.MouseButton1Click:Connect(function()
-	if sound.TimeLength > 0 then
-		sound.TimePosition = math.clamp(sound.TimePosition + 10,0,sound.TimeLength)
+	if sound.TimeLength>0 then
+		sound.TimePosition=math.clamp(sound.TimePosition+10,0,sound.TimeLength)
 	end
 end)
 back.MouseButton1Click:Connect(function()
-	if sound.TimeLength > 0 then
-		sound.TimePosition = math.clamp(sound.TimePosition - 10,0,sound.TimeLength)
+	if sound.TimeLength>0 then
+		sound.TimePosition=math.clamp(sound.TimePosition-10,0,sound.TimeLength)
 	end
 end)
 
---[ GUI de Modificações ]--
-local modGui = Instance.new("Frame")
-modGui.Size = UDim2.fromScale(0.5,0.55)
-modGui.Position = UDim2.fromScale(0.5,0.5)
-modGui.AnchorPoint = Vector2.new(0.5,0.5)
-modGui.BackgroundColor3 = Color3.fromRGB(18,18,18)
-modGui.Visible = false
-modGui.Parent = gui
-Instance.new("UICorner", modGui).CornerRadius = UDim.new(0,26)
-
-local closeMod = Instance.new("TextButton")
-closeMod.Text = "❌"
-closeMod.Size = UDim2.fromScale(0.1,0.1)
-closeMod.Position = UDim2.fromScale(0.88,0.02)
-closeMod.BackgroundTransparency = 1
-closeMod.TextScaled = true
-closeMod.Parent = modGui
-closeMod.MouseButton1Click:Connect(function()
-	modGui.Visible = false
-	gui.Enabled = true
-end)
-
-local titleMod = Instance.new("TextLabel")
-titleMod.Text = "Seção de Modificações"
-titleMod.Size = UDim2.fromScale(1,0.1)
-titleMod.Position = UDim2.fromScale(0,0.2)
-titleMod.BackgroundTransparency = 1
-titleMod.TextScaled = true
-titleMod.TextColor3 = Color3.fromRGB(200,200,200)
-titleMod.Parent = modGui
-
--- Função para criar sliders + textbox
-local function makeOption(name, yPos, min,max,default)
-	local label = Instance.new("TextLabel")
-	label.Text = name
-	label.Size = UDim2.fromScale(0.45,0.08)
-	label.Position = UDim2.fromScale(0.05,yPos)
-	label.BackgroundTransparency = 1
-	label.TextColor3 = Color3.fromRGB(200,200,200)
-	label.TextScaled = true
-	label.Parent = modGui
-
-	local slider = Instance.new("Frame")
-	slider.Size = UDim2.fromScale(0.6,0.06)
-	slider.Position = UDim2.fromScale(0.05,yPos+0.08)
-	slider.BackgroundColor3 = Color3.fromRGB(50,50,50)
-	slider.Parent = modGui
-	Instance.new("UICorner",slider)
-
-	local fill = Instance.new("Frame")
-	fill.Size = UDim2.fromScale((default-min)/(max-min),1)
-	fill.BackgroundColor3 = Color3.fromRGB(100,100,255)
-	fill.Parent = slider
-	Instance.new("UICorner", fill)
-
-	local txt = Instance.new("TextBox")
-	txt.Size = UDim2.fromScale(0.2,1)
-	txt.Position = UDim2.fromScale(0.8,0)
-	txt.BackgroundColor3 = Color3.fromRGB(30,30,30)
-	txt.TextColor3 = Color3.new(1,1,1)
-	txt.Text = tostring(default)
-	txt.ClearTextOnFocus = false
-	txt.Parent = slider
-	Instance.new("UICorner", txt).CornerRadius = UDim.new(0,8)
-
-	local function updateValue(v)
-		local frac = (v-min)/(max-min)
-		fill.Size = UDim2.fromScale(frac,1)
-		txt.Text = string.format("%.2f",v)
-		return v
-	end
-
-	fill.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			local mouse = player:GetMouse()
-			local conn
-			conn = RunService.RenderStepped:Connect(function()
-				local rel = math.clamp((mouse.X - slider.AbsolutePosition.X)/slider.AbsoluteSize.X,0,1)
-				updateValue(min + rel*(max-min))
-			end)
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					conn:Disconnect()
-				end
-			end)
-		end
-	end)
-
-	txt.FocusLost:Connect(function()
-		local v = tonumber(txt.Text) or default
-		v = math.clamp(v,min,max)
-		updateValue(v)
-	end)
-
-	return function() return tonumber(txt.Text) end
-end
-
-local getSpeed = makeOption("Speed",0.35,0.5,2,1)
-local getVolume = makeOption("Volume",0.55,0,5,1)
-local getPitch = makeOption("Pitch",0.75,0.5,2,1)
-
--- Reverb switch
-local reverbLabel = Instance.new("TextLabel")
-reverbLabel.Text = "Reverb"
-reverbLabel.Size = UDim2.fromScale(0.45,0.08)
-reverbLabel.Position = UDim2.fromScale(0.05,0.95-0.08)
-reverbLabel.BackgroundTransparency = 1
-reverbLabel.TextColor3 = Color3.fromRGB(200,200,200)
-reverbLabel.TextScaled = true
-reverbLabel.Parent = modGui
-
-local reverbBtn = Instance.new("TextButton")
-reverbBtn.Size = UDim2.fromScale(0.15,0.08)
-reverbBtn.Position = UDim2.fromScale(0.55,0.95-0.08)
-reverbBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-reverbBtn.Text = "OFF"
-reverbBtn.TextScaled = true
-reverbBtn.Parent = modGui
-Instance.new("UICorner", reverbBtn)
-local reverbOn = false
-reverbBtn.MouseButton1Click:Connect(function()
-	reverbOn = not reverbOn
-	reverbBtn.Text = reverbOn and "ON" or "OFF"
-end)
-
--- Abrir GUI de modificações
-settingsBtn.MouseButton1Click:Connect(function()
-	gui.Enabled = false
-	modGui.Visible = true
-end)
-
--- Atualizar música em tempo real
-RunService.RenderStepped:Connect(function()
-	sound.PlaybackSpeed = getSpeed()
-	sound.Volume = getVolume()
-	sound.Pitch = getPitch()
-end)
-
---[ Bola + Anel Flutuante ]--
+-- Bola + Anel
 local ball, ringParts = nil, {}
 local renderConn
 
@@ -306,56 +160,54 @@ local function spawnBall(char)
 	if not head then return end
 
 	if ball then ball:Destroy() end
-	for _, p in ipairs(ringParts) do p:Destroy() end
-	ringParts = {}
+	for _,p in ipairs(ringParts) do p:Destroy() end
+	ringParts={}
 	if renderConn then renderConn:Disconnect() end
 
 	ball = Instance.new("Part")
 	ball.Shape = Enum.PartType.Ball
-	ball.Size = Vector3.new(1.2,1.2,1.2)
-	ball.Material = Enum.Material.Neon
-	ball.Anchored = true
-	ball.CanCollide = false
-	ball.Parent = workspace
+	ball.Size=Vector3.new(1.2,1.2,1.2)
+	ball.Material=Enum.Material.Neon
+	ball.Anchored=true
+	ball.CanCollide=false
+	ball.Parent=workspace
 
 	local click = Instance.new("ClickDetector")
 	click.Parent = ball
-	click.MouseClick:Connect(openGui)
+	click.MouseClick:Connect(function()
+		guiMain.Enabled=true
+	end)
 
-	local RING_COUNT = 48
-	local RING_RADIUS = 5
-	for i = 1,RING_COUNT do
+	local RING_COUNT=48
+	local RING_RADIUS=5
+	for i=1,RING_COUNT do
 		local p = Instance.new("Part")
-		p.Size = Vector3.new(0.25,0.1,0.7)
-		p.Anchored = true
-		p.CanCollide = false
-		p.Material = Enum.Material.Neon
-		p.Parent = workspace
+		p.Size=Vector3.new(0.25,0.1,0.7)
+		p.Anchored=true
+		p.CanCollide=false
+		p.Material=Enum.Material.Neon
+		p.Parent=workspace
 		table.insert(ringParts,p)
 	end
 
-	local t,hue,ringRot = 0,0,0
+	local t,hue,ringRot=0,0,0
 	renderConn = RunService.RenderStepped:Connect(function(dt)
 		if not ball or not head.Parent then return end
-		t += dt
-		hue = (hue + dt*0.6)%1
-		ringRot += dt*1.2
+		t+=dt
+		hue=(hue+dt*0.6)%1
+		ringRot+=dt*1.2
 
-		local color = Color3.fromHSV(hue,1,1)
-		ball.Color = color
-		barFill.BackgroundColor3 = color
+		local color=Color3.fromHSV(hue,1,1)
+		ball.Color=color
+		barFill.BackgroundColor3=color
 
-		local base = head.CFrame * CFrame.new(0,2 + math.sin(t*3)*0.4,0)
-		ball.CFrame = base
+		local base=head.CFrame*CFrame.new(0,2+math.sin(t*3)*0.4,0)
+		ball.CFrame=base
 
 		for i,p in ipairs(ringParts) do
-			local a = (i/RING_COUNT)*math.pi*2 + ringRot
-			p.CFrame = base * CFrame.new(math.cos(a)*RING_RADIUS,0,math.sin(a)*RING_RADIUS)
-			p.Color = color
-		end
-
-		if sound.TimeLength > 0 then
-			barFill.Size = UDim2.fromScale(sound.TimePosition/sound.TimeLength,1)
+			local a=(i/RING_COUNT)*math.pi*2+ringRot
+			p.CFrame=base*CFrame.new(math.cos(a)*RING_RADIUS,0,math.sin(a)*RING_RADIUS)
+			p.Color=color
 		end
 	end)
 end
@@ -365,3 +217,98 @@ player.CharacterAdded:Connect(function(c)
 	task.wait(0.1)
 	spawnBall(c)
 end)
+
+-- GUI de Configurações
+local closeSettings = Instance.new("TextButton")
+closeSettings.Text = "❌"
+closeSettings.Size=UDim2.fromScale(0.1,0.1)
+closeSettings.Position=UDim2.fromScale(0.88,0.02)
+closeSettings.BackgroundTransparency=1
+closeSettings.TextScaled=true
+closeSettings.Parent=frameSettings
+closeSettings.MouseButton1Click:Connect(function()
+	guiSettings.Enabled=false
+end)
+
+local options={"Speed","Volume","Pitch","Reverb"}
+local optionY=0.15
+for _,opt in ipairs(options) do
+	local label = Instance.new("TextLabel")
+	label.Text=opt
+	label.Size=UDim2.fromScale(0.4,0.08)
+	label.Position=UDim2.fromScale(0.05,optionY)
+	label.BackgroundTransparency=1
+	label.TextColor3=Color3.fromRGB(255,255,255)
+	label.TextScaled=true
+	label.Parent=frameSettings
+
+	if opt=="Reverb" then
+		local switch = Instance.new("TextButton")
+		switch.Text="OFF"
+		switch.Size=UDim2.fromScale(0.15,0.08)
+		switch.Position=UDim2.fromScale(0.55,optionY)
+		switch.Parent=frameSettings
+		switch.MouseButton1Click:Connect(function()
+			if switch.Text=="OFF" then
+				switch.Text="ON"
+			else
+				switch.Text="OFF"
+			end
+		end)
+	else
+		local sliderBg = Instance.new("Frame")
+		sliderBg.Size=UDim2.fromScale(0.4,0.08)
+		sliderBg.Position=UDim2.fromScale(0.55,optionY)
+		sliderBg.BackgroundColor3=Color3.fromRGB(50,50,50)
+		sliderBg.Parent=frameSettings
+		Instance.new("UICorner",sliderBg)
+
+		local sliderFill = Instance.new("Frame")
+		sliderFill.Size=UDim2.fromScale(0,1)
+		sliderFill.BackgroundColor3=Color3.fromRGB(0,170,255)
+		sliderFill.Parent=sliderBg
+		Instance.new("UICorner",sliderFill)
+
+		local boxVal = Instance.new("TextBox")
+		boxVal.Size=UDim2.fromScale(0.08,0.08)
+		boxVal.Position=UDim2.fromScale(0.96,optionY)
+		boxVal.Text="1"
+		boxVal.BackgroundColor3=Color3.fromRGB(30,30,30)
+		boxVal.TextColor3=Color3.new(1,1,1)
+		boxVal.ClearTextOnFocus=false
+		boxVal.Parent=frameSettings
+		Instance.new("UICorner",boxVal).CornerRadius=UDim.new(0,8)
+
+		local function updateSlider(val)
+			val = math.clamp(tonumber(val) or 1,0,7)
+			sliderFill.Size=UDim2.fromScale(val/7,1)
+			boxVal.Text=tostring(val)
+			if opt=="Speed" then sound.PlaybackSpeed=val end
+			if opt=="Volume" then sound.Volume=val end
+			if opt=="Pitch" then sound.Pitch=val end
+		end
+
+		sliderBg.InputBegan:Connect(function(input)
+			if input.UserInputType==Enum.UserInputType.MouseButton1 then
+				local mouse=game.Players.LocalPlayer:GetMouse()
+				local function move()
+					local pos=math.clamp((mouse.X-sliderBg.AbsolutePosition.X)/sliderBg.AbsoluteSize.X,0,1)
+					updateSlider(pos*7)
+				end
+				move()
+				local conn
+				conn=mouse.Move:Connect(move)
+				local up
+				up=mouse.Button1Up:Connect(function()
+					conn:Disconnect()
+					up:Disconnect()
+				end)
+			end
+		end)
+
+		boxVal.FocusLost:Connect(function()
+			updateSlider(boxVal.Text)
+		end)
+	end
+	optionY+=0.15
+end
