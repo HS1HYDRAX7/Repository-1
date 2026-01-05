@@ -73,8 +73,8 @@ close.BackgroundTransparency = 1
 close.TextScaled = true
 close.Parent = frame
 
-local box = Instance.new("TextBox")
-box.PlaceholderText = "ID da música"
+local box = Instance.new("")
+box.PlaceholderText = "Music ID"
 box.Size = UDim2.fromScale(0.9,0.12)
 box.Position = UDim2.fromScale(0.05,0.15)
 box.BackgroundColor3 = Color3.fromRGB(30,30,30)
@@ -120,7 +120,7 @@ local back = makeButton("⏪", UDim2.fromScale(0.05,0.62))
 local forward = makeButton("⏩", UDim2.fromScale(0.55,0.62))
 
 local credits = Instance.new("TextLabel")
-credits.Text = "Made by Hydra"
+credits.Text = "Made by 📑Hydra📑"
 credits.Size = UDim2.fromScale(1,0.1)
 credits.Position = UDim2.fromScale(0,0.85)
 credits.BackgroundTransparency = 1
