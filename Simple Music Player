@@ -3,39 +3,15 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
+local gui, frame, box, play, pause, back, forward, barBg, barFill, credits, sound
 
--- Criação da bola e anel apenas uma vez
-local ball = Instance.new("Part")
-ball.Shape = Enum.PartType.Ball
-ball.Size = Vector3.new(1.2,1.2,1.2)
-ball.Material = Enum.Material.Neon
-ball.Anchored = true
-ball.CanCollide = false
-ball.Parent = workspace
-
-local click = Instance.new("ClickDetector")
-click.Parent = ball
-
-local ringParts = {}
-local RING_COUNT = 36
-local RING_RADIUS = 4.5
-for i = 1, RING_COUNT do
-	local p = Instance.new("Part")
-	p.Size = Vector3.new(0.3,0.1,0.7)
-	p.Anchored = true
-	p.CanCollide = false
-	p.Material = Enum.Material.Neon
-	p.Parent = workspace
-	table.insert(ringParts, p)
-end
-
--- GUI
-local gui = Instance.new("ScreenGui")
+-- Cria GUI (executa só uma vez)
+gui = Instance.new("ScreenGui")
 gui.ResetOnSpawn = false
 gui.Enabled = false
 gui.Parent = player.PlayerGui
 
-local frame = Instance.new("Frame")
+frame = Instance.new("Frame")
 frame.Size = UDim2.fromScale(0.5,0.55)
 frame.Position = UDim2.fromScale(0.5,0.5)
 frame.AnchorPoint = Vector2.new(0.5,0.5)
@@ -71,8 +47,9 @@ close.Position = UDim2.fromScale(0.88,0.02)
 close.BackgroundTransparency = 1
 close.TextScaled = true
 close.Parent = frame
+close.MouseButton1Click:Connect(closeGui)
 
-local box = Instance.new("TextBox")
+box = Instance.new("TextBox")
 box.PlaceholderText = "Music ID"
 box.Size = UDim2.fromScale(0.9,0.12)
 box.Position = UDim2.fromScale(0.05,0.15)
@@ -100,24 +77,24 @@ local function makeButton(text, pos)
 	return b
 end
 
-local play = makeButton("▶️", UDim2.fromScale(0.05,0.32))
-local pause = makeButton("⏸️", UDim2.fromScale(0.55,0.32))
-local back = makeButton("⏪", UDim2.fromScale(0.05,0.62))
-local forward = makeButton("⏩", UDim2.fromScale(0.55,0.62))
+play = makeButton("▶️", UDim2.fromScale(0.05,0.32))
+pause = makeButton("⏸️", UDim2.fromScale(0.55,0.32))
+back = makeButton("⏪", UDim2.fromScale(0.05,0.62))
+forward = makeButton("⏩", UDim2.fromScale(0.55,0.62))
 
-local barBg = Instance.new("Frame")
+barBg = Instance.new("Frame")
 barBg.Size = UDim2.fromScale(0.9,0.06)
 barBg.Position = UDim2.fromScale(0.05,0.52)
 barBg.BackgroundColor3 = Color3.fromRGB(45,45,45)
 barBg.Parent = frame
 Instance.new("UICorner", barBg)
 
-local barFill = Instance.new("Frame")
+barFill = Instance.new("Frame")
 barFill.Size = UDim2.fromScale(0,1)
 barFill.Parent = barBg
 Instance.new("UICorner", barFill)
 
-local credits = Instance.new("TextLabel")
+credits = Instance.new("TextLabel")
 credits.Text = "Made by Hydra"
 credits.Size = UDim2.fromScale(1,0.1)
 credits.Position = UDim2.fromScale(0,0.85)
@@ -126,7 +103,7 @@ credits.TextScaled = true
 credits.TextColor3 = Color3.fromRGB(160,160,160)
 credits.Parent = frame
 
-local sound = Instance.new("Sound")
+sound = Instance.new("Sound")
 sound.Volume = 5
 sound.PlaybackSpeed = 0.9
 sound.Parent = gui
@@ -162,32 +139,51 @@ back.MouseButton1Click:Connect(function()
 	end
 end)
 
-click.MouseClick:Connect(openGui)
-close.MouseButton1Click:Connect(closeGui)
+-- Função para criar bola e anel
+local function createBallAndRing(char)
+	while not char:FindFirstChild("Head") do task.wait() end
+	local head = char.Head
 
-local t = 0
-local hue = 0
-local ringRot = 0
-local currentHead = char:FindFirstChild("Head")
+	local ball = Instance.new("Part")
+	ball.Shape = Enum.PartType.Ball
+	ball.Size = Vector3.new(1.2,1.2,1.2)
+	ball.Material = Enum.Material.Neon
+	ball.Anchored = true
+	ball.CanCollide = false
+	ball.Parent = workspace
 
--- Atualiza referência de head após respawn
-player.CharacterAdded:Connect(function(c)
-	char = c
-	humanoid = char:WaitForChild("Humanoid")
-	currentHead = char:WaitForChild("Head")
-end)
+	local click = Instance.new("ClickDetector")
+	click.Parent = ball
+	click.MouseClick:Connect(openGui)
 
-RunService.RenderStepped:Connect(function(dt)
-	t += dt
-	hue = (hue + dt * 0.6) % 1
-	ringRot += dt
+	local ringParts = {}
+	local RING_COUNT = 36
+	local RING_RADIUS = 4.5
+	for i = 1, RING_COUNT do
+		local p = Instance.new("Part")
+		p.Size = Vector3.new(0.3,0.1,0.7)
+		p.Anchored = true
+		p.CanCollide = false
+		p.Material = Enum.Material.Neon
+		p.Parent = workspace
+		table.insert(ringParts, p)
+	end
 
-	local color = Color3.fromHSV(hue,1,1)
-	ball.Color = color
-	barFill.BackgroundColor3 = color
+	local t = 0
+	local hue = 0
+	local ringRot = 0
 
-	if currentHead then
-		local base = currentHead.CFrame * CFrame.new(0,2 + math.sin(t*3)*0.4,0)
+	RunService.RenderStepped:Connect(function(dt)
+		if not ball or not head.Parent then return end
+		t += dt
+		hue = (hue + dt * 0.6) % 1
+		ringRot += dt
+
+		local color = Color3.fromHSV(hue,1,1)
+		ball.Color = color
+		barFill.BackgroundColor3 = color
+
+		local base = head.CFrame * CFrame.new(0,2 + math.sin(t*3)*0.4,0)
 		ball.CFrame = base
 
 		for i,p in ipairs(ringParts) do
@@ -195,9 +191,18 @@ RunService.RenderStepped:Connect(function(dt)
 			p.CFrame = base * CFrame.new(math.cos(a)*RING_RADIUS,0,math.sin(a)*RING_RADIUS)
 			p.Color = color
 		end
-	end
 
-	if sound.TimeLength > 0 then
-		barFill.Size = UDim2.fromScale(sound.TimePosition / sound.TimeLength,1)
-	end
+		if sound.TimeLength > 0 then
+			barFill.Size = UDim2.fromScale(sound.TimePosition / sound.TimeLength,1)
+		end
+	end)
+end
+
+-- Detecta respawn
+player.CharacterAdded:Connect(function(char)
+	task.wait(0.1)
+	createBallAndRing(char)
 end)
+
+-- Primeira criação
+createBallAndRing(char)
