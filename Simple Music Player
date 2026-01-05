@@ -4,7 +4,6 @@ local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 
--- GUI
 local gui = Instance.new("ScreenGui")
 gui.ResetOnSpawn = false
 gui.Enabled = false
@@ -23,17 +22,19 @@ local function openGui()
 	gui.Enabled = true
 	frame.Size = UDim2.fromScale(0.3,0.3)
 	frame.BackgroundTransparency = 1
-	TweenService:Create(frame, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-		Size = UDim2.fromScale(0.5,0.55),
-		BackgroundTransparency = 0
-	}):Play()
+	TweenService:Create(
+		frame,
+		TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+		{Size = UDim2.fromScale(0.5,0.55), BackgroundTransparency = 0}
+	):Play()
 end
 
 local function closeGui()
-	TweenService:Create(frame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-		Size = UDim2.fromScale(0.3,0.3),
-		BackgroundTransparency = 1
-	}):Play()
+	TweenService:Create(
+		frame,
+		TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+		{Size = UDim2.fromScale(0.3,0.3), BackgroundTransparency = 1}
+	):Play()
 	task.delay(0.25, function()
 		gui.Enabled = false
 	end)
@@ -67,12 +68,6 @@ local function makeButton(text, pos)
 	b.TextScaled = true
 	b.Parent = frame
 	Instance.new("UICorner", b)
-	b.MouseEnter:Connect(function()
-		TweenService:Create(b, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(60,60,60)}):Play()
-	end)
-	b.MouseLeave:Connect(function()
-		TweenService:Create(b, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(40,40,40)}):Play()
-	end)
 	return b
 end
 
@@ -94,7 +89,7 @@ barFill.Parent = barBg
 Instance.new("UICorner", barFill)
 
 local credits = Instance.new("TextLabel")
-credits.Text = "By 📑Hydra📑"
+credits.Text = "Made by Hydra"
 credits.Size = UDim2.fromScale(1,0.1)
 credits.Position = UDim2.fromScale(0,0.85)
 credits.BackgroundTransparency = 1
@@ -103,8 +98,8 @@ credits.TextColor3 = Color3.fromRGB(160,160,160)
 credits.Parent = frame
 
 local sound = Instance.new("Sound")
-sound.Volume = 2        -- volume ajustado
-sound.PlaybackSpeed = 1 -- velocidade ajustada
+sound.Volume = 2
+sound.PlaybackSpeed = 1
 sound.Parent = gui
 
 local currentId
@@ -118,38 +113,39 @@ play.MouseButton1Click:Connect(function()
 		sound:Resume()
 	end
 end)
+
 pause.MouseButton1Click:Connect(function()
 	if sound.IsPlaying then sound:Pause() end
 end)
+
 forward.MouseButton1Click:Connect(function()
 	if sound.TimeLength > 0 then
 		sound.TimePosition = math.clamp(sound.TimePosition + 10, 0, sound.TimeLength)
 	end
 end)
+
 back.MouseButton1Click:Connect(function()
 	if sound.TimeLength > 0 then
 		sound.TimePosition = math.clamp(sound.TimePosition - 10, 0, sound.TimeLength)
 	end
 end)
 
--- Bola + Anel
-local ball, ringParts = nil, {}
+local ball
+local ringParts = {}
 local renderConn
 
 local function getHead(char)
-	if not char then return nil end
 	return char:FindFirstChild("Head") or char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
 end
 
 local function spawnBall(char)
-	if not char then return end
+	if renderConn then renderConn:Disconnect() end
+	if ball then ball:Destroy() end
+	for _,p in ipairs(ringParts) do p:Destroy() end
+	ringParts = {}
+
 	local head = getHead(char)
 	if not head then return end
-
-	if ball then ball:Destroy() end
-	for _, p in ipairs(ringParts) do p:Destroy() end
-	ringParts = {}
-	if renderConn then renderConn:Disconnect() end
 
 	ball = Instance.new("Part")
 	ball.Shape = Enum.PartType.Ball
@@ -161,26 +157,43 @@ local function spawnBall(char)
 
 	local click = Instance.new("ClickDetector")
 	click.Parent = ball
-	click.MouseClick:Connect(openGui)
 
-	local RING_COUNT = 48
-	local RING_RADIUS = 5
-	for i = 1,RING_COUNT do
+	click.MouseClick:Connect(function()
+		openGui()
+		local grow = TweenService:Create(
+			ball,
+			TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+			{Size = Vector3.new(1.6,1.6,1.6)}
+		)
+		local shrink = TweenService:Create(
+			ball,
+			TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			{Size = Vector3.new(1.2,1.2,1.2)}
+		)
+		grow:Play()
+		grow.Completed:Wait()
+		shrink:Play()
+	end)
+
+	local RING_COUNT = 56
+	local RING_RADIUS = 5.5
+
+	for i = 1, RING_COUNT do
 		local p = Instance.new("Part")
 		p.Size = Vector3.new(0.25,0.1,0.7)
 		p.Anchored = true
 		p.CanCollide = false
 		p.Material = Enum.Material.Neon
 		p.Parent = workspace
-		table.insert(ringParts,p)
+		table.insert(ringParts, p)
 	end
 
-	local t, hue, ringRot = 0,0,0
+	local t,hue,rot = 0,0,0
 	renderConn = RunService.RenderStepped:Connect(function(dt)
-		if not ball or not head.Parent then return end
+		if not head.Parent then return end
 		t += dt
-		hue = (hue + dt * 0.6) % 1
-		ringRot += dt*1.2
+		hue = (hue + dt*0.6) % 1
+		rot += dt*1.5
 
 		local color = Color3.fromHSV(hue,1,1)
 		ball.Color = color
@@ -190,8 +203,8 @@ local function spawnBall(char)
 		ball.CFrame = base
 
 		for i,p in ipairs(ringParts) do
-			local a = (i/RING_COUNT)*math.pi*2 + ringRot
-			p.CFrame = base * CFrame.new(math.cos(a)*RING_RADIUS,0,math.sin(a)*RING_RADIUS)
+			local a = (i/RING_COUNT)*math.pi*2
+			p.CFrame = base * CFrame.Angles(math.rad(25),0,0) * CFrame.new(math.cos(a+rot)*RING_RADIUS,0,math.sin(a+rot)*RING_RADIUS)
 			p.Color = color
 		end
 
@@ -201,8 +214,11 @@ local function spawnBall(char)
 	end)
 end
 
-spawnBall(player.Character)
-player.CharacterAdded:Connect(function(c)
+if player.Character then
+	spawnBall(player.Character)
+end
+
+player.CharacterAdded:Connect(function(char)
 	task.wait(0.1)
-	spawnBall(c)
+	spawnBall(char)
 end)
