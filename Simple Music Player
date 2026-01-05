@@ -94,7 +94,7 @@ barFill.Parent = barBg
 Instance.new("UICorner", barFill)
 
 local credits = Instance.new("TextLabel")
-credits.Text = "Made by Hydra"
+credits.Text = "By 📑Hydra📑"
 credits.Size = UDim2.fromScale(1,0.1)
 credits.Position = UDim2.fromScale(0,0.85)
 credits.BackgroundTransparency = 1
