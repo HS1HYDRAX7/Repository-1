@@ -3,9 +3,11 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+
 local gui, frame, box, play, pause, back, forward, barBg, barFill, credits, sound
 
--- Cria GUI (executa só uma vez)
+-- GUI
 gui = Instance.new("ScreenGui")
 gui.ResetOnSpawn = false
 gui.Enabled = false
@@ -109,7 +111,6 @@ sound.PlaybackSpeed = 0.9
 sound.Parent = gui
 
 local currentId
-
 play.MouseButton1Click:Connect(function()
 	local id = tonumber(box.Text)
 	if id and id ~= currentId then
@@ -120,31 +121,34 @@ play.MouseButton1Click:Connect(function()
 		sound:Resume()
 	end
 end)
-
 pause.MouseButton1Click:Connect(function()
-	if sound.IsPlaying then
-		sound:Pause()
-	end
+	if sound.IsPlaying then sound:Pause() end
 end)
-
 forward.MouseButton1Click:Connect(function()
 	if sound.TimeLength > 0 then
 		sound.TimePosition = math.clamp(sound.TimePosition + 10, 0, sound.TimeLength)
 	end
 end)
-
 back.MouseButton1Click:Connect(function()
 	if sound.TimeLength > 0 then
 		sound.TimePosition = math.clamp(sound.TimePosition - 10, 0, sound.TimeLength)
 	end
 end)
 
--- Função para criar bola e anel
-local function createBallAndRing(char)
+-- Variáveis globais da bola e do anel
+local ball, ringParts = nil, {}
+
+local function spawnBall(char)
 	while not char:FindFirstChild("Head") do task.wait() end
 	local head = char.Head
 
-	local ball = Instance.new("Part")
+	-- Deleta anteriores
+	if ball then ball:Destroy() end
+	for _, p in ipairs(ringParts) do p:Destroy() end
+	ringParts = {}
+
+	-- Cria bola
+	ball = Instance.new("Part")
 	ball.Shape = Enum.PartType.Ball
 	ball.Size = Vector3.new(1.2,1.2,1.2)
 	ball.Material = Enum.Material.Neon
@@ -156,7 +160,7 @@ local function createBallAndRing(char)
 	click.Parent = ball
 	click.MouseClick:Connect(openGui)
 
-	local ringParts = {}
+	-- Cria anel
 	local RING_COUNT = 36
 	local RING_RADIUS = 4.5
 	for i = 1, RING_COUNT do
@@ -169,10 +173,7 @@ local function createBallAndRing(char)
 		table.insert(ringParts, p)
 	end
 
-	local t = 0
-	local hue = 0
-	local ringRot = 0
-
+	local t, hue, ringRot = 0,0,0
 	RunService.RenderStepped:Connect(function(dt)
 		if not ball or not head.Parent then return end
 		t += dt
@@ -198,11 +199,9 @@ local function createBallAndRing(char)
 	end)
 end
 
--- Detecta respawn
-player.CharacterAdded:Connect(function(char)
+spawnBall(char)
+player.CharacterAdded:Connect(function(c)
+	char = c
 	task.wait(0.1)
-	createBallAndRing(char)
+	spawnBall(char)
 end)
-
--- Primeira criação
-createBallAndRing(char)
