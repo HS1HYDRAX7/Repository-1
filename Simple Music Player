@@ -3,6 +3,7 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
 
 local gui, frame, box, play, pause, back, forward, barBg, barFill, credits, sound
 gui = Instance.new("ScreenGui")
@@ -132,20 +133,27 @@ back.MouseButton1Click:Connect(function()
 	end
 end)
 
--- Variáveis globais da bola e anel
 local ball, ringParts = nil, {}
-local t, hue, ringRot = 0,0,0
+local renderConn
+
+local function getHead(char)
+	if not char then return nil end
+	local head = char:FindFirstChild("Head")
+	if head then return head end
+	local humanoid = char:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		head = char:FindFirstChild("Head") or char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+	end
+	return head
+end
 
 local function spawnBall(char)
-	while not char:FindFirstChild("Head") do task.wait() end
-	local head = char.Head
-
-	-- Deleta anteriores
+	if not char then return end
 	if ball then ball:Destroy() end
 	for _, p in ipairs(ringParts) do p:Destroy() end
 	ringParts = {}
+	if renderConn then renderConn:Disconnect() end
 
-	-- Cria bola
 	ball = Instance.new("Part")
 	ball.Shape = Enum.PartType.Ball
 	ball.Size = Vector3.new(1.2,1.2,1.2)
@@ -156,9 +164,10 @@ local function spawnBall(char)
 
 	local click = Instance.new("ClickDetector")
 	click.Parent = ball
-	click.MouseClick:Connect(openGui)
+	click.MouseClick:Connect(function()
+		gui.Enabled = true
+	end)
 
-	-- Cria anel
 	local RING_COUNT = 36
 	local RING_RADIUS = 4.5
 	for i = 1, RING_COUNT do
@@ -171,8 +180,12 @@ local function spawnBall(char)
 		table.insert(ringParts, p)
 	end
 
-	RunService:BindToRenderStep("BallRingFollow", Enum.RenderPriority.Camera.Value + 1, function(dt)
-		if not ball or not head.Parent then return end
+	local t, hue, ringRot = 0, 0, 0
+	renderConn = RunService.RenderStepped:Connect(function(dt)
+		if not char or not char.Parent then return end
+		local head = getHead(char)
+		if not head then return end
+
 		t += dt
 		hue = (hue + dt * 0.6) % 1
 		ringRot += dt
@@ -196,9 +209,8 @@ local function spawnBall(char)
 	end)
 end
 
-spawnBall(char)
+spawnBall(player.Character)
 player.CharacterAdded:Connect(function(c)
-	char = c
 	task.wait(0.1)
-	spawnBall(char)
+	spawnBall(c)
 end)
