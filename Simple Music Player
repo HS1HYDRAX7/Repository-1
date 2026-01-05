@@ -35,7 +35,7 @@ local function closeGui()
 		TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
 		{Size = UDim2.fromScale(0.3,0.3), BackgroundTransparency = 1}
 	):Play()
-	task.delay(0.25, function()
+	task.delay(0.25,function()
 		gui.Enabled = false
 	end)
 end
@@ -59,7 +59,7 @@ box.ClearTextOnFocus = false
 box.Parent = frame
 Instance.new("UICorner", box).CornerRadius = UDim.new(0,16)
 
-local function makeButton(text, pos)
+local function makeButton(text,pos)
 	local b = Instance.new("TextButton")
 	b.Text = text
 	b.Size = UDim2.fromScale(0.4,0.14)
@@ -71,10 +71,10 @@ local function makeButton(text, pos)
 	return b
 end
 
-local play = makeButton("▶️", UDim2.fromScale(0.05,0.32))
-local pause = makeButton("⏸️", UDim2.fromScale(0.55,0.32))
-local back = makeButton("⏪", UDim2.fromScale(0.05,0.62))
-local forward = makeButton("⏩", UDim2.fromScale(0.55,0.62))
+local play = makeButton("▶️",UDim2.fromScale(0.05,0.32))
+local pause = makeButton("⏸️",UDim2.fromScale(0.55,0.32))
+local back = makeButton("⏪",UDim2.fromScale(0.05,0.62))
+local forward = makeButton("⏩",UDim2.fromScale(0.55,0.62))
 
 local barBg = Instance.new("Frame")
 barBg.Size = UDim2.fromScale(0.9,0.06)
@@ -107,7 +107,7 @@ play.MouseButton1Click:Connect(function()
 	local id = tonumber(box.Text)
 	if id and id ~= currentId then
 		currentId = id
-		sound.SoundId = "rbxassetid://" .. id
+		sound.SoundId = "rbxassetid://"..id
 		sound:Play()
 	elseif not sound.IsPlaying then
 		sound:Resume()
@@ -120,13 +120,13 @@ end)
 
 forward.MouseButton1Click:Connect(function()
 	if sound.TimeLength > 0 then
-		sound.TimePosition = math.clamp(sound.TimePosition + 10, 0, sound.TimeLength)
+		sound.TimePosition = math.clamp(sound.TimePosition+10,0,sound.TimeLength)
 	end
 end)
 
 back.MouseButton1Click:Connect(function()
 	if sound.TimeLength > 0 then
-		sound.TimePosition = math.clamp(sound.TimePosition - 10, 0, sound.TimeLength)
+		sound.TimePosition = math.clamp(sound.TimePosition-10,0,sound.TimeLength)
 	end
 end)
 
@@ -157,35 +157,27 @@ local function spawnBall(char)
 
 	local click = Instance.new("ClickDetector")
 	click.Parent = ball
-
 	click.MouseClick:Connect(function()
 		openGui()
-		local grow = TweenService:Create(
-			ball,
-			TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-			{Size = Vector3.new(1.6,1.6,1.6)}
-		)
-		local shrink = TweenService:Create(
-			ball,
-			TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-			{Size = Vector3.new(1.2,1.2,1.2)}
-		)
-		grow:Play()
-		grow.Completed:Wait()
-		shrink:Play()
+		local t1 = TweenService:Create(ball,TweenInfo.new(0.15,Enum.EasingStyle.Back),{Size=Vector3.new(1.6,1.6,1.6)})
+		local t2 = TweenService:Create(ball,TweenInfo.new(0.2),{Size=Vector3.new(1.2,1.2,1.2)})
+		t1:Play()
+		t1.Completed:Wait()
+		t2:Play()
 	end)
 
-	local RING_COUNT = 56
-	local RING_RADIUS = 5.5
+	local RING_COUNT = 32
+	local RING_RADIUS = 3.2
+	local RING_Y_OFFSET = -1.2
 
-	for i = 1, RING_COUNT do
+	for i=1,RING_COUNT do
 		local p = Instance.new("Part")
-		p.Size = Vector3.new(0.25,0.1,0.7)
+		p.Size = Vector3.new(0.22,0.08,0.5)
 		p.Anchored = true
 		p.CanCollide = false
 		p.Material = Enum.Material.Neon
 		p.Parent = workspace
-		table.insert(ringParts, p)
+		table.insert(ringParts,p)
 	end
 
 	local t,hue,rot = 0,0,0
@@ -193,7 +185,7 @@ local function spawnBall(char)
 		if not head.Parent then return end
 		t += dt
 		hue = (hue + dt*0.6) % 1
-		rot += dt*1.5
+		rot += dt*1.2
 
 		local color = Color3.fromHSV(hue,1,1)
 		ball.Color = color
@@ -202,14 +194,15 @@ local function spawnBall(char)
 		local base = head.CFrame * CFrame.new(0,2 + math.sin(t*3)*0.4,0)
 		ball.CFrame = base
 
+		local ringBase = base * CFrame.new(0,RING_Y_OFFSET,0)
 		for i,p in ipairs(ringParts) do
-			local a = (i/RING_COUNT)*math.pi*2
-			p.CFrame = base * CFrame.Angles(math.rad(25),0,0) * CFrame.new(math.cos(a+rot)*RING_RADIUS,0,math.sin(a+rot)*RING_RADIUS)
+			local a = (i/RING_COUNT)*math.pi*2 + rot
+			p.CFrame = ringBase * CFrame.new(math.cos(a)*RING_RADIUS,0,math.sin(a)*RING_RADIUS)
 			p.Color = color
 		end
 
 		if sound.TimeLength > 0 then
-			barFill.Size = UDim2.fromScale(sound.TimePosition / sound.TimeLength,1)
+			barFill.Size = UDim2.fromScale(sound.TimePosition/sound.TimeLength,1)
 		end
 	end)
 end
