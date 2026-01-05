@@ -60,7 +60,6 @@ box.ClearTextOnFocus = false
 box.Parent = frame
 Instance.new("UICorner", box).CornerRadius = UDim.new(0,16)
 
--- Função para criar botões com hover
 local function makeButton(text, pos)
 	local b = Instance.new("TextButton")
 	b.Text = text
@@ -219,7 +218,6 @@ local function makeOption(name, yPos, min,max,default)
 	txt.Parent = slider
 	Instance.new("UICorner", txt).CornerRadius = UDim.new(0,8)
 
-	-- Atualizar slider <-> textbox
 	local function updateValue(v)
 		local frac = (v-min)/(max-min)
 		fill.Size = UDim2.fromScale(frac,1)
@@ -286,9 +284,84 @@ settingsBtn.MouseButton1Click:Connect(function()
 	modGui.Visible = true
 end)
 
--- Atualizar música
+-- Atualizar música em tempo real
 RunService.RenderStepped:Connect(function()
 	sound.PlaybackSpeed = getSpeed()
 	sound.Volume = getVolume()
 	sound.Pitch = getPitch()
+end)
+
+--[ Bola + Anel Flutuante ]--
+local ball, ringParts = nil, {}
+local renderConn
+
+local function getHead(char)
+	if not char then return nil end
+	return char:FindFirstChild("Head") or char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+end
+
+local function spawnBall(char)
+	if not char then return end
+	local head = getHead(char)
+	if not head then return end
+
+	if ball then ball:Destroy() end
+	for _, p in ipairs(ringParts) do p:Destroy() end
+	ringParts = {}
+	if renderConn then renderConn:Disconnect() end
+
+	ball = Instance.new("Part")
+	ball.Shape = Enum.PartType.Ball
+	ball.Size = Vector3.new(1.2,1.2,1.2)
+	ball.Material = Enum.Material.Neon
+	ball.Anchored = true
+	ball.CanCollide = false
+	ball.Parent = workspace
+
+	local click = Instance.new("ClickDetector")
+	click.Parent = ball
+	click.MouseClick:Connect(openGui)
+
+	local RING_COUNT = 48
+	local RING_RADIUS = 5
+	for i = 1,RING_COUNT do
+		local p = Instance.new("Part")
+		p.Size = Vector3.new(0.25,0.1,0.7)
+		p.Anchored = true
+		p.CanCollide = false
+		p.Material = Enum.Material.Neon
+		p.Parent = workspace
+		table.insert(ringParts,p)
+	end
+
+	local t,hue,ringRot = 0,0,0
+	renderConn = RunService.RenderStepped:Connect(function(dt)
+		if not ball or not head.Parent then return end
+		t += dt
+		hue = (hue + dt*0.6)%1
+		ringRot += dt*1.2
+
+		local color = Color3.fromHSV(hue,1,1)
+		ball.Color = color
+		barFill.BackgroundColor3 = color
+
+		local base = head.CFrame * CFrame.new(0,2 + math.sin(t*3)*0.4,0)
+		ball.CFrame = base
+
+		for i,p in ipairs(ringParts) do
+			local a = (i/RING_COUNT)*math.pi*2 + ringRot
+			p.CFrame = base * CFrame.new(math.cos(a)*RING_RADIUS,0,math.sin(a)*RING_RADIUS)
+			p.Color = color
+		end
+
+		if sound.TimeLength > 0 then
+			barFill.Size = UDim2.fromScale(sound.TimePosition/sound.TimeLength,1)
+		end
+	end)
+end
+
+spawnBall(player.Character)
+player.CharacterAdded:Connect(function(c)
+	task.wait(0.1)
+	spawnBall(c)
 end)
