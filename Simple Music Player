@@ -3,8 +3,14 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
-local hrp = char:WaitForChild("HumanoidRootPart")
+while not player.Character do task.wait() end
+local char = player.Character
+
+local humanoid = char:WaitForChild("Humanoid")
+while humanoid.RootPart == nil do task.wait() end
+local hrp = humanoid.RootPart
+
+task.wait(0.1)
 
 local ball = Instance.new("Part")
 ball.Shape = Enum.PartType.Ball
@@ -12,7 +18,7 @@ ball.Size = Vector3.new(1.2,1.2,1.2)
 ball.Material = Enum.Material.Neon
 ball.Anchored = true
 ball.CanCollide = false
-ball.Parent = workspace
+ball.Parent = char
 
 local click = Instance.new("ClickDetector")
 click.Parent = ball
@@ -27,7 +33,7 @@ for i = 1, RING_COUNT do
 	p.Anchored = true
 	p.CanCollide = false
 	p.Material = Enum.Material.Neon
-	p.Parent = workspace
+	p.Parent = char
 	table.insert(ringParts, p)
 end
 
@@ -73,7 +79,7 @@ close.BackgroundTransparency = 1
 close.TextScaled = true
 close.Parent = frame
 
-local box = Instance.new("")
+local box = Instance.new("ID")
 box.PlaceholderText = "Music ID"
 box.Size = UDim2.fromScale(0.9,0.12)
 box.Position = UDim2.fromScale(0.05,0.15)
@@ -120,7 +126,7 @@ local back = makeButton("⏪", UDim2.fromScale(0.05,0.62))
 local forward = makeButton("⏩", UDim2.fromScale(0.55,0.62))
 
 local credits = Instance.new("TextLabel")
-credits.Text = "Made by 📑Hydra📑"
+credits.Text = "Made by Hydra"
 credits.Size = UDim2.fromScale(1,0.1)
 credits.Position = UDim2.fromScale(0,0.85)
 credits.BackgroundTransparency = 1
