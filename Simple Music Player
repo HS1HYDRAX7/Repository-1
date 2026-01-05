@@ -118,13 +118,13 @@ end)
 
 forward.MouseButton1Click:Connect(function()
 	if sound.TimeLength > 0 then
-		sound.TimePosition = math.clamp(sound.TimePosition + 10,0,sound.TimeLength)
+		sound.TimePosition = math.clamp(sound.TimePosition+10,0,sound.TimeLength)
 	end
 end)
 
 back.MouseButton1Click:Connect(function()
 	if sound.TimeLength > 0 then
-		sound.TimePosition = math.clamp(sound.TimePosition - 10,0,sound.TimeLength)
+		sound.TimePosition = math.clamp(sound.TimePosition-10,0,sound.TimeLength)
 	end
 end)
 
@@ -133,7 +133,7 @@ local ringParts = {}
 local renderConn
 
 local function getHead(char)
-	return char:FindFirstChild("Head")
+	return char:FindFirstChild("Head") or char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
 end
 
 local function spawnBall(char)
@@ -164,12 +164,12 @@ local function spawnBall(char)
 		t2:Play()
 	end)
 
-	local RING_COUNT = 32
-	local RING_RADIUS = 2.2
+	local RING_COUNT = 36
+	local RING_RADIUS = 4.5
 
 	for i=1,RING_COUNT do
 		local p = Instance.new("Part")
-		p.Size = Vector3.new(0.18,0.06,0.45)
+		p.Size = Vector3.new(0.3,0.1,0.7)
 		p.Anchored = true
 		p.CanCollide = false
 		p.Material = Enum.Material.Neon
@@ -192,11 +192,8 @@ local function spawnBall(char)
 		ball.CFrame = base
 
 		for i,p in ipairs(ringParts) do
-			local a = (i/RING_COUNT)*math.pi*2
-			p.CFrame =
-				base
-				* CFrame.Angles(0,rot,0)
-				* CFrame.new(math.cos(a)*RING_RADIUS,0,math.sin(a)*RING_RADIUS)
+			local a = (i/RING_COUNT)*math.pi*2 + rot
+			p.CFrame = base * CFrame.new(math.cos(a)*RING_RADIUS,0,math.sin(a)*RING_RADIUS)
 			p.Color = color
 		end
 
