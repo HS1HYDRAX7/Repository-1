@@ -1,0 +1,382 @@
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+-- Configuration
+local config = {
+    accentColor = Color3.fromRGB(0, 255, 170),
+    bgColor = Color3.fromRGB(18, 18, 24),
+    keyColor = Color3.fromRGB(35, 35, 45),
+    keyHoverColor = Color3.fromRGB(50, 50, 65),
+    textColor = Color3.fromRGB(255, 255, 255)
+}
+
+-- Create Main GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "Nexus Keyboard"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- Try to parent to protected location
+pcall(function()
+    if gethui then
+        ScreenGui.Parent = gethui()
+    elseif syn and syn.protect_gui then
+        syn.protect_gui(ScreenGui)
+        ScreenGui.Parent = game:GetService("CoreGui")
+    else
+        ScreenGui.Parent = game:GetService("CoreGui")
+    end
+end)
+
+if not ScreenGui.Parent then
+    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+end
+
+-- Main Frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 720, 0, 310)
+MainFrame.Position = UDim2.new(0.5, 0, 1, 100)
+MainFrame.AnchorPoint = Vector2.new(0.5, 1)
+MainFrame.BackgroundColor3 = config.bgColor
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+MainFrame.Parent = ScreenGui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.Parent = MainFrame
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = config.accentColor
+MainStroke.Thickness = 2
+MainStroke.Transparency = 0.7
+MainStroke.Parent = MainFrame
+
+-- Title Bar
+local TitleBar = Instance.new("Frame")
+TitleBar.Name = "TitleBar"
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 33)
+TitleBar.BorderSizePixel = 0
+TitleBar.Parent = MainFrame
+
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 12)
+TitleCorner.Parent = TitleBar
+
+local TitleFix = Instance.new("Frame")
+TitleFix.Size = UDim2.new(1, 0, 0, 12)
+TitleFix.Position = UDim2.new(0, 0, 1, -12)
+TitleFix.BackgroundColor3 = Color3.fromRGB(25, 25, 33)
+TitleFix.BorderSizePixel = 0
+TitleFix.Parent = TitleBar
+
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(1, -100, 1, 0)
+TitleLabel.Position = UDim2.new(0, 12, 0, 0)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "KlielScripts | Mobile Keyboard"
+TitleLabel.TextColor3 = config.accentColor
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextSize = 15
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.TextStrokeTransparency = 0.5
+TitleLabel.Parent = TitleBar
+
+-- Control Buttons
+local function createControlButton(text, position, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 32, 0, 32)
+    btn.Position = position
+    btn.AnchorPoint = Vector2.new(1, 0.5)
+    btn.BackgroundColor3 = config.keyColor
+    btn.Text = text
+    btn.TextColor3 = config.textColor
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 18
+    btn.BorderSizePixel = 0
+    btn.AutoButtonColor = false
+    btn.Parent = TitleBar
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = btn
+    
+    btn.MouseButton1Click:Connect(callback)
+    
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = config.keyHoverColor}):Play()
+    end)
+    
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = config.keyColor}):Play()
+    end)
+    
+    return btn
+end
+
+local minimized = false
+local KeyboardFrame
+
+createControlButton("−", UDim2.new(1, -42, 0.5, 0), function()
+    minimized = not minimized
+    if minimized then
+        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {
+            Size = UDim2.new(0, 350, 0, 40)
+        }):Play()
+        if KeyboardFrame then
+            KeyboardFrame.Visible = false
+        end
+    else
+        TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {
+            Size = UDim2.new(0, 720, 0, 310)
+        }):Play()
+        if KeyboardFrame then
+            KeyboardFrame.Visible = true
+        end
+    end
+end)
+
+createControlButton("×", UDim2.new(1, -8, 0.5, 0), function()
+    TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {
+        Position = UDim2.new(0.5, 0, 1, 100)
+    }):Play()
+    wait(0.3)
+    ScreenGui:Destroy()
+end)
+
+-- Keyboard Container
+KeyboardFrame = Instance.new("Frame")
+KeyboardFrame.Name = "KeyboardFrame"
+KeyboardFrame.Size = UDim2.new(1, -16, 1, -52)
+KeyboardFrame.Position = UDim2.new(0, 8, 0, 44)
+KeyboardFrame.BackgroundTransparency = 1
+KeyboardFrame.Parent = MainFrame
+
+-- State Management
+local shiftEnabled = false
+local capsLockEnabled = false
+local keyButtons = {}
+
+-- Key Layout
+local keys = {
+    {
+        {"Escape", 1}, {"F1", 1}, {"F2", 1}, {"F3", 1}, {"F4", 1}, {"F5", 1}, {"F6", 1}, {"F7", 1}, 
+        {"F8", 1}, {"F9", 1}, {"F10", 1}, {"F11", 1}, {"F12", 1}, {"Delete", 1.3}
+    },
+    {
+        {"Backquote", 1, "`"}, {"One", 1, "1"}, {"Two", 1, "2"}, {"Three", 1, "3"}, {"Four", 1, "4"}, 
+        {"Five", 1, "5"}, {"Six", 1, "6"}, {"Seven", 1, "7"}, {"Eight", 1, "8"}, {"Nine", 1, "9"}, 
+        {"Zero", 1, "0"}, {"Minus", 1, "-"}, {"Equals", 1, "="}, {"Backspace", 1.5, "←"}
+    },
+    {
+        {"Tab", 1.3, "Tab"}, {"Q", 1, "Q"}, {"W", 1, "W"}, {"E", 1, "E"}, {"R", 1, "R"}, 
+        {"T", 1, "T"}, {"Y", 1, "Y"}, {"U", 1, "U"}, {"I", 1, "I"}, {"O", 1, "O"}, 
+        {"P", 1, "P"}, {"LeftBracket", 1, "["}, {"RightBracket", 1, "]"}, {"Backslash", 1.2, "\\"}
+    },
+    {
+        {"CapsLock", 1.5, "Caps"}, {"A", 1, "A"}, {"S", 1, "S"}, {"D", 1, "D"}, {"F", 1, "F"}, 
+        {"G", 1, "G"}, {"H", 1, "H"}, {"J", 1, "J"}, {"K", 1, "K"}, {"L", 1, "L"}, 
+        {"Semicolon", 1, ";"}, {"Quote", 1, "'"}, {"Return", 1.7, "Enter"}
+    },
+    {
+        {"LeftShift", 1.8, "Shift"}, {"Z", 1, "Z"}, {"X", 1, "X"}, {"C", 1, "C"}, {"V", 1, "V"}, 
+        {"B", 1, "B"}, {"N", 1, "N"}, {"M", 1, "M"}, {"Comma", 1, ","}, {"Period", 1, "."}, 
+        {"Slash", 1, "/"}, {"RightShift", 2.2, "Shift"}
+    },
+    {
+        {"LeftControl", 1.2, "Ctrl"}, {"LeftAlt", 1.2, "Alt"}, {"Space", 7, "Space"}, 
+        {"RightAlt", 1.2, "Alt"}, {"Left", 0.8, "◀️"}, {"Down", 0.8, "🔽"}, {"Right", 0.8, "▶️"}
+    }
+}
+
+-- Create Key Function
+local function createKey(keyData, row, col)
+    local keyName = keyData[1]
+    local keyWidth = keyData[2] or 1
+    local displayText = keyData[3] or keyName
+    
+    local key = Instance.new("TextButton")
+    key.Name = "Key_" .. keyName
+    key.Size = UDim2.new(0, 42 * keyWidth + (3 * (keyWidth - 1)), 0, 38)
+    key.BackgroundColor3 = config.keyColor
+    key.Text = displayText
+    key.TextColor3 = config.textColor
+    key.Font = Enum.Font.GothamBold
+    key.TextSize = keyWidth > 1.5 and 12 or 14
+    key.BorderSizePixel = 0
+    key.AutoButtonColor = false
+    key.TextStrokeTransparency = 0.8
+    key.Parent = KeyboardFrame
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = key
+    
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(60, 60, 75)
+    stroke.Thickness = 1
+    stroke.Transparency = 0.5
+    stroke.Parent = key
+    
+    keyButtons[keyName] = key
+    
+    -- Hover effects
+    key.MouseEnter:Connect(function()
+        TweenService:Create(key, TweenInfo.new(0.1), {
+            BackgroundColor3 = config.keyHoverColor
+        }):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.1), {
+            Color = config.accentColor,
+            Transparency = 0.3
+        }):Play()
+    end)
+    
+    key.MouseLeave:Connect(function()
+        local targetColor = config.keyColor
+        if (keyName == "CapsLock" and capsLockEnabled) or ((keyName == "LeftShift" or keyName == "RightShift") and shiftEnabled) then
+            targetColor = config.accentColor
+        end
+        TweenService:Create(key, TweenInfo.new(0.1), {
+            BackgroundColor3 = targetColor
+        }):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.1), {
+            Color = Color3.fromRGB(60, 60, 75),
+            Transparency = 0.5
+        }):Play()
+    end)
+    
+    -- Click animation
+    key.MouseButton1Down:Connect(function()
+        TweenService:Create(key, TweenInfo.new(0.05), {
+            Size = UDim2.new(0, (42 * keyWidth + (3 * (keyWidth - 1))) * 0.95, 0, 36)
+        }):Play()
+        
+        -- Press the key
+        handleKeyPress(keyName, true)
+    end)
+    
+    key.MouseButton1Up:Connect(function()
+        TweenService:Create(key, TweenInfo.new(0.05), {
+            Size = UDim2.new(0, 42 * keyWidth + (3 * (keyWidth - 1)), 0, 38)
+        }):Play()
+        
+        -- Release the key
+        handleKeyPress(keyName, false)
+    end)
+    
+    return key
+end
+
+-- Handle Key Press/Release
+function handleKeyPress(keyName, isDown)
+    if keyName == "LeftShift" or keyName == "RightShift" then
+        if isDown then
+            shiftEnabled = not shiftEnabled
+            updateKeyboard()
+        end
+        return
+    elseif keyName == "CapsLock" then
+        if isDown then
+            capsLockEnabled = not capsLockEnabled
+            shiftEnabled = false
+            updateKeyboard()
+        end
+        return
+    end
+    
+    -- Use keypress/keyrelease for executor compatibility
+    if isDown then
+        pcall(function()
+            keypress(Enum.KeyCode[keyName])
+        end)
+    else
+        pcall(function()
+            keyrelease(Enum.KeyCode[keyName])
+        end)
+    end
+end
+
+-- Update Keyboard Display
+function updateKeyboard()
+    for keyName, keyButton in pairs(keyButtons) do
+        if keyName == "CapsLock" then
+            if capsLockEnabled then
+                keyButton.BackgroundColor3 = config.accentColor
+                keyButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+            else
+                keyButton.BackgroundColor3 = config.keyColor
+                keyButton.TextColor3 = config.textColor
+            end
+        elseif keyName == "LeftShift" or keyName == "RightShift" then
+            if shiftEnabled then
+                keyButton.BackgroundColor3 = config.accentColor
+                keyButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+            else
+                keyButton.BackgroundColor3 = config.keyColor
+                keyButton.TextColor3 = config.textColor
+            end
+        end
+    end
+end
+
+-- Layout Keys
+local yPos = 4
+for rowIndex, row in ipairs(keys) do
+    local xPos = 4
+    for colIndex, keyData in ipairs(row) do
+        local key = createKey(keyData, rowIndex, colIndex)
+        key.Position = UDim2.new(0, xPos, 0, yPos)
+        xPos = xPos + (42 * keyData[2]) + 3 + ((keyData[2] - 1) * 3)
+    end
+    yPos = yPos + 38 + 3
+end
+
+-- No status label needed
+
+-- Drag Functionality
+local dragging = false
+local dragInput, mousePos, framePos
+
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        mousePos = input.Position
+        framePos = MainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+TitleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - mousePos
+        MainFrame.Position = UDim2.new(
+            framePos.X.Scale,
+            framePos.X.Offset + delta.X,
+            framePos.Y.Scale,
+            framePos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- Entrance Animation
+MainFrame.Position = UDim2.new(0.5, 0, 1, 100)
+wait(0.1)
+TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+    Position = UDim2.new(0.5, 0, 1, -10)
+}):Play()
+
+print("✓ KlielScripts Mobile Keyboard loaded successfully!")
+print("✓ Using keypress/keyrelease functions for executor compatibility")
