@@ -1,0 +1,224 @@
+-- ModernClock + Chat Panel Extension
+-- Base GUI reutilizado conforme solicitado
+
+if game.CoreGui:FindFirstChild("ModernClock") then
+	return
+end
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "ModernClock"
+gui.ResetOnSpawn = false
+gui.Parent = game.CoreGui
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- ===== CLOCK BAR =====
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 190, 0, 44)
+frame.Position = UDim2.new(0.1, 0, 0, 8)
+frame.AnchorPoint = Vector2.new(0.5, 0)
+frame.BackgroundColor3 = Color3.fromRGB(18,18,18)
+frame.BackgroundTransparency = 0.05
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(1,0)
+corner.Parent = frame
+
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(0.65,0,1,0)
+label.BackgroundTransparency = 1
+label.Font = Enum.Font.GothamBold
+label.TextColor3 = Color3.fromRGB(255,255,255)
+label.TextSize = 22
+label.TextXAlignment = Left
+label.Text = "00:00:00"
+label.Parent = frame
+label.Position = UDim2.new(0.08,0,0,0)
+
+-- ===== CHAT BUTTON =====
+local chatButton = Instance.new("TextButton")
+chatButton.Size = UDim2.new(0,36,0,36)
+chatButton.Position = UDim2.new(1,-42,0.5,0)
+chatButton.AnchorPoint = Vector2.new(0,0.5)
+chatButton.BackgroundColor3 = Color3.fromRGB(30,30,30)
+chatButton.Text = "💬"
+chatButton.TextSize = 18
+chatButton.AutoButtonColor = false
+chatButton.Parent = frame
+
+local chatCorner = Instance.new("UICorner")
+chatCorner.CornerRadius = UDim.new(1,0)
+chatCorner.Parent = chatButton
+
+-- ===== CHAT PANEL =====
+local chatGui = Instance.new("Frame")
+chatGui.Size = UDim2.new(0,360,0,300)
+chatGui.Position = UDim2.new(0.5,0,0.55,0)
+chatGui.AnchorPoint = Vector2.new(0.5,0.5)
+chatGui.BackgroundColor3 = Color3.fromRGB(16,16,16)
+chatGui.Visible = false
+chatGui.Parent = gui
+chatGui.ZIndex = 10
+
+local chatCornerMain = Instance.new("UICorner")
+chatCornerMain.CornerRadius = UDim.new(0,18)
+chatCornerMain.Parent = chatGui
+
+-- ===== TOP BAR =====
+local topBar = Instance.new("Frame")
+topBar.Size = UDim2.new(1,0,0,36)
+topBar.BackgroundColor3 = Color3.fromRGB(22,22,22)
+topBar.Parent = chatGui
+
+local topCorner = Instance.new("UICorner")
+topCorner.CornerRadius = UDim.new(0,18)
+topCorner.Parent = topBar
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0,32,0,32)
+closeBtn.Position = UDim2.new(1,-38,0.5,0)
+closeBtn.AnchorPoint = Vector2.new(0,0.5)
+closeBtn.Text = "✖"
+closeBtn.TextSize = 18
+closeBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+closeBtn.AutoButtonColor = false
+closeBtn.Parent = topBar
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(1,0)
+closeCorner.Parent = closeBtn
+
+-- ===== MESSAGE AREA =====
+local messagesFrame = Instance.new("ScrollingFrame")
+messagesFrame.Size = UDim2.new(1,-20,1,-92)
+messagesFrame.Position = UDim2.new(0,10,0,46)
+messagesFrame.CanvasSize = UDim2.new(0,0,0,0)
+messagesFrame.ScrollBarImageTransparency = 1
+messagesFrame.BackgroundTransparency = 1
+messagesFrame.Parent = chatGui
+
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0,8)
+layout.Parent = messagesFrame
+
+-- ===== INPUT =====
+local inputBox = Instance.new("TextBox")
+inputBox.Size = UDim2.new(1,-56,0,36)
+inputBox.Position = UDim2.new(0,10,1,-46)
+inputBox.PlaceholderText = "Mensagem..."
+inputBox.Text = ""
+inputBox.Font = Enum.Font.Gotham
+inputBox.TextSize = 14
+inputBox.TextColor3 = Color3.fromRGB(255,255,255)
+inputBox.BackgroundColor3 = Color3.fromRGB(26,26,26)
+inputBox.Parent = chatGui
+
+local inputCorner = Instance.new("UICorner")
+inputCorner.CornerRadius = UDim.new(0,12)
+inputCorner.Parent = inputBox
+
+local sendBtn = Instance.new("TextButton")
+sendBtn.Size = UDim2.new(0,36,0,36)
+sendBtn.Position = UDim2.new(1,-46,1,-46)
+sendBtn.Text = "📨"
+sendBtn.TextSize = 16
+sendBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+sendBtn.AutoButtonColor = false
+sendBtn.Parent = chatGui
+
+local sendCorner = Instance.new("UICorner")
+sendCorner.CornerRadius = UDim.new(1,0)
+sendCorner.Parent = sendBtn
+
+-- ===== FUNCTIONS =====
+local function animate(obj, props, t)
+	TweenService:Create(obj, TweenInfo.new(t, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), props):Play()
+end
+
+local function addMessage(text)
+	local msg = Instance.new("TextLabel")
+	msg.Size = UDim2.new(1,-10,0,0)
+	msg.AutomaticSize = Y
+	msg.TextWrapped = true
+	msg.BackgroundColor3 = Color3.fromRGB(28,28,28)
+	msg.TextColor3 = Color3.fromRGB(230,230,230)
+	msg.Font = Enum.Font.Gotham
+	msg.TextSize = 14
+	msg.TextXAlignment = Left
+	msg.TextYAlignment = Top
+	msg.Text = text
+	msg.BackgroundTransparency = 0
+	msg.Parent = messagesFrame
+	msg.ZIndex = 11
+
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0,12)
+	c.Parent = msg
+
+	msg.Size = UDim2.new(1,-10,0,0)
+	msg.BackgroundTransparency = 1
+	animate(msg, {BackgroundTransparency = 0}, 0.25)
+
+	task.wait()
+	messagesFrame.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 10)
+	messagesFrame.CanvasPosition = Vector2.new(0, math.max(0, messagesFrame.CanvasSize.Y.Offset - messagesFrame.AbsoluteWindowSize.Y))
+end
+
+-- ===== CHAT LOG =====
+for _,plr in ipairs(Players:GetPlayers()) do
+	plr.Chatted:Connect(function(message)
+		if message:sub(1,2) == "/w" or message:sub(1,9) == "/whisper" then
+			addMessage("(PM) "..message)
+		else
+			addMessage(message)
+		end
+	end)
+end
+
+Players.PlayerAdded:Connect(function(plr)
+	plr.Chatted:Connect(function(message)
+		if message:sub(1,2) == "/w" or message:sub(1,9) == "/whisper" then
+			addMessage("(PM) "..message)
+		else
+			addMessage(message)
+		end
+	end)
+end)
+
+-- ===== INPUT SEND =====
+sendBtn.MouseButton1Click:Connect(function()
+	if inputBox.Text ~= "" then
+		game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(inputBox.Text,"All")
+		inputBox.Text = ""
+	end
+end)
+
+-- ===== OPEN / CLOSE =====
+chatButton.MouseButton1Click:Connect(function()
+	chatGui.Visible = true
+	chatGui.Size = UDim2.new(0,0,0,0)
+	animate(chatGui,{Size = UDim2.new(0,360,0,300)},0.25)
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+	animate(chatGui,{Size = UDim2.new(0,0,0,0)},0.2)
+	task.delay(0.2,function()
+		chatGui.Visible = false
+	end)
+end)
+
+-- ===== CLOCK =====
+task.spawn(function()
+	while true do
+		local t = os.date("*t")
+		label.Text = string.format("%02d:%02d:%02d", t.hour, t.min, t.sec)
+		task.wait(1)
+	end
+end)
