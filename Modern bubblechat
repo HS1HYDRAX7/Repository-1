@@ -1,51 +1,30 @@
-if game.CoreGui:FindFirstChild("ModernClock") then return end
+if game.CoreGui:FindFirstChild("ModernTopChat") then return end
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local UIS = game:GetService("UserInputService")
+local GuiService = game:GetService("GuiService")
 local player = Players.LocalPlayer
 
+local inset = GuiService:GetGuiInset()
+
 local gui = Instance.new("ScreenGui")
-gui.Name = "ModernClock"
+gui.Name = "ModernTopChat"
 gui.ResetOnSpawn = false
 gui.Parent = game.CoreGui
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-local bar = Instance.new("Frame")
-bar.Size = UDim2.new(0,190,0,44)
-bar.Position = UDim2.new(0.1,0,0,8)
-bar.AnchorPoint = Vector2.new(0.5,0)
-bar.BackgroundColor3 = Color3.fromRGB(20,20,20)
-bar.BackgroundTransparency = 0.1
-bar.Active = true
-bar.Draggable = true
-bar.Parent = gui
+local bubble = Instance.new("TextButton")
+bubble.Size = UDim2.new(0,40,0,40)
+bubble.Position = UDim2.new(0, inset.X + 72, 0, inset.Y + 6)
+bubble.BackgroundColor3 = Color3.fromRGB(20,20,20)
+bubble.BackgroundTransparency = 0.1
+bubble.Text = "✉️"
+bubble.TextSize = 18
+bubble.AutoButtonColor = false
+bubble.Parent = gui
 
-local barCorner = Instance.new("UICorner", bar)
-barCorner.CornerRadius = UDim.new(1,0)
-
-local clock = Instance.new("TextLabel")
-clock.Size = UDim2.new(0.6,0,1,0)
-clock.Position = UDim2.new(0.08,0,0,0)
-clock.BackgroundTransparency = 1
-clock.Font = Enum.Font.GothamBold
-clock.TextColor3 = Color3.new(1,1,1)
-clock.TextSize = 22
-clock.TextXAlignment = Left
-clock.Parent = bar
-
-local openBtn = Instance.new("TextButton")
-openBtn.Size = UDim2.new(0,36,0,36)
-openBtn.Position = UDim2.new(1,-42,0.5,0)
-openBtn.AnchorPoint = Vector2.new(0,0.5)
-openBtn.Text = "✉️"
-openBtn.TextSize = 18
-openBtn.AutoButtonColor = false
-openBtn.BackgroundColor3 = Color3.fromRGB(20,20,20)
-openBtn.BackgroundTransparency = 0.1
-openBtn.Parent = bar
-
-local btnCorner = Instance.new("UICorner", openBtn)
-btnCorner.CornerRadius = UDim.new(1,0)
+local bubbleCorner = Instance.new("UICorner", bubble)
+bubbleCorner.CornerRadius = UDim.new(1,0)
 
 local chatGui = Instance.new("Frame")
 chatGui.Size = UDim2.new(0,0,0,0)
@@ -54,6 +33,7 @@ chatGui.AnchorPoint = Vector2.new(0.5,0.5)
 chatGui.BackgroundColor3 = Color3.fromRGB(16,16,16)
 chatGui.Visible = false
 chatGui.Parent = gui
+chatGui.ZIndex = 10
 
 local chatCorner = Instance.new("UICorner", chatGui)
 chatCorner.CornerRadius = UDim.new(0,18)
@@ -172,30 +152,19 @@ send.MouseButton1Click:Connect(function()
 	end
 end)
 
-openBtn.MouseButton1Down:Connect(function()
-	tween(openBtn,{BackgroundColor3=Color3.fromRGB(220,220,220)},0.08)
-	tween(openBtn,{Size=UDim2.new(0,32,0,32)},0.08)
+bubble.MouseButton1Down:Connect(function()
+	tween(bubble,{BackgroundColor3=Color3.fromRGB(220,220,220),Size=UDim2.new(0,34,0,34)},0.08)
 end)
 
-openBtn.MouseButton1Up:Connect(function()
-	tween(openBtn,{BackgroundColor3=Color3.fromRGB(20,20,20)},0.12)
-	tween(openBtn,{Size=UDim2.new(0,36,0,36)},0.12)
-
-	chatGui.Visible=true
+bubble.MouseButton1Up:Connect(function()
+	tween(bubble,{BackgroundColor3=Color3.fromRGB(20,20,20),Size=UDim2.new(0,40,0,40)},0.12)
+	chatGui.Visible = true
 	tween(chatGui,{Size=UDim2.new(0,360,0,300)},0.25)
 end)
 
 close.MouseButton1Click:Connect(function()
 	tween(chatGui,{Size=UDim2.new(0,0,0,0)},0.2)
 	task.delay(0.2,function()
-		chatGui.Visible=false
+		chatGui.Visible = false
 	end)
-end)
-
-task.spawn(function()
-	while true do
-		local t=os.date("*t")
-		clock.Text=string.format("%02d:%02d:%02d",t.hour,t.min,t.sec)
-		task.wait(1)
-	end
 end)
