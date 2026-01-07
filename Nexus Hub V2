@@ -155,6 +155,79 @@ RunService.Heartbeat:Connect(function()
 	end
 end)
 
+local espSurvivor=false
+local espKiller=false
+local espGen=false
+
+local function clearESP()
+	for _,v in ipairs(workspace:GetDescendants()) do
+		if v:IsA("Highlight") and v.Name=="NexusHL" then v:Destroy() end
+	end
+end
+
+local function addHL(inst,color)
+	local hl=inst:FindFirstChild("NexusHL")
+	if not hl then
+		hl=Instance.new("Highlight")
+		hl.Name="NexusHL"
+		hl.Adornee=inst
+		hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
+		hl.Parent=inst
+	end
+	hl.FillColor=color
+	hl.OutlineColor=color
+	hl.FillTransparency=0.45
+end
+
+task.spawn(function()
+	while task.wait(0.5) do
+		if not (espSurvivor or espKiller or espGen) then continue end
+		local wp=workspace:FindFirstChild("Players")
+		if wp then
+			for _,plr in ipairs(Players:GetPlayers()) do
+				if plr~=LocalPlayer and plr.Character then
+					if espKiller and plr.Character.Parent==wp:FindFirstChild("Killers") then
+						addHL(plr.Character,Color3.fromRGB(255,0,0))
+					end
+					if espSurvivor and plr.Character.Parent==wp:FindFirstChild("Survivors") then
+						addHL(plr.Character,Color3.fromRGB(0,255,0))
+					end
+				end
+			end
+		end
+		if espGen then
+			local map=workspace:FindFirstChild("Map")
+			local ing=map and map:FindFirstChild("Ingame")
+			local m=ing and ing:FindFirstChild("Map")
+			if m then
+				for _,g in ipairs(m:GetChildren()) do
+					if g.Name=="Generator" then
+						addHL(g,Color3.fromRGB(255,255,0))
+					end
+				end
+			end
+		end
+	end
+end)
+
+ForsakenTab:Toggle({
+	Title="ESP Killers",
+	Value=false,
+	Callback=function(v) espKiller=v if not v then clearESP() end end
+})
+
+ForsakenTab:Toggle({
+	Title="ESP Survivors",
+	Value=false,
+	Callback=function(v) espSurvivor=v if not v then clearESP() end end
+})
+
+ForsakenTab:Toggle({
+	Title="ESP Generators",
+	Value=false,
+	Callback=function(v) espGen=v if not v then clearESP() end end
+})
+
 local infStamina=false
 local staminaConn
 local staminaModule
@@ -196,7 +269,7 @@ local ClockParagraph=InfoTab:Paragraph({
 
 task.spawn(function()
 	while task.wait(1) do
-		ClockParagraph:Set("Desc",os.date("%H:%M:%S"))
+		ClockParagraph:SetDesc(os.date("%H:%M:%S"))
 	end
 end)
 
