@@ -1,4 +1,4 @@
-local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -23,17 +23,22 @@ local LocalPlayer = Players.LocalPlayer
 local FONT = Font.new("rbxassetid://12187370928")
 local DEFAULT_GRAVITY = workspace.Gravity
 
-local Window = OrionLib:MakeWindow({
-	Name = "Nexus Hub v2.2.5",
-	HidePremium = true,
-	SaveConfig = false,
-	ConfigFolder = "NexusHub"
+local Window = WindUI:CreateWindow({
+	Title = "Nexus Hub v2.2.1",
+	Icon = "sparkles",
+	Author = "by Hydra",
+	Folder = "NexusHub",
+	Size = UDim2.fromOffset(600,460),
+	Transparent = true,
+	Theme = "Dark",
+	Resizable = true,
+	HideSearchBar = true
 })
 
-local PlayerTab = Window:MakeTab({Name="Player",Icon="rbxassetid://4483345998"})
-local ForsakenTab = Window:MakeTab({Name="Forsaken",Icon="rbxassetid://4483345998"})
-local OthersTab = Window:MakeTab({Name="Others",Icon="rbxassetid://4483345998"})
-local InfoTab = Window:MakeTab({Name="Information",Icon="rbxassetid://4483345998"})
+local PlayerTab = Window:CreateTab("Player","user")
+local ForsakenTab = Window:CreateTab("Forsaken","skull")
+local OthersTab = Window:CreateTab("Others","layers")
+local InfoTab = Window:CreateTab("Information","info")
 
 local playerEnabled=false
 local noclipEnabled=false
@@ -73,47 +78,20 @@ LocalPlayer.CharacterAdded:Connect(function(c)
 	if noclipEnabled then task.wait(0.25) applyNoclip(c) end
 end)
 
-PlayerTab:AddToggle({
-	Name="Enable",
-	Default=false,
-	Callback=function(v)
-		playerEnabled=v
-		if not v then workspace.Gravity=DEFAULT_GRAVITY end
-	end
-})
+PlayerTab:Toggle("Enable",false,function(v)
+	playerEnabled=v
+	if not v then workspace.Gravity=DEFAULT_GRAVITY end
+end)
 
-PlayerTab:AddSlider({
-	Name="CFrame Speed",
-	Min=1,
-	Max=70,
-	Default=1,
-	Increment=1,
-	Callback=function(v) cframeSpeed=v end
-})
+PlayerTab:Slider("CFrame Speed",1,70,1,function(v) cframeSpeed=v end)
+PlayerTab:Slider("Gravity",0,300,196,function(v) gravity=v end)
 
-PlayerTab:AddSlider({
-	Name="Gravity",
-	Min=0,
-	Max=300,
-	Default=196,
-	Increment=1,
-	Callback=function(v) gravity=v end
-})
+PlayerTab:Toggle("Noclip",false,function(v)
+	noclipEnabled=v
+	if v then applyNoclip(LocalPlayer.Character) else removeNoclip() end
+end)
 
-PlayerTab:AddToggle({
-	Name="Noclip",
-	Default=false,
-	Callback=function(v)
-		noclipEnabled=v
-		if v then applyNoclip(LocalPlayer.Character) else removeNoclip() end
-	end
-})
-
-PlayerTab:AddToggle({
-	Name="Infinite Jump",
-	Default=false,
-	Callback=function(v) infJump=v end
-})
+PlayerTab:Toggle("Infinite Jump",false,function(v) infJump=v end)
 
 UserInputService.JumpRequest:Connect(function()
 	if infJump and LocalPlayer.Character then
@@ -231,35 +209,23 @@ local function updateGenESP()
 	end
 end
 
-ForsakenTab:AddToggle({
-	Name="Infinite Stamina",
-	Default=false,
-	Callback=function(v)
-		infStamina=v
-		if staminaConn then staminaConn:Disconnect() staminaConn=nil end
-		if v then
-			local sprint=ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting")
-			staminaModule=require(sprint)
-			staminaConn=RunService.Heartbeat:Connect(function()
-				if infStamina then staminaModule.Stamina=staminaModule.MaxStamina or 999 end
-			end)
-		end
+ForsakenTab:Toggle("Infinite Stamina",false,function(v)
+	infStamina=v
+	if staminaConn then staminaConn:Disconnect() staminaConn=nil end
+	if v then
+		local sprint=ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting")
+		staminaModule=require(sprint)
+		staminaConn=RunService.Heartbeat:Connect(function()
+			if infStamina then staminaModule.Stamina=staminaModule.MaxStamina or 999 end
+		end)
 	end
-})
+end)
 
-ForsakenTab:AddToggle({Name="ESP Killers",Default=false,Callback=function(v) espKiller=v if not v then clearAllESP() end end})
-ForsakenTab:AddToggle({Name="ESP Survivors",Default=false,Callback=function(v) espSurvivor=v if not v then clearAllESP() end end})
-ForsakenTab:AddToggle({Name="ESP Generators",Default=false,Callback=function(v) espGen=v if not v then clearAllESP() end end})
-ForsakenTab:AddToggle({Name="Auto Generator",Default=false,Callback=function(v) autoGen=v end})
-
-ForsakenTab:AddSlider({
-	Name="Gen Speed",
-	Min=1,
-	Max=10,
-	Default=5,
-	Increment=1,
-	Callback=function(v) genDelay=v end
-})
+ForsakenTab:Toggle("ESP Killers",false,function(v) espKiller=v if not v then clearAllESP() end end)
+ForsakenTab:Toggle("ESP Survivors",false,function(v) espSurvivor=v if not v then clearAllESP() end end)
+ForsakenTab:Toggle("ESP Generators",false,function(v) espGen=v if not v then clearAllESP() end end)
+ForsakenTab:Toggle("Auto Generator",false,function(v) autoGen=v end)
+ForsakenTab:Slider("Gen Speed",1,10,5,function(v) genDelay=v end)
 
 task.spawn(function()
 	while task.wait(0.5) do
@@ -288,27 +254,17 @@ task.spawn(function()
 	end
 end)
 
-OthersTab:AddButton({
-	Name="Infinite Yield With AI",
-	Callback=function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/BokX1/InfiniteYieldWithAI/refs/heads/main/InfiniteYieldWithAI.Lua"))()
-	end
-})
-
-OthersTab:AddButton({
-	Name="Chat Spy",
-	Callback=function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/HS1HYDRAX7/Nexus-Hub/refs/heads/main/Chat%20Spy"))()
-	end
-})
-
-local clockLabel
-clockLabel = InfoTab:AddParagraph("Clock","--:--:--")
-
-task.spawn(function()
-	while task.wait(1) do
-		clockLabel:Set("Clock",""..os.date("%H:%M:%S"))
-	end
+OthersTab:Button("Infinite Yield With AI",function()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/BokX1/InfiniteYieldWithAI/refs/heads/main/InfiniteYieldWithAI.Lua"))()
 end)
 
-OrionLib:Init()
+OthersTab:Button("Chat Spy",function()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/HS1HYDRAX7/Nexus-Hub/refs/heads/main/Chat%20Spy"))()
+end)
+
+local clockLabel = InfoTab:Label("Clock: --:--:--")
+task.spawn(function()
+	while task.wait(1) do
+		clockLabel:Set("Clock: "..os.date("%H:%M:%S"))
+	end
+end)
