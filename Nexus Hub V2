@@ -35,14 +35,14 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-	Title = "v2.2.5",
+	Title = "v0.2.4",
 	Color = Color3.fromRGB(10, 25, 90),
 	Radius = 100,
 })
 
 WindUI:Popup({
 	Title = "Welcome to Nexus Hub 🎉",
-	Icon = "rbxassetid://12771215446",
+	Icon = "info",
 	Buttons = {
 		{
 			Title = "Continue",
