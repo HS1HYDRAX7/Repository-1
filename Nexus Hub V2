@@ -1,4 +1,4 @@
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Vovabro46/trash/refs/heads/main/Aurora.lua"))()
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -23,17 +23,17 @@ local LocalPlayer = Players.LocalPlayer
 local FONT = Font.new("rbxassetid://12187370928")
 local DEFAULT_GRAVITY = workspace.Gravity
 
-local Win = Library:Window("Nexus Hub v2.2.4 ☄️", "rbxassetid://122360365318466")
+local Window = OrionLib:MakeWindow({
+	Name = "Nexus Hub v2.2.5",
+	HidePremium = true,
+	SaveConfig = false,
+	ConfigFolder = "NexusHub"
+})
 
-local PlayerTab = Win:Tab("player")
-local ForsakenTab = Win:Tab("forsaken")
-local OthersTab = Win:Tab("others")
-local InfoTab = Win:Tab("info")
-
-local PlayerPage = PlayerTab:Page("Player", "user")
-local ForsakenPage = ForsakenTab:Page("Forsaken", "alert-triangle")
-local OthersPage = OthersTab:Page("Others", "layers")
-local InfoPage = InfoTab:Page("Information", "info")
+local PlayerTab = Window:MakeTab({Name="Player",Icon="rbxassetid://4483345998"})
+local ForsakenTab = Window:MakeTab({Name="Forsaken",Icon="rbxassetid://4483345998"})
+local OthersTab = Window:MakeTab({Name="Others",Icon="rbxassetid://4483345998"})
+local InfoTab = Window:MakeTab({Name="Information",Icon="rbxassetid://4483345998"})
 
 local playerEnabled=false
 local noclipEnabled=false
@@ -54,8 +54,7 @@ local function applyNoclip(character)
 		end
 	end
 	noclipConn=RunService.Stepped:Connect(function()
-		if not noclipEnabled then return end
-		if not character.Parent then return end
+		if not noclipEnabled or not character.Parent then return end
 		for _,p in ipairs(character:GetDescendants()) do
 			if p:IsA("BasePart") then p.CanCollide=false end
 		end
@@ -74,27 +73,47 @@ LocalPlayer.CharacterAdded:Connect(function(c)
 	if noclipEnabled then task.wait(0.25) applyNoclip(c) end
 end)
 
-PlayerPage:Toggle("Enable", "plr_enable", "Enable player modifiers", "Left", function(v)
-	playerEnabled=v
-	if not v then workspace.Gravity=DEFAULT_GRAVITY end
-end)
+PlayerTab:AddToggle({
+	Name="Enable",
+	Default=false,
+	Callback=function(v)
+		playerEnabled=v
+		if not v then workspace.Gravity=DEFAULT_GRAVITY end
+	end
+})
 
-PlayerPage:Slider("CFrame Speed", "plr_cfs", 1, 70, 1, "Left", function(v)
-	cframeSpeed=v
-end)
+PlayerTab:AddSlider({
+	Name="CFrame Speed",
+	Min=1,
+	Max=70,
+	Default=1,
+	Increment=1,
+	Callback=function(v) cframeSpeed=v end
+})
 
-PlayerPage:Slider("Gravity", "plr_grav", 0, 300, 196, "Left", function(v)
-	gravity=v
-end)
+PlayerTab:AddSlider({
+	Name="Gravity",
+	Min=0,
+	Max=300,
+	Default=196,
+	Increment=1,
+	Callback=function(v) gravity=v end
+})
 
-PlayerPage:Toggle("Noclip", "plr_noclip", "Disable collisions", "Right", function(v)
-	noclipEnabled=v
-	if v then applyNoclip(LocalPlayer.Character) else removeNoclip() end
-end)
+PlayerTab:AddToggle({
+	Name="Noclip",
+	Default=false,
+	Callback=function(v)
+		noclipEnabled=v
+		if v then applyNoclip(LocalPlayer.Character) else removeNoclip() end
+	end
+})
 
-PlayerPage:Toggle("Infinite Jump", "plr_infjump", "Unlimited jumps", "Right", function(v)
-	infJump=v
-end)
+PlayerTab:AddToggle({
+	Name="Infinite Jump",
+	Default=false,
+	Callback=function(v) infJump=v end
+})
 
 UserInputService.JumpRequest:Connect(function()
 	if infJump and LocalPlayer.Character then
@@ -208,61 +227,39 @@ local function updateGenESP()
 			local prog=g:FindFirstChild("Progress")
 			local percent=prog and normalizeProgress(prog.Value) or 0
 			addHighlight(g,percent>=100 and DARK_GREEN or YELLOW)
-			if not g:FindFirstChild("NexusGen") then
-				local bb=Instance.new("BillboardGui")
-				bb.Name="NexusGen"
-				bb.Adornee=g
-				bb.Size=UDim2.fromOffset(150,18)
-				bb.StudsOffset=Vector3.new(0,3,0)
-				bb.AlwaysOnTop=true
-				bb.Parent=g
-				local tl=Instance.new("TextLabel")
-				tl.Size=UDim2.fromScale(1,1)
-				tl.BackgroundTransparency=1
-				tl.FontFace=FONT
-				tl.TextStrokeTransparency=0.3
-				tl.Parent=bb
-			end
-			g.NexusGen.TextLabel.Text=percent>=100 and "Generator repaired" or (percent.."%")
-			g.NexusGen.TextLabel.TextColor3=percent>=100 and DARK_GREEN or YELLOW
 		end
 	end
 end
 
-ForsakenPage:Toggle("Infinite Stamina", "fs_infsta", "Unlimited stamina", "Left", function(v)
-	infStamina=v
-	if staminaConn then staminaConn:Disconnect() staminaConn=nil end
-	if v then
-		local sprint=ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting")
-		staminaModule=require(sprint)
-		staminaConn=RunService.Heartbeat:Connect(function()
-			if infStamina then staminaModule.Stamina=staminaModule.MaxStamina or 999 end
-		end)
+ForsakenTab:AddToggle({
+	Name="Infinite Stamina",
+	Default=false,
+	Callback=function(v)
+		infStamina=v
+		if staminaConn then staminaConn:Disconnect() staminaConn=nil end
+		if v then
+			local sprint=ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting")
+			staminaModule=require(sprint)
+			staminaConn=RunService.Heartbeat:Connect(function()
+				if infStamina then staminaModule.Stamina=staminaModule.MaxStamina or 999 end
+			end)
+		end
 	end
-end)
+})
 
-ForsakenPage:Toggle("ESP Killers", "fs_esk", "Highlight killers", "Left", function(v)
-	espKiller=v
-	if not v then clearAllESP() end
-end)
+ForsakenTab:AddToggle({Name="ESP Killers",Default=false,Callback=function(v) espKiller=v if not v then clearAllESP() end end})
+ForsakenTab:AddToggle({Name="ESP Survivors",Default=false,Callback=function(v) espSurvivor=v if not v then clearAllESP() end end})
+ForsakenTab:AddToggle({Name="ESP Generators",Default=false,Callback=function(v) espGen=v if not v then clearAllESP() end end})
+ForsakenTab:AddToggle({Name="Auto Generator",Default=false,Callback=function(v) autoGen=v end})
 
-ForsakenPage:Toggle("ESP Survivors", "fs_ess", "Highlight survivors", "Left", function(v)
-	espSurvivor=v
-	if not v then clearAllESP() end
-end)
-
-ForsakenPage:Toggle("ESP Generators", "fs_esg", "Highlight generators", "Right", function(v)
-	espGen=v
-	if not v then clearAllESP() end
-end)
-
-ForsakenPage:Toggle("Auto Generator", "fs_autogen", "Auto repair generators", "Right", function(v)
-	autoGen=v
-end)
-
-ForsakenPage:Slider("Gen Speed", "fs_genspd", 1, 10, 5, "Right", function(v)
-	genDelay=v
-end)
+ForsakenTab:AddSlider({
+	Name="Gen Speed",
+	Min=1,
+	Max=10,
+	Default=5,
+	Increment=1,
+	Callback=function(v) genDelay=v end
+})
 
 task.spawn(function()
 	while task.wait(0.5) do
@@ -291,22 +288,27 @@ task.spawn(function()
 	end
 end)
 
-OthersPage:Button("Infinite Yield With AI", "Load admin", "Left", function()
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/BokX1/InfiniteYieldWithAI/refs/heads/main/InfiniteYieldWithAI.Lua"))()
-end)
+OthersTab:AddButton({
+	Name="Infinite Yield With AI",
+	Callback=function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/BokX1/InfiniteYieldWithAI/refs/heads/main/InfiniteYieldWithAI.Lua"))()
+	end
+})
 
-OthersPage:Button("Chat Spy", "Spy chat", "Right", function()
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/HS1HYDRAX7/Nexus-Hub/refs/heads/main/Chat%20Spy"))()
-end)
+OthersTab:AddButton({
+	Name="Chat Spy",
+	Callback=function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/HS1HYDRAX7/Nexus-Hub/refs/heads/main/Chat%20Spy"))()
+	end
+})
 
-local clockLabel = InfoPage:Label("Clock: --:--:--", "Left")
+local clockLabel
+clockLabel = InfoTab:AddParagraph("Clock","--:--:--")
+
 task.spawn(function()
 	while task.wait(1) do
-		clockLabel:Set("Clock: "..os.date("%H:%M:%S"))
+		clockLabel:Set("Clock",""..os.date("%H:%M:%S"))
 	end
 end)
 
-InfoPage:Paragraph("Creators", "Hydra (Owner)", "Left")
-
-Library:Notification("Welcome", "Nexus Hub Loaded", 5)
-Library:ConfigSystem(Win)
+OrionLib:Init()
