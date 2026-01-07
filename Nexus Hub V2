@@ -37,7 +37,7 @@ local Window = WindUI:CreateWindow({
 Window:Tag({
 	Title = "v2.2.5",
 	Color = Color3.fromRGB(10, 25, 90),
-	Radius = 100,
+	Radius = 10,
 })
 
 WindUI:Popup({
@@ -103,7 +103,7 @@ end })
 PlayerTab:Slider({
 	Title="CFrame Speed",
 	Step=1,
-	Value={Min=1,Max=50,Default=1},
+	Value={Min=1,Max=70,Default=1},
 	Callback=function(v) cframeSpeed=v end
 })
 
