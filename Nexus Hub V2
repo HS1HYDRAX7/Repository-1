@@ -25,7 +25,6 @@ local DEFAULT_GRAVITY = workspace.Gravity
 
 local Window = WindUI:CreateWindow({
 	Title = "Nexus Hub",
-	Icon = "sparkles",
 	Author = "by Hydra",
 	Folder = "NexusHub",
 	Transparent = true,
@@ -37,9 +36,8 @@ local Window = WindUI:CreateWindow({
 
 Window:Tag({
 	Title = "v2.2.5",
-	Icon = "github",
-	Color = Color3.fromRGB(10, 25, 60),
-	Radius = 0,
+	Color = Color3.fromRGB(10, 25, 90),
+	Radius = 10,
 })
 
 WindUI:Popup({
@@ -48,7 +46,6 @@ WindUI:Popup({
 	Buttons = {
 		{
 			Title = "Continue",
-			Icon = "arrow-right",
 			Variant = "Primary",
 			Callback = function() end,
 		}
@@ -106,7 +103,7 @@ end })
 PlayerTab:Slider({
 	Title="CFrame Speed",
 	Step=1,
-	Value={Min=1,Max=25,Default=1},
+	Value={Min=1,Max=50,Default=1},
 	Callback=function(v) cframeSpeed=v end
 })
 
@@ -155,6 +152,9 @@ end)
 local espSurvivor=false
 local espKiller=false
 local espGen=false
+local autoGen=false
+local genDelay=5
+local genBusy=false
 local infStamina=false
 local staminaConn
 local staminaModule
@@ -202,6 +202,15 @@ local function addNameESP(char,text,color)
 	tl.Parent=bb
 end
 
+local DARK_GREEN=Color3.fromRGB(0,120,0)
+local YELLOW=Color3.fromRGB(255,255,0)
+
+local function normalizeProgress(v)
+	if v>=10000 then return math.clamp(math.floor(v/100),0,100) end
+	if v>100 then return math.clamp(math.floor(v),0,100) end
+	return math.clamp(math.floor(v),0,100)
+end
+
 local function updatePlayerESP()
 	local wp=workspace:FindFirstChild("Players")
 	if not wp then return end
@@ -221,6 +230,38 @@ local function updatePlayerESP()
 	end
 end
 
+local function updateGenESP()
+	if not espGen then return end
+	local map=workspace:FindFirstChild("Map")
+	local ing=map and map:FindFirstChild("Ingame")
+	local m=ing and ing:FindFirstChild("Map")
+	if not m then return end
+	for _,g in ipairs(m:GetChildren()) do
+		if g.Name=="Generator" then
+			local prog=g:FindFirstChild("Progress")
+			local percent=prog and normalizeProgress(prog.Value) or 0
+			addHighlight(g,percent>=100 and DARK_GREEN or YELLOW)
+			if not g:FindFirstChild("NexusGen") then
+				local bb=Instance.new("BillboardGui")
+				bb.Name="NexusGen"
+				bb.Adornee=g
+				bb.Size=UDim2.fromOffset(150,18)
+				bb.StudsOffset=Vector3.new(0,3,0)
+				bb.AlwaysOnTop=true
+				bb.Parent=g
+				local tl=Instance.new("TextLabel")
+				tl.Size=UDim2.fromScale(1,1)
+				tl.BackgroundTransparency=1
+				tl.FontFace=FONT
+				tl.TextStrokeTransparency=0.3
+				tl.Parent=bb
+			end
+			g.NexusGen.TextLabel.Text=percent>=100 and "Generator repaired" or (percent.."%")
+			g.NexusGen.TextLabel.TextColor3=percent>=100 and DARK_GREEN or YELLOW
+		end
+	end
+end
+
 ForsakenTab:Toggle({ Title="Infinite Stamina", Value=false, Callback=function(v)
 	infStamina=v
 	if staminaConn then staminaConn:Disconnect() staminaConn=nil end
@@ -235,10 +276,39 @@ end })
 
 ForsakenTab:Toggle({ Title="ESP Killers", Value=false, Callback=function(v) espKiller=v if not v then clearAllESP() end end })
 ForsakenTab:Toggle({ Title="ESP Survivors", Value=false, Callback=function(v) espSurvivor=v if not v then clearAllESP() end end })
+ForsakenTab:Toggle({ Title="ESP Generators", Value=false, Callback=function(v) espGen=v if not v then clearAllESP() end end })
+ForsakenTab:Toggle({ Title="Auto Generator", Value=false, Callback=function(v) autoGen=v end })
+ForsakenTab:Slider({
+	Title="Auto Generator Speed",
+	Step=1,
+	Value={Min=1,Max=10,Default=5},
+	Callback=function(v) genDelay=v end
+})
 
 task.spawn(function()
 	while task.wait(0.5) do
 		updatePlayerESP()
+		updateGenESP()
+	end
+end)
+
+task.spawn(function()
+	while task.wait(1) do
+		if autoGen and not genBusy then
+			genBusy=true
+			local map=workspace:FindFirstChild("Map")
+			local ing=map and map:FindFirstChild("Ingame")
+			local m=ing and ing:FindFirstChild("Map")
+			if m then
+				for _,g in ipairs(m:GetChildren()) do
+					if g.Name=="Generator" and g:FindFirstChild("Remotes") then
+						pcall(function() g.Remotes.RE:FireServer() end)
+						task.wait(genDelay)
+					end
+				end
+			end
+			genBusy=false
+		end
 	end
 end)
 
