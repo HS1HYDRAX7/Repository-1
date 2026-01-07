@@ -8,7 +8,7 @@ local LocalPlayer = Players.LocalPlayer
 local DEFAULT_GRAVITY = workspace.Gravity
 
 local Window = WindUI:CreateWindow({
-	Title = "Nexus Hub v2.2.2",
+	Title = "Nexus Hub v2.2.3",
 	Icon = "sparkles",
 	Author = "by Hydra",
 	Folder = "NexusHub",
@@ -20,8 +20,20 @@ local Window = WindUI:CreateWindow({
 	ScrollBarEnabled = true
 })
 
+WindUI:Popup({
+	Title = "Welcome to Nexus Hub 🎉",
+	Icon = "info",
+	Buttons = {
+		{
+			Title = "Continue",
+			Icon = "arrow-right",
+			Variant = "Primary",
+			Callback = function() end
+		}
+	}
+})
+
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user" })
-local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "layers" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -68,33 +80,55 @@ LocalPlayer.CharacterAdded:Connect(function(c)
 	end
 end)
 
-PlayerTab:Toggle("Enable", false, function(v)
-	playerEnabled = v
-	if not v then workspace.Gravity = DEFAULT_GRAVITY end
-end)
-
-PlayerTab:Slider("CFrame Speed", 1, 70, 1, function(v)
-	cframeSpeed = v
-end)
-
-PlayerTab:Slider("Gravity", 0, 300, 196, function(v)
-	gravity = v
-end)
-
-PlayerTab:Toggle("Noclip", false, function(v)
-	noclipEnabled = v
-	if v then
-		if LocalPlayer.Character then
-			applyNoclip(LocalPlayer.Character)
-		end
-	else
-		removeNoclip()
+PlayerTab:Toggle({
+	Title = "Enable",
+	Value = false,
+	Callback = function(v)
+		playerEnabled = v
+		if not v then workspace.Gravity = DEFAULT_GRAVITY end
 	end
-end)
+})
 
-PlayerTab:Toggle("Infinite Jump", false, function(v)
-	infJump = v
-end)
+PlayerTab:Slider({
+	Title = "CFrame Speed",
+	Step = 1,
+	Value = { Min = 1, Max = 70, Default = 1 },
+	Callback = function(v)
+		cframeSpeed = v
+	end
+})
+
+PlayerTab:Slider({
+	Title = "Gravity",
+	Step = 1,
+	Value = { Min = 0, Max = 300, Default = 196 },
+	Callback = function(v)
+		gravity = v
+	end
+})
+
+PlayerTab:Toggle({
+	Title = "Noclip",
+	Value = false,
+	Callback = function(v)
+		noclipEnabled = v
+		if v then
+			if LocalPlayer.Character then
+				applyNoclip(LocalPlayer.Character)
+			end
+		else
+			removeNoclip()
+		end
+	end
+})
+
+PlayerTab:Toggle({
+	Title = "Infinite Jump",
+	Value = false,
+	Callback = function(v)
+		infJump = v
+	end
+})
 
 UserInputService.JumpRequest:Connect(function()
 	if infJump and LocalPlayer.Character then
@@ -118,14 +152,21 @@ RunService.Heartbeat:Connect(function()
 	end
 end)
 
-OthersTab:Button("Infinite Yield With AI", function()
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/BokX1/InfiniteYieldWithAI/refs/heads/main/InfiniteYieldWithAI.Lua"))()
-end)
+OthersTab:Button({
+	Title = "Infinite Yield With AI",
+	Callback = function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/BokX1/InfiniteYieldWithAI/refs/heads/main/InfiniteYieldWithAI.Lua"))()
+	end
+})
 
-local clockLabel = InfoTab:Label("Clock: --:--:--")
+local clockParagraph = InfoTab:Paragraph({
+	Title = "Clock",
+	Desc = "00:00:00"
+})
+
 task.spawn(function()
 	while task.wait(1) do
-		clockLabel:Set("Clock: "..os.date("%H:%M:%S"))
+		clockParagraph:Set("Desc", os.date("%H:%M:%S"))
 	end
 end)
 
