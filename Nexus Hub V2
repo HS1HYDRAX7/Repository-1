@@ -24,7 +24,7 @@ local FONT = Font.new("rbxassetid://12187370928")
 local DEFAULT_GRAVITY = workspace.Gravity
 
 local Window = WindUI:CreateWindow({
-	Title = "Nexus Hub v2.2.1",
+	Title = "Nexus Hub v2.2.5 ☄️",
 	Icon = "sparkles",
 	Author = "by Hydra",
 	Folder = "NexusHub",
@@ -268,3 +268,5 @@ task.spawn(function()
 		clockLabel:Set("Clock: "..os.date("%H:%M:%S"))
 	end
 end)
+
+Window:Init()
