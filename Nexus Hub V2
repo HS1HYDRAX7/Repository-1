@@ -4,28 +4,10 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TextChatService = game:GetService("TextChatService")
-local StarterGui = game:GetService("StarterGui")
-
-pcall(function()
-	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true)
-end)
-
-local chatConfig = TextChatService:WaitForChild("ChatWindowConfiguration")
-
-RunService.RenderStepped:Connect(function()
-	chatConfig.Enabled = true
-	chatConfig.ChatWindowVisible = true
-	chatConfig.ChatWindowActive = true
-	chatConfig.ChatInputBarConfiguration.Enabled = true
-end)
-
 local LocalPlayer = Players.LocalPlayer
-local DEFAULT_GRAVITY = workspace.Gravity
-local FONT = Font.new("rbxassetid://12187370928")
 
 local Window = WindUI:CreateWindow({
-	Title = "Nexus Hub v2.2.1",
+	Title = "Nexus Hub",
 	Icon = "sparkles",
 	Author = "by Hydra",
 	Folder = "NexusHub",
@@ -35,6 +17,13 @@ local Window = WindUI:CreateWindow({
 	Resizable = true,
 	HideSearchBar = false,
 	ScrollBarEnabled = true
+})
+
+Window:Tag({
+	Title = "v2.2.5",
+	Icon = "github",
+	Color = Color3.fromRGB(10, 25, 60),
+	Radius = 0
 })
 
 WindUI:Popup({
@@ -55,42 +44,31 @@ local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
 local OthersTab   = Window:Tab({ Title = "Others", Icon = "layers" })
 local InfoTab     = Window:Tab({ Title = "Information", Icon = "info" })
 
+local DEFAULT_GRAVITY = workspace.Gravity
 local playerEnabled=false
-local noclipEnabled=false
+local noclip=false
 local infJump=false
 local cframeSpeed=1
 local gravity=196.2
 local noclipConn
-local originalCollisions={}
 
-local function applyNoclip(character)
+local function setNoclip(char,state)
 	if noclipConn then noclipConn:Disconnect() end
-	originalCollisions={}
-	for _,p in ipairs(character:GetDescendants()) do
-		if p:IsA("BasePart") then
-			originalCollisions[p]=p.CanCollide
-			p.CanCollide=false
-		end
-	end
-	noclipConn=RunService.Stepped:Connect(function()
-		if noclipEnabled and character.Parent then
-			for _,p in ipairs(character:GetDescendants()) do
-				if p:IsA("BasePart") then p.CanCollide=false end
+	if not state then return end
+	noclipConn = RunService.Stepped:Connect(function()
+		for _,v in ipairs(char:GetDescendants()) do
+			if v:IsA("BasePart") then
+				v.CanCollide = false
 			end
 		end
 	end)
 end
 
-local function removeNoclip()
-	if noclipConn then noclipConn:Disconnect() noclipConn=nil end
-	for p,v in pairs(originalCollisions) do
-		if p and p.Parent then p.CanCollide=v end
-	end
-	originalCollisions={}
-end
-
 LocalPlayer.CharacterAdded:Connect(function(c)
-	if noclipEnabled then task.wait(0.25) applyNoclip(c) end
+	if noclip then
+		task.wait(0.2)
+		setNoclip(c,true)
+	end
 end)
 
 PlayerTab:Toggle({
@@ -105,7 +83,7 @@ PlayerTab:Toggle({
 PlayerTab:Slider({
 	Title="CFrame Speed",
 	Step=1,
-	Value={Min=1,Max=70,Default=1},
+	Value={Min=1,Max=80,Default=1},
 	Callback=function(v) cframeSpeed=v end
 })
 
@@ -120,11 +98,9 @@ PlayerTab:Toggle({
 	Title="Noclip",
 	Value=false,
 	Callback=function(v)
-		noclipEnabled=v
+		noclip=v
 		if v and LocalPlayer.Character then
-			applyNoclip(LocalPlayer.Character)
-		else
-			removeNoclip()
+			setNoclip(LocalPlayer.Character,true)
 		end
 	end
 })
@@ -137,73 +113,62 @@ PlayerTab:Toggle({
 
 UserInputService.JumpRequest:Connect(function()
 	if infJump and LocalPlayer.Character then
-		local hum=LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-		if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+		local h=LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+		if h then h:ChangeState(Enum.HumanoidStateType.Jumping) end
 	end
 end)
 
 RunService.Heartbeat:Connect(function()
 	if not playerEnabled then return end
-	local char=LocalPlayer.Character
-	local hrp=char and char:FindFirstChild("HumanoidRootPart")
-	local hum=char and char:FindFirstChildOfClass("Humanoid")
-	if not hrp or not hum then return end
+	local c=LocalPlayer.Character
+	local hrp=c and c:FindFirstChild("HumanoidRootPart")
+	local h=c and c:FindFirstChildOfClass("Humanoid")
+	if not hrp or not h then return end
 	workspace.Gravity=gravity
-	local dir=hum.MoveDirection
-	if dir.Magnitude>0 then
-		hrp.CFrame=hrp.CFrame+(dir*(cframeSpeed*0.08))
+	local d=h.MoveDirection
+	if d.Magnitude>0 then
+		hrp.CFrame=hrp.CFrame+(d*(cframeSpeed*0.08))
 	end
 end)
 
-local espSurvivor=false
-local espKiller=false
-local espGen=false
+local espKillers=false
+local espSurvivors=false
+local espGens=false
 
 local function clearESP()
 	for _,v in ipairs(workspace:GetDescendants()) do
-		if v:IsA("Highlight") and v.Name=="NexusHL" then v:Destroy() end
+		if v:IsA("Highlight") and v.Name=="NexusESP" then
+			v:Destroy()
+		end
 	end
 end
 
-local function addHL(inst,color)
-	local hl=inst:FindFirstChild("NexusHL")
-	if not hl then
-		hl=Instance.new("Highlight")
-		hl.Name="NexusHL"
-		hl.Adornee=inst
-		hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
-		hl.Parent=inst
-	end
-	hl.FillColor=color
-	hl.OutlineColor=color
-	hl.FillTransparency=0.45
+local function esp(target,color)
+	if target:FindFirstChild("NexusESP") then return end
+	local h=Instance.new("Highlight")
+	h.Name="NexusESP"
+	h.Adornee=target
+	h.FillColor=color
+	h.OutlineColor=color
+	h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
+	h.FillTransparency=0.45
+	h.Parent=target
 end
 
 task.spawn(function()
 	while task.wait(0.5) do
-		if not (espSurvivor or espKiller or espGen) then continue end
-		local wp=workspace:FindFirstChild("Players")
-		if wp then
-			for _,plr in ipairs(Players:GetPlayers()) do
-				if plr~=LocalPlayer and plr.Character then
-					if espKiller and plr.Character.Parent==wp:FindFirstChild("Killers") then
-						addHL(plr.Character,Color3.fromRGB(255,0,0))
-					end
-					if espSurvivor and plr.Character.Parent==wp:FindFirstChild("Survivors") then
-						addHL(plr.Character,Color3.fromRGB(0,255,0))
-					end
+		if espKillers or espSurvivors then
+			for _,p in ipairs(Players:GetPlayers()) do
+				if p~=LocalPlayer and p.Character then
+					if espKillers then esp(p.Character,Color3.fromRGB(255,0,0)) end
+					if espSurvivors then esp(p.Character,Color3.fromRGB(0,255,0)) end
 				end
 			end
 		end
-		if espGen then
-			local map=workspace:FindFirstChild("Map")
-			local ing=map and map:FindFirstChild("Ingame")
-			local m=ing and ing:FindFirstChild("Map")
-			if m then
-				for _,g in ipairs(m:GetChildren()) do
-					if g.Name=="Generator" then
-						addHL(g,Color3.fromRGB(255,255,0))
-					end
+		if espGens then
+			for _,g in ipairs(workspace:GetDescendants()) do
+				if g.Name=="Generator" then
+					esp(g,Color3.fromRGB(255,255,0))
 				end
 			end
 		end
@@ -213,40 +178,52 @@ end)
 ForsakenTab:Toggle({
 	Title="ESP Killers",
 	Value=false,
-	Callback=function(v) espKiller=v if not v then clearESP() end end
+	Callback=function(v) espKillers=v if not v then clearESP() end end
 })
 
 ForsakenTab:Toggle({
 	Title="ESP Survivors",
 	Value=false,
-	Callback=function(v) espSurvivor=v if not v then clearESP() end end
+	Callback=function(v) espSurvivors=v if not v then clearESP() end end
 })
 
 ForsakenTab:Toggle({
 	Title="ESP Generators",
 	Value=false,
-	Callback=function(v) espGen=v if not v then clearESP() end end
+	Callback=function(v) espGens=v if not v then clearESP() end end
 })
 
-local infStamina=false
-local staminaConn
-local staminaModule
+local autoGen=false
+local autoGenSpeed=1
 
 ForsakenTab:Toggle({
-	Title="Infinite Stamina",
+	Title="Auto Generator",
 	Value=false,
-	Callback=function(v)
-		infStamina=v
-		if staminaConn then staminaConn:Disconnect() staminaConn=nil end
-		if v then
-			local sprint=ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting")
-			staminaModule=require(sprint)
-			staminaConn=RunService.Heartbeat:Connect(function()
-				if infStamina then staminaModule.Stamina=staminaModule.MaxStamina or 999 end
-			end)
+	Callback=function(v) autoGen=v end
+})
+
+ForsakenTab:Slider({
+	Title="Auto Generator Speed",
+	Step=1,
+	Value={Min=1,Max=10,Default=1},
+	Callback=function(v) autoGenSpeed=v end
+})
+
+task.spawn(function()
+	while task.wait(0.1) do
+		if autoGen then
+			for _,g in ipairs(workspace:GetDescendants()) do
+				if g.Name=="Generator" and g:FindFirstChild("Progress") then
+					g.Progress.Value = math.clamp(
+						g.Progress.Value + autoGenSpeed,
+						0,
+						g.Progress.MaxValue
+					)
+				end
+			end
 		end
 	end
-})
+end)
 
 OthersTab:Button({
 	Title="Infinite Yield With AI",
@@ -255,21 +232,14 @@ OthersTab:Button({
 	end
 })
 
-OthersTab:Button({
-	Title="Chat Spy",
-	Callback=function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/HS1HYDRAX7/Nexus-Hub/refs/heads/main/Chat%20Spy"))()
-	end
-})
-
-local ClockParagraph=InfoTab:Paragraph({
+local Clock = InfoTab:Paragraph({
 	Title="Clock",
 	Desc="--:--:--"
 })
 
 task.spawn(function()
 	while task.wait(1) do
-		ClockParagraph:SetDesc(os.date("%H:%M:%S"))
+		Clock:SetDesc(os.date("%H:%M:%S"))
 	end
 end)
 
