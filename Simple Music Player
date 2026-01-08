@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
 
@@ -8,31 +9,57 @@ local gui = Instance.new("ScreenGui")
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
+-- Tela principal com drag
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.fromScale(0.3,0.4)
+mainFrame.Size = UDim2.fromScale(0.25,0.35)
 mainFrame.Position = UDim2.fromScale(0.35,0.3)
 mainFrame.BackgroundColor3 = Color3.fromRGB(18,18,18)
 mainFrame.BorderSizePixel = 0
 mainFrame.Parent = gui
 Instance.new("UICorner",mainFrame).CornerRadius = UDim.new(0,20)
 
+local dragging = false
+local dragInput, mousePos, framePos
+
+mainFrame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		mousePos = input.Position
+		framePos = mainFrame.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+mainFrame.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - mousePos
+		mainFrame.Position = framePos + UDim2.new(0, delta.X, 0, delta.Y)
+	end
+end)
+
+-- Bola e anel menores
 local ball = Instance.new("Frame")
-ball.Size = UDim2.fromOffset(60,60)
-ball.Position = UDim2.fromScale(0.5,0.4)
+ball.Size = UDim2.fromOffset(40,40)
+ball.Position = UDim2.fromScale(0.5,0.3)
 ball.AnchorPoint = Vector2.new(0.5,0.5)
 ball.BackgroundColor3 = Color3.fromRGB(255,0,0)
 ball.Parent = mainFrame
 Instance.new("UICorner",ball).CornerRadius = UDim.new(1,0)
 
 local ring = Instance.new("UIStroke")
-ring.Thickness = 5
-ring.Color = Color3.fromRGB(255,0,0)
+ring.Thickness = 3
+ring.Color = Color3.fromRGB(0,0,0)
 ring.Parent = ball
-
-local outline = Instance.new("UIStroke")
-outline.Thickness = 2
-outline.Color = Color3.fromRGB(0,0,0)
-outline.Parent = ball
 
 local click = Instance.new("TextButton")
 click.Size = UDim2.fromScale(1,1)
@@ -40,6 +67,7 @@ click.BackgroundTransparency = 1
 click.Text = ""
 click.Parent = ball
 
+-- GUI de música com animação
 local musicGui = Instance.new("Frame")
 musicGui.Size = UDim2.fromScale(0.5,0.55)
 musicGui.Position = UDim2.fromScale(0.5,0.5)
@@ -50,6 +78,14 @@ musicGui.Visible = false
 musicGui.Parent = gui
 Instance.new("UICorner",musicGui).CornerRadius = UDim.new(0,26)
 
+local function openGui(frame)
+	frame.Size = UDim2.fromScale(0.3,0.3)
+	frame.Visible = true
+	TweenService:Create(frame,TweenInfo.new(0.35,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{
+		Size = UDim2.fromScale(0.5,0.55)
+	}):Play()
+end
+
 local close = Instance.new("TextButton")
 close.Text = "❌"
 close.Size = UDim2.fromScale(0.1,0.1)
@@ -58,7 +94,12 @@ close.BackgroundTransparency = 1
 close.TextScaled = true
 close.Parent = musicGui
 close.MouseButton1Click:Connect(function()
-	musicGui.Visible = false
+	TweenService:Create(musicGui,TweenInfo.new(0.25,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{
+		Size = UDim2.fromScale(0.3,0.3)
+	}):Play()
+	task.delay(0.25,function()
+		musicGui.Visible = false
+	end)
 end)
 
 local box = Instance.new("TextBox")
@@ -80,6 +121,12 @@ local function makeButton(text,pos)
 	b.TextScaled = true
 	b.Parent = musicGui
 	Instance.new("UICorner",b)
+	b.MouseEnter:Connect(function()
+		TweenService:Create(b,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(60,60,60)}):Play()
+	end)
+	b.MouseLeave:Connect(function()
+		TweenService:Create(b,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(40,40,40)}):Play()
+	end)
 	return b
 end
 
@@ -140,7 +187,7 @@ back.MouseButton1Click:Connect(function()
 end)
 
 click.MouseButton1Click:Connect(function()
-	musicGui.Visible = true
+	openGui(musicGui)
 end)
 
 local hue = 0
@@ -148,6 +195,6 @@ RunService.RenderStepped:Connect(function(dt)
 	hue = (hue + dt*0.6) % 1
 	local color = Color3.fromHSV(hue,1,1)
 	ball.BackgroundColor3 = color
-	ring.Color = color
+	ring.Color = Color3.fromRGB(0,0,0)
 	barFill.BackgroundColor3 = color
 end)
