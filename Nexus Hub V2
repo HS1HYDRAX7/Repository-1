@@ -35,21 +35,27 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-	Title = "v2.2.5",
-	Color = Color3.fromRGB(20, 107, 219),
+	Title = "v2.0.7",
+	Color = Color3.fromRGB(149, 21, 41),
 	Radius = 100,
 })
 
 WindUI:Popup({
-	Title = "Welcome to Nexus Hub",
-	Icon = "info",
-	Buttons = {
-		{
-			Title = "Continue",
-			Variant = "Primary",
-			Callback = function() end,
-		}
-	}
+    Title = "Welcome to Nexus Hub 🎉",
+    Icon = "info",
+    Buttons = {
+        {
+            Title = "GET OUT",
+            Callback = function() end,
+            Variant = "Tertiary",
+        },
+        {
+            Title = "Continue",
+            Icon = "arrow-right",
+            Callback = function() end,
+            Variant = "Primary",
+        }
+    }
 })
 
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user" })
