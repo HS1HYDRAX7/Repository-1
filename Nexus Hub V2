@@ -103,14 +103,14 @@ end })
 PlayerTab:Slider({
 	Title="CFrame Speed",
 	Step=1,
-	Value={Min=1,Max=70,Default=1},
+	Value={Min=1,Max=50,Default=1},
 	Callback=function(v) cframeSpeed=v end
 })
 
 PlayerTab:Slider({
 	Title="Gravity",
 	Step=1,
-	Value={Min=0,Max=300,Default=196},
+	Value={Min=1,Max=196,Default=196},
 	Callback=function(v) gravity=v end
 })
 
