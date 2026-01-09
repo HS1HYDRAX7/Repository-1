@@ -36,8 +36,8 @@ local Window = WindUI:CreateWindow({
 
 Window:Tag({
 	Title = "v2.2.5",
-	Color = Color3.fromRGB(10, 25, 90),
-	Radius = 10,
+	Color = Color3.fromRGB(20, 107, 219),
+	Radius = 100,
 })
 
 WindUI:Popup({
