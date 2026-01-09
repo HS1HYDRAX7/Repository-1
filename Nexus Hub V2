@@ -41,21 +41,15 @@ Window:Tag({
 })
 
 WindUI:Popup({
-    Title = "Welcome to Nexus Hub 🎉",
-    Icon = "info",
-    Buttons = {
-        {
-            Title = "GET OUT",
-            Callback = function() end,
-            Variant = "Tertiary",
-        },
-        {
-            Title = "Continue",
-            Icon = "arrow-right",
-            Callback = function() end,
-            Variant = "Primary",
-        }
-    }
+	Title = "Welcome to Nexus Hub 🎉",
+	Icon = "info",
+	Buttons = {
+		{
+			Title = "◀️ Continue ▶️",
+			Variant = "Primary",
+			Callback = function() end,
+		}
+	}
 })
 
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user" })
