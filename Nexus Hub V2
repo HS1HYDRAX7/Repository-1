@@ -8,355 +8,324 @@ local TextChatService = game:GetService("TextChatService")
 local StarterGui = game:GetService("StarterGui")
 
 pcall(function()
-    StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true)
+	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true)
 end)
 
 local chatConfig = TextChatService:WaitForChild("ChatWindowConfiguration")
-
 RunService.RenderStepped:Connect(function()
-    chatConfig.Enabled = true
-    chatConfig.ChatWindowVisible = true
-    chatConfig.ChatWindowActive = true
-    chatConfig.ChatInputBarConfiguration.Enabled = true
+	chatConfig.Enabled = true
+	chatConfig.ChatWindowVisible = true
+	chatConfig.ChatWindowActive = true
+	chatConfig.ChatInputBarConfiguration.Enabled = true
 end)
 
 local LocalPlayer = Players.LocalPlayer
-local FONT = Font.new("rbxassetid://12187370928")
+local FONT = Font.new("rbxassetid://12187368843")
 local DEFAULT_GRAVITY = workspace.Gravity
 
 local Window = WindUI:CreateWindow({
-    Title = "Nexus Hub",
-    Author = "by Hydra",
-    Folder = "NexusHub",
-    Size = UDim2.fromOffset(580, 460),
-    Transparent = true,
-    Theme = "Dark",
-    Resizable = true,
-    HideSearchBar = false,
-    ScrollBarEnabled = true
+	Title = "Nexus Hub",
+	Author = "by Hydra",
+	Folder = "NexusHub",
+	Transparent = true,
+	Theme = "Dark",
+	Resizable = true,
+	HideSearchBar = false,
+	ScrollBarEnabled = true,
 })
 
 Window:Tag({
-    Title = "v2.2.5",
-    Icon = "info",
-    Color = Color3.fromRGB(5, 20, 60),
-    Radius = 100
+	Title = "v2.2.5",
+	Color = Color3.fromRGB(10, 25, 90),
+	Radius = 10,
 })
 
 WindUI:Popup({
-    Title = "Welcome to Nexus Hub",
-    Icon = "info",
-    Content = "",
-    Buttons = {
-        {
-            Title = "Continue",
-            Callback = function() end,
-            Variant = "Primary",
-        }
-    }
+	Title = "Welcome to Nexus Hub",
+	Icon = "info",
+	Buttons = {
+		{
+			Title = "Continue",
+			Variant = "Primary",
+			Callback = function() end,
+		}
+	}
 })
 
-local PlayerTab = Window:Tab({ Title = "Player", Icon = "person" })
-local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "description" })
-local OthersTab = Window:Tab({ Title = "Others", Icon = "auto_awesome" })
+local PlayerTab = Window:Tab({ Title = "Player", Icon = "user" })
+local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
+local OthersTab = Window:Tab({ Title = "Others", Icon = "layers" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
-local playerEnabled = false
-local noclipEnabled = false
-local infJump = false
-local cframeSpeed = 0.3
-local gravity = 196.2
+local playerEnabled=false
+local noclipEnabled=false
+local infJump=false
+local cframeSpeed=1
+local gravity=196.2
 local noclipConn
-local originalCollisions = {}
+local originalCollisions={}
 
 local function applyNoclip(character)
-    if noclipConn then noclipConn:Disconnect() end
-    if not character then return end
-    originalCollisions = {}
-    for _,p in ipairs(character:GetDescendants()) do
-        if p:IsA("BasePart") then
-            originalCollisions[p] = p.CanCollide
-            p.CanCollide = false
-        end
-    end
-    noclipConn = RunService.Stepped:Connect(function()
-        if not noclipEnabled then return end
-        if not character.Parent then return end
-        for _,p in ipairs(character:GetDescendants()) do
-            if p:IsA("BasePart") then
-                p.CanCollide = false
-            end
-        end
-    end)
+	if noclipConn then noclipConn:Disconnect() end
+	if not character then return end
+	originalCollisions={}
+	for _,p in ipairs(character:GetDescendants()) do
+		if p:IsA("BasePart") then
+			originalCollisions[p]=p.CanCollide
+			p.CanCollide=false
+		end
+	end
+	noclipConn=RunService.Stepped:Connect(function()
+		if not noclipEnabled or not character.Parent then return end
+		for _,p in ipairs(character:GetDescendants()) do
+			if p:IsA("BasePart") then p.CanCollide=false end
+		end
+	end)
 end
 
 local function removeNoclip()
-    if noclipConn then noclipConn:Disconnect() noclipConn = nil end
-    for p,v in pairs(originalCollisions) do
-        if p and p.Parent then
-            p.CanCollide = v
-        end
-    end
-    originalCollisions = {}
+	if noclipConn then noclipConn:Disconnect() noclipConn=nil end
+	for p,v in pairs(originalCollisions) do
+		if p and p.Parent then p.CanCollide=v end
+	end
+	originalCollisions={}
 end
 
 LocalPlayer.CharacterAdded:Connect(function(c)
-    if noclipEnabled then
-        task.wait(0.25)
-        applyNoclip(c)
-    end
+	if noclipEnabled then task.wait(0.25) applyNoclip(c) end
 end)
 
-PlayerTab:Toggle({
-    Title = "Enable",
-    Value = false,
-    Callback = function(v)
-        playerEnabled = v
-        if not v then
-            workspace.Gravity = DEFAULT_GRAVITY
-        end
-    end
+PlayerTab:Toggle({ Title="Enable", Value=false, Callback=function(v)
+	playerEnabled=v
+	if not v then workspace.Gravity=DEFAULT_GRAVITY end
+end })
+
+PlayerTab:Slider({
+	Title="CFrame Speed",
+	Step=1,
+	Value={Min=1,Max=70,Default=1},
+	Callback=function(v) cframeSpeed=v end
 })
 
 PlayerTab:Slider({
-    Title = "CFrame Speed",
-    Step = 0.05,
-    Value = { Min = 0.1, Max = 25, Default = 1 },
-    Callback = function(v)
-        cframeSpeed = v * 0.5
-    end
-})
-
-PlayerTab:Slider({
-    Title = "Gravity",
-    Step = 1,
-    Value = { Min = 0.1, Max = 196, Default = 196 },
-    Callback = function(v)
-        gravity = v
-    end
+	Title="Gravity",
+	Step=1,
+	Value={Min=0,Max=300,Default=196},
+	Callback=function(v) gravity=v end
 })
 
 PlayerTab:Toggle({
-    Title = "Noclip",
-    Value = false,
-    Callback = function(v)
-        noclipEnabled = v
-        if v then
-            applyNoclip(LocalPlayer.Character)
-        else
-            removeNoclip()
-        end
-    end
+	Title="Noclip",
+	Value=false,
+	Callback=function(v)
+		noclipEnabled=v
+		if v then applyNoclip(LocalPlayer.Character) else removeNoclip() end
+	end
 })
 
 PlayerTab:Toggle({
-    Title = "Infinite Jump",
-    Value = false,
-    Callback = function(v)
-        infJump = v
-    end
+	Title="Infinite Jump",
+	Value=false,
+	Callback=function(v) infJump=v end
 })
 
 UserInputService.JumpRequest:Connect(function()
-    if infJump and LocalPlayer.Character then
-        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if hum then
-            hum:ChangeState(Enum.HumanoidStateType.Jumping)
-        end
-    end
+	if infJump and LocalPlayer.Character then
+		local hum=LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+		if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+	end
 end)
 
 RunService.Heartbeat:Connect(function()
-    if not playerEnabled then return end
-    local char = LocalPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    if not hrp or not hum then return end
-    workspace.Gravity = gravity
-    local dir = hum.MoveDirection
-    if dir.Magnitude > 0 then
-        hrp.CFrame = hrp.CFrame + (dir * (cframeSpeed * 0.08))
-    end
+	if not playerEnabled then return end
+	local char=LocalPlayer.Character
+	local hrp=char and char:FindFirstChild("HumanoidRootPart")
+	local hum=char and char:FindFirstChildOfClass("Humanoid")
+	if not hrp or not hum then return end
+	workspace.Gravity=gravity
+	local dir=hum.MoveDirection
+	if dir.Magnitude>0 then
+		hrp.CFrame=hrp.CFrame+(dir*(cframeSpeed*0.08))
+	end
 end)
 
-local espSurvivor = false
-local espKiller = false
-local espGen = false
-local espPlayers = false
-local autoGen = false
-local genDelay = 5
-local genBusy = false
-local infStamina = false
+local espSurvivor=false
+local espKiller=false
+local espGen=false
+local autoGen=false
+local genDelay=5
+local genBusy=false
+local infStamina=false
 local staminaConn
 local staminaModule
 
 local function clearAllESP()
-    for _,obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("Highlight") and obj.Name == "NexusHL" then obj:Destroy() end
-        if obj:IsA("BillboardGui") and (obj.Name == "NexusName" or obj.Name == "NexusGen") then obj:Destroy() end
-    end
+	for _,obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Highlight") and obj.Name=="NexusHL" then obj:Destroy() end
+		if obj:IsA("BillboardGui") and (obj.Name=="NexusName" or obj.Name=="NexusGen") then obj:Destroy() end
+	end
 end
 
 local function addHighlight(inst,color)
-    local hl = inst:FindFirstChild("NexusHL")
-    if not hl then
-        hl = Instance.new("Highlight")
-        hl.Name = "NexusHL"
-        hl.Adornee = inst
-        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-        hl.Parent = inst
-    end
-    hl.FillColor = color
-    hl.OutlineColor = color
-    hl.FillTransparency = 0.45
+	local hl=inst:FindFirstChild("NexusHL")
+	if not hl then
+		hl=Instance.new("Highlight")
+		hl.Name="NexusHL"
+		hl.Adornee=inst
+		hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
+		hl.Parent=inst
+	end
+	hl.FillColor=color
+	hl.OutlineColor=color
+	hl.FillTransparency=0.45
 end
 
 local function addNameESP(char,text,color)
-    if char:FindFirstChild("NexusName") then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    local bb = Instance.new("BillboardGui")
-    bb.Name = "NexusName"
-    bb.Adornee = hrp
-    bb.Size = UDim2.fromOffset(120,16)
-    bb.StudsOffset = Vector3.new(0,-3,0)
-    bb.AlwaysOnTop = true
-    bb.Parent = char
-    local tl = Instance.new("TextLabel")
-    tl.Size = UDim2.fromScale(1,1)
-    tl.BackgroundTransparency = 1
-    tl.Text = text
-    tl.FontFace = FONT
-    tl.TextSize = 11
-    tl.TextColor3 = color
-    tl.TextStrokeTransparency = 0.3
-    tl.Parent = bb
+	if char:FindFirstChild("NexusName") then return end
+	local hrp=char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+	local bb=Instance.new("BillboardGui")
+	bb.Name="NexusName"
+	bb.Adornee=hrp
+	bb.Size=UDim2.fromOffset(120,16)
+	bb.StudsOffset=Vector3.new(0,-3,0)
+	bb.AlwaysOnTop=true
+	bb.Parent=char
+	local tl=Instance.new("TextLabel")
+	tl.Size=UDim2.fromScale(1,1)
+	tl.BackgroundTransparency=1
+	tl.Text=text
+	tl.FontFace=FONT
+	tl.TextSize=11
+	tl.TextColor3=color
+	tl.TextStrokeTransparency=0.3
+	tl.Parent=bb
+end
+
+local DARK_GREEN=Color3.fromRGB(0,120,0)
+local YELLOW=Color3.fromRGB(255,255,0)
+
+local function normalizeProgress(v)
+	if v>=10000 then return math.clamp(math.floor(v/100),0,100) end
+	if v>100 then return math.clamp(math.floor(v),0,100) end
+	return math.clamp(math.floor(v),0,100)
 end
 
 local function updatePlayerESP()
-    local wp = workspace:FindFirstChild("Players")
-    local killers = wp and wp:FindFirstChild("Killers")
-    local survivors = wp and wp:FindFirstChild("Survivors")
-    for _,plr in ipairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character then
-            if espPlayers then
-                addHighlight(plr.Character, Color3.fromRGB(255,255,255))
-                addNameESP(plr.Character, plr.Name, Color3.fromRGB(255,255,255))
-            elseif killers and plr.Character.Parent == killers and espKiller then
-                addHighlight(plr.Character, Color3.fromRGB(255,0,0))
-                addNameESP(plr.Character, plr.Name, Color3.fromRGB(255,80,80))
-            elseif survivors and plr.Character.Parent == survivors and espSurvivor then
-                addHighlight(plr.Character, Color3.fromRGB(0,255,0))
-                addNameESP(plr.Character, plr.Name, Color3.fromRGB(80,255,80))
-            end
-        end
-    end
-end
-
-local DARK_GREEN = Color3.fromRGB(0,120,0)
-local YELLOW = Color3.fromRGB(255,255,0)
-
-local function normalizeProgress(v)
-    if v >= 10000 then return math.clamp(math.floor(v/100),0,100) end
-    if v > 100 then return math.clamp(math.floor(v),0,100) end
-    return math.clamp(math.floor(v),0,100)
+	local wp=workspace:FindFirstChild("Players")
+	if not wp then return end
+	local killers=wp:FindFirstChild("Killers")
+	local survivors=wp:FindFirstChild("Survivors")
+	for _,plr in ipairs(Players:GetPlayers()) do
+		if plr~=LocalPlayer and plr.Character then
+			if espKiller and killers and plr.Character.Parent==killers then
+				addHighlight(plr.Character,Color3.fromRGB(255,0,0))
+				addNameESP(plr.Character,plr.Name,Color3.fromRGB(255,80,80))
+			end
+			if espSurvivor and survivors and plr.Character.Parent==survivors then
+				addHighlight(plr.Character,Color3.fromRGB(0,255,0))
+				addNameESP(plr.Character,plr.Name,Color3.fromRGB(80,255,80))
+			end
+		end
+	end
 end
 
 local function updateGenESP()
-    if not espGen then return end
-    local map = workspace:FindFirstChild("Map")
-    local ing = map and map:FindFirstChild("Ingame")
-    local m = ing and ing:FindFirstChild("Map")
-    if not m then return end
-    for _,g in ipairs(m:GetChildren()) do
-        if g.Name == "Generator" then
-            local prog = g:FindFirstChild("Progress")
-            local percent = prog and normalizeProgress(prog.Value) or 0
-            addHighlight(g, percent >= 100 and DARK_GREEN or YELLOW)
-            if not g:FindFirstChild("NexusGen") then
-                local bb = Instance.new("BillboardGui")
-                bb.Name = "NexusGen"
-                bb.Adornee = g
-                bb.Size = UDim2.fromOffset(150,18)
-                bb.StudsOffset = Vector3.new(0,3,0)
-                bb.AlwaysOnTop = true
-                bb.Parent = g
-                local tl = Instance.new("TextLabel")
-                tl.Size = UDim2.fromScale(1,1)
-                tl.BackgroundTransparency = 1
-                tl.FontFace = FONT
-                tl.TextStrokeTransparency = 0.3
-                tl.Parent = bb
-            end
-            g.NexusGen.TextLabel.Text = percent >= 100 and "Generator repaired" or (percent .. "%")
-            g.NexusGen.TextLabel.TextColor3 = percent >= 100 and DARK_GREEN or YELLOW
-        end
-    end
+	if not espGen then return end
+	local map=workspace:FindFirstChild("Map")
+	local ing=map and map:FindFirstChild("Ingame")
+	local m=ing and ing:FindFirstChild("Map")
+	if not m then return end
+	for _,g in ipairs(m:GetChildren()) do
+		if g.Name=="Generator" then
+			local prog=g:FindFirstChild("Progress")
+			local percent=prog and normalizeProgress(prog.Value) or 0
+			addHighlight(g,percent>=100 and DARK_GREEN or YELLOW)
+			if not g:FindFirstChild("NexusGen") then
+				local bb=Instance.new("BillboardGui")
+				bb.Name="NexusGen"
+				bb.Adornee=g
+				bb.Size=UDim2.fromOffset(150,18)
+				bb.StudsOffset=Vector3.new(0,3,0)
+				bb.AlwaysOnTop=true
+				bb.Parent=g
+				local tl=Instance.new("TextLabel")
+				tl.Size=UDim2.fromScale(1,1)
+				tl.BackgroundTransparency=1
+				tl.FontFace=FONT
+				tl.TextStrokeTransparency=0.3
+				tl.Parent=bb
+			end
+			g.NexusGen.TextLabel.Text=percent>=100 and "Generator repaired" or (percent.."%")
+			g.NexusGen.TextLabel.TextColor3=percent>=100 and DARK_GREEN or YELLOW
+		end
+	end
 end
 
-ForsakenTab:Toggle({ Title = "Infinite Stamina", Value = false, Callback = function(v)
-    infStamina = v
-    if staminaConn then staminaConn:Disconnect() staminaConn = nil end
-    if v then
-        local sprint = ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting")
-        staminaModule = require(sprint)
-        staminaConn = RunService.Heartbeat:Connect(function()
-            if infStamina then
-                staminaModule.Stamina = staminaModule.MaxStamina or 999
-            end
-        end)
-    end
+ForsakenTab:Toggle({ Title="Infinite Stamina", Value=false, Callback=function(v)
+	infStamina=v
+	if staminaConn then staminaConn:Disconnect() staminaConn=nil end
+	if v then
+		local sprint=ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting")
+		staminaModule=require(sprint)
+		staminaConn=RunService.Heartbeat:Connect(function()
+			if infStamina then staminaModule.Stamina=staminaModule.MaxStamina or 999 end
+		end)
+	end
 end })
 
-ForsakenTab:Toggle({ Title = "ESP Killers", Value = false, Callback = function(v) espKiller = v if not v then clearAllESP() end end })
-ForsakenTab:Toggle({ Title = "ESP Survivors", Value = false, Callback = function(v) espSurvivor = v if not v then clearAllESP() end end })
-ForsakenTab:Toggle({ Title = "ESP Generators", Value = false, Callback = function(v) espGen = v if not v then clearAllESP() end end })
-ForsakenTab:Toggle({ Title = "Auto Generator", Value = false, Callback = function(v) autoGen = v end })
-ForsakenTab:Slider({ Title = "Gen Speed", Step = 1, Value = { Min = 1, Max = 10, Default = 5 }, Callback = function(v) genDelay = v end })
-
-OthersTab:Toggle({
-    Title = "ESP Players",
-    Value = false,
-    Callback = function(v)
-        espPlayers = v
-        if not v then clearAllESP() end
-    end
+ForsakenTab:Toggle({ Title="ESP Killers", Value=false, Callback=function(v) espKiller=v if not v then clearAllESP() end end })
+ForsakenTab:Toggle({ Title="ESP Survivors", Value=false, Callback=function(v) espSurvivor=v if not v then clearAllESP() end end })
+ForsakenTab:Toggle({ Title="ESP Generators", Value=false, Callback=function(v) espGen=v if not v then clearAllESP() end end })
+ForsakenTab:Toggle({ Title="Auto Generator", Value=false, Callback=function(v) autoGen=v end })
+ForsakenTab:Slider({
+	Title="Auto Generator Speed",
+	Step=1,
+	Value={Min=1,Max=10,Default=5},
+	Callback=function(v) genDelay=v end
 })
 
 task.spawn(function()
-    while task.wait(0.5) do
-        updatePlayerESP()
-        updateGenESP()
-    end
+	while task.wait(0.5) do
+		updatePlayerESP()
+		updateGenESP()
+	end
 end)
 
 task.spawn(function()
-    while task.wait(1) do
-        if autoGen and not genBusy then
-            genBusy = true
-            local map = workspace:FindFirstChild("Map")
-            local ing = map and map:FindFirstChild("Ingame")
-            local m = ing and ing:FindFirstChild("Map")
-            if m then
-                for _,g in ipairs(m:GetChildren()) do
-                    if g.Name == "Generator" and g:FindFirstChild("Remotes") then
-                        pcall(function()
-                            g.Remotes.RE:FireServer()
-                        end)
-                        task.wait(genDelay)
-                    end
-                end
-            end
-            genBusy = false
-        end
-    end
+	while task.wait(1) do
+		if autoGen and not genBusy then
+			genBusy=true
+			local map=workspace:FindFirstChild("Map")
+			local ing=map and map:FindFirstChild("Ingame")
+			local m=ing and ing:FindFirstChild("Map")
+			if m then
+				for _,g in ipairs(m:GetChildren()) do
+					if g.Name=="Generator" and g:FindFirstChild("Remotes") then
+						pcall(function() g.Remotes.RE:FireServer() end)
+						task.wait(genDelay)
+					end
+				end
+			end
+			genBusy=false
+		end
+	end
 end)
 
-local clockLabel = InfoTab:Paragraph({ Title = "Clock", Desc = "--:--:--" })
+OthersTab:Button({
+	Title="Infinite Yield With AI",
+	Callback=function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/BokX1/InfiniteYieldWithAI/refs/heads/main/InfiniteYieldWithAI.Lua"))()
+	end
+})
+
+local clockParagraph = InfoTab:Paragraph({ Title="Clock", Desc="--:--:--" })
 task.spawn(function()
-    while task.wait(1) do
-        clockLabel:Set("Clock", os.date("%H:%M:%S"))
-    end
+	while task.wait(1) do
+		clockParagraph:SetDesc(os.date("%H:%M:%S"))
+	end
 end)
+
+InfoTab:Paragraph({ Title="Creators", Desc="Hydra (Owner)" })
 
 Window:Init()
