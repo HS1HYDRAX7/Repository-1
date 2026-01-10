@@ -45,7 +45,7 @@ WindUI:Popup({
 	Icon = "info",
 	Buttons = {
 		{
-			Title = "⮕",
+			Title = "𝕮𝖔𝖓𝖙𝖎𝖓𝖚𝖊",
 			Variant = "Primary",
 			Callback = function() end,
 		}
