@@ -35,7 +35,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-	Title = "v2.0.7",
+	Title = "v2.0.8",
 	Color = Color3.fromRGB(149, 21, 41),
 	Radius = 100,
 })
@@ -45,7 +45,7 @@ WindUI:Popup({
 	Icon = "info",
 	Buttons = {
 		{
-			Title = "◀️ Continue ▶️",
+			Title = "⮕",
 			Variant = "Primary",
 			Callback = function() end,
 		}
