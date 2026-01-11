@@ -319,6 +319,13 @@ OthersTab:Button({
 	end
 })
 
+OthersTab:Button({
+	Title="Better Errors",
+	Callback=function()
+		loadstring(game:HttpGet("https://pastefy.app/2t0mIQQ4/raw"))()
+	end
+})
+
 local clockParagraph = InfoTab:Paragraph({ Title="Clock", Desc="--:--:--" })
 task.spawn(function()
 	while task.wait(1) do
