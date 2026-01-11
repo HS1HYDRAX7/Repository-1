@@ -27,30 +27,29 @@ local Window = WindUI:CreateWindow({
 	Title = "Nexus Hub",
 	Author = "by Hydra",
 	Folder = "NexusHub",
-	Size = UDim2.fromOffset(580, 460),
-	MinSize = Vector2.new(560, 350),
-	MaxSize = Vector2.new(850, 560),
 	Transparent = true,
 	Theme = "Dark",
 	Resizable = true,
-	SideBarWidth = 200,
-	BackgroundImageTransparency = 0.42,
 	HideSearchBar = false,
 	ScrollBarEnabled = true,
-	KeySystem = {
-		Key = { "H&Y" },
-		Note = "Key System",
-   
-        },
-		URL = "H&Y",
-		SaveKey = false
-	}
 })
 
 Window:Tag({
 	Title = "v2.0.8",
 	Color = Color3.fromRGB(149, 21, 41),
-	Radius = 100
+	Radius = 100,
+})
+
+WindUI:Popup({
+	Title = "Welcome to Nexus Hub 🎉",
+	Icon = "info",
+	Buttons = {
+		{
+			Title = "𝕮𝖔𝖓𝖙𝖎𝖓𝖚𝖊",
+			Variant = "Primary",
+			Callback = function() end,
+		}
+	}
 })
 
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user" })
