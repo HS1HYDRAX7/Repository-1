@@ -40,8 +40,6 @@ local Window = WindUI:CreateWindow({
 	KeySystem = {
 		Key = { "H&Y" },
 		Note = "Key System",
-		Thumbnail = {
-			Image = "rbxassetid://96510194465420",
 		},
 		URL = "H&Y",
 		SaveKey = false
