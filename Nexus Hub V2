@@ -41,10 +41,9 @@ local Window = WindUI:CreateWindow({
 		Key = { "H&Y" },
 		Note = "Key System",
 		Thumbnail = {
-			Image = "rbxassetid://",
-			Title = "Nexus Hub"
+			Image = "rbxassetid://96510194465420",
 		},
-		URL = "YOUR LINK TO GET KEY",
+		URL = "H&Y",
 		SaveKey = false
 	}
 })
