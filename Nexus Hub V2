@@ -40,17 +40,12 @@ Window:Tag({
 	Radius = 100,
 })
 
-WindUI:Popup({
-	Title = "Welcome to Nexus Hub 🎉",
-	Icon = "info",
-	Buttons = {
-		{
-			Title = "Continue ",
-      Icon = "arrow-right",
-      Variant = "Primary",
-			Callback = function() end,
-		}
-	}
+    KeySystem = {
+        Key = { "H&Y" },
+        Note = "Key System",
+        Icon = "key",
+        SaveKey = false
+    },
 })
 
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user" })
