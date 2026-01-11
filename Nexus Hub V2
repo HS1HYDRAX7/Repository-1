@@ -40,7 +40,8 @@ local Window = WindUI:CreateWindow({
 	KeySystem = {
 		Key = { "H&Y" },
 		Note = "Key System",
-		},
+   
+        },
 		URL = "H&Y",
 		SaveKey = false
 	}
