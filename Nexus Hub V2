@@ -91,7 +91,7 @@ local function removeNoclip()
 	originalCollisions={}
 end
 
-LocalPlayer.CharacterAdded:Connect(function(c)
+localPlayer.CharacterAdded:Connect(function(c)
 	if noclipEnabled then task.wait(0.25) applyNoclip(c) end
 end)
 
