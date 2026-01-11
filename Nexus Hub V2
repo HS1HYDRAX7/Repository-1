@@ -323,9 +323,9 @@ OthersTab:Button({
 })
 
 OthersTab:Button({
-	Title="Waypoints",
+	Title="Web Browser",
 	Callback=function()
-		loadstring(game:HttpGet("https://gist.githubusercontent.com/hello1234567q/ac905e2b7b4be1c678690c2346f0a196/raw/b7ae1e04fd407391ef132d3937c2739f4539c6b5/waypoint"))()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/HS1HYDRAX7/Repository-1/refs/heads/main/T.E.S.T"))()
     end
 })
 
