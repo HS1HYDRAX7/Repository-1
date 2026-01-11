@@ -32,20 +32,18 @@ local Window = WindUI:CreateWindow({
 	Resizable = true,
 	HideSearchBar = false,
 	ScrollBarEnabled = true,
+	KeySystem = {
+		Key = { "H&Y" },
+		Note = "Key System",
+		Icon = "key",
+		SaveKey = false
+	}
 })
 
 Window:Tag({
 	Title = "v2.0.8",
 	Color = Color3.fromRGB(149, 21, 41),
-	Radius = 100,
-})
-
-    KeySystem = {
-        Key = { "H&Y" },
-        Note = "Key System",
-        Icon = "key",
-        SaveKey = false
-    },
+	Radius = 100
 })
 
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user" })
