@@ -27,15 +27,24 @@ local Window = WindUI:CreateWindow({
 	Title = "Nexus Hub",
 	Author = "by Hydra",
 	Folder = "NexusHub",
+	Size = UDim2.fromOffset(580, 460),
+	MinSize = Vector2.new(560, 350),
+	MaxSize = Vector2.new(850, 560),
 	Transparent = true,
 	Theme = "Dark",
 	Resizable = true,
+	SideBarWidth = 200,
+	BackgroundImageTransparency = 0.42,
 	HideSearchBar = false,
 	ScrollBarEnabled = true,
 	KeySystem = {
 		Key = { "H&Y" },
 		Note = "Key System",
-		Icon = "key",
+		Thumbnail = {
+			Image = "rbxassetid://",
+			Title = "Nexus Hub"
+		},
+		URL = "YOUR LINK TO GET KEY",
 		SaveKey = false
 	}
 })
