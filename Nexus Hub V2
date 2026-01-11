@@ -320,9 +320,9 @@ OthersTab:Button({
 })
 
 OthersTab:Button({
-	Title="Better Errors",
+	Title="Inflex Executor",
 	Callback=function()
-		loadstring(game:HttpGet("https://pastefy.app/2t0mIQQ4/raw"))()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/mertzeyrek000-droid/InflexExecutor/refs/heads/main/InflexV1"))()
 	end
 })
 
