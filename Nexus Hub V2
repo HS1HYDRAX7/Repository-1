@@ -92,7 +92,10 @@ local function removeNoclip()
 end
 
 LocalPlayer.CharacterAdded:Connect(function(c)
-	if noclipEnabled then task.wait(0.25) applyNoclip(c) end
+	task.wait(0.25)
+	if noclipEnabled then
+		applyNoclip(c)
+	end
 end)
 
 PlayerTab:Toggle({ Title="Enable", Value=false, Callback=function(v)
@@ -323,6 +326,7 @@ OthersTab:Button({
 	Title="Better Errors",
 	Callback=function()
 		loadstring(game:HttpGet("https://pastefy.app/2t0mIQQ4/raw"))()
+end
 })
 
 local clockParagraph = InfoTab:Paragraph({ Title="Clock", Desc="--:--:--" })
