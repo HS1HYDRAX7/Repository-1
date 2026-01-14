@@ -56,6 +56,56 @@ local PlayerTab = Window:Tab({ Title = "Player", Icon = "user" })
 local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "layers" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
+local AddTab = Window:Tab({ Title = "Add", Icon = "plus" })
+
+local addedScripts = {}
+
+local scriptBox = AddTab:Input({
+	Title = "Script",
+	Placeholder = "Cole o script aqui (não ofuscado)",
+	Multiline = true,
+	ClearOnFocus = false,
+})
+
+AddTab:Button({
+	Title = "Confirmar Extração",
+	Callback = function()
+		local src = scriptBox.Value
+		if not src or src == "" then return end
+
+		local hasLoadstring = src:lower():find("loadstring")
+		local isToggle = src:lower():find("toggle") or src:lower():find("enabled")
+		local name = "Script #" .. tostring(#addedScripts + 1)
+
+		if isToggle then
+			AddTab:Toggle({
+				Title = name,
+				Value = false,
+				Callback = function(v)
+					if v then
+						local f = loadstring(src)
+						if f then
+							task.spawn(f)
+						end
+					end
+				end
+			})
+		else
+			AddTab:Button({
+				Title = name,
+				Callback = function()
+					local f = loadstring(src)
+					if f then
+						task.spawn(f)
+					end
+				end
+			})
+		end
+
+		table.insert(addedScripts, src)
+		scriptBox:SetValue("")
+	end
+})
 
 local playerEnabled=false
 local noclipEnabled=false
@@ -106,7 +156,7 @@ end })
 PlayerTab:Slider({
 	Title="CFrame Speed",
 	Step=1,
-	Value={Min=1,Max=50,Default=1},
+	Value={Min=1,Max=500,Default=1},
 	Callback=function(v) cframeSpeed=v end
 })
 
