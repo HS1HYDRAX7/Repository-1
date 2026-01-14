@@ -30,8 +30,12 @@ local Window = WindUI:CreateWindow({
 	Transparent = true,
 	Theme = "Dark",
 	Resizable = true,
-	HideSearchBar = false,
+	HideSearchBar = true,
 	ScrollBarEnabled = true,
+})
+
+Window:DisableTopbarButtons({
+	"Close",
 })
 
 Window:Tag({
