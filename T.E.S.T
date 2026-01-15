@@ -12,7 +12,7 @@ local function formatUrl(input)
 		return input, nil
 	end
 	local searchQuery = input:gsub(" ", "+")
-	return "http://startpage.onion/search?q=" .. searchQuery, nil
+	return "https://www.startpage.com/search?q=" .. searchQuery, nil
 end
 
 local function open_browser(url, asJson)
@@ -79,7 +79,7 @@ textBox.Position = UDim2.new(0.05, 0, 0.5, -17.5)
 textBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 textBox.BackgroundTransparency = 0.5
 textBox.TextColor3 = Color3.fromRGB(220, 220, 220)
-textBox.PlaceholderText = "ex: startpage, privacidade"
+textBox.PlaceholderText = "ex: pesquisa segura"
 textBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
 textBox.Font = Enum.Font.Gotham
 textBox.TextSize = 14
@@ -174,7 +174,7 @@ sendButton.MouseButton1Click:Connect(function()
 		statusLabel.Text = ""
 		return
 	end
-	statusLabel.Text = "Abrindo via Startpage..."
+	statusLabel.Text = "Abrindo Startpage..."
 	statusLabel.TextColor3 = Color3.fromRGB(100, 200, 100)
 	open_browser(url, true)
 	task.wait(3)
