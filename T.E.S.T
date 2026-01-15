@@ -174,7 +174,7 @@ sendButton.MouseButton1Click:Connect(function()
 		statusLabel.Text = ""
 		return
 	end
-	statusLabel.Text = "Abrindo Startpage..."
+	statusLabel.Text = "Opening Please Wait...."
 	statusLabel.TextColor3 = Color3.fromRGB(100, 200, 100)
 	open_browser(url, true)
 	task.wait(3)
