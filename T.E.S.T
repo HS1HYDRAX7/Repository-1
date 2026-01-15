@@ -6,7 +6,7 @@ local UserInputService = game:GetService("UserInputService")
 local function formatUrl(input)
 	input = input:match("^%s*(.-)%s*$")
 	if input == "" then
-		return nil, "Digite uma URL ou termo de busca."
+		return nil, "Enter a URL or search term."
 	end
 	if input:match("^https?://") then
 		return input, nil
@@ -79,7 +79,7 @@ textBox.Position = UDim2.new(0.05, 0, 0.5, -17.5)
 textBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 textBox.BackgroundTransparency = 0.5
 textBox.TextColor3 = Color3.fromRGB(220, 220, 220)
-textBox.PlaceholderText = "ex: pesquisa segura"
+textBox.PlaceholderText = "Search Something"
 textBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
 textBox.Font = Enum.Font.Gotham
 textBox.TextSize = 14
