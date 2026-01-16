@@ -284,7 +284,7 @@ ForsakenTab:Toggle({ Title="Auto Generator", Value=false, Callback=function(v) a
 ForsakenTab:Slider({
 	Title="Auto Generator Speed",
 	Step=1,
-	Value={Min=0.50,Max=5,Default=5},
+	Value={Min=1,Max=5,Default=5},
 	Callback=function(v) genDelay=v end
 })
 
