@@ -41,7 +41,7 @@ Window:Tag({
 })
 
 WindUI:Popup({
-	Title = "Welcome to Nexus Hub 🎉",
+	Title = "Welcome to Elysium X 🎉",
 	Icon = "info",
 	Buttons = {
 		{
