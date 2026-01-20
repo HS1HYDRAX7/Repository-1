@@ -78,7 +78,7 @@ gripCorner.Parent = gripDot
 end
 
 local textBox = Instance.new("TextBox")
-textBox.Size = UDim2.new(0.9, -70, 0, 35)
+textBox.Size = UDim2.new(0.85, -50, 0, 35)
 textBox.Position = UDim2.new(0.05, 0, 0.5, -17.5)
 textBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 textBox.BackgroundTransparency = 0.5
@@ -88,7 +88,6 @@ textBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
 textBox.Font = Enum.Font.Gotham
 textBox.TextSize = 14
 textBox.TextXAlignment = Enum.TextXAlignment.Left
-textBox.TextYAlignment = Enum.TextYAlignment.Center
 textBox.Text = ""
 textBox.Parent = frame
 
@@ -104,7 +103,7 @@ uiStrokeTextBox.Parent = textBox
 
 local sendButton = Instance.new("TextButton")
 sendButton.Size = UDim2.new(0, 35, 0, 35)
-sendButton.Position = UDim2.new(0.95, -35, 0.5, -17.5)
+sendButton.Position = UDim2.new(0.9, -10, 0.5, -17.5)
 sendButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 sendButton.BackgroundTransparency = 0.7
 sendButton.Text = "↑"
