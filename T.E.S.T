@@ -49,7 +49,7 @@ ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 15))
 uiGradient.Parent = frame
 
 local uiCornerFrame = Instance.new("UICorner")
-uiCornerFrame.CornerRadius = UDim.new(0, 12)
+uiCornerFrame.CornerRadius = UDim.new(0, 28)
 uiCornerFrame.Parent = frame
 
 local uiStrokeFrame = Instance.new("UIStroke")
@@ -71,6 +71,10 @@ gripDot.Position = UDim2.new(0.5, -30 + (i * 12), 0, 1)
 gripDot.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 gripDot.BorderSizePixel = 0
 gripDot.Parent = dragHandle
+
+local gripCorner = Instance.new("UICorner")
+gripCorner.CornerRadius = UDim.new(1, 0)
+gripCorner.Parent = gripDot
 end
 
 local textBox = Instance.new("TextBox")
@@ -88,7 +92,7 @@ textBox.Text = ""
 textBox.Parent = frame
 
 local uiCornerTextBox = Instance.new("UICorner")
-uiCornerTextBox.CornerRadius = UDim.new(0, 8)
+uiCornerTextBox.CornerRadius = UDim.new(0, 20)
 uiCornerTextBox.Parent = textBox
 
 local uiStrokeTextBox = Instance.new("UIStroke")
@@ -109,7 +113,7 @@ sendButton.TextSize = 16
 sendButton.Parent = frame
 
 local uiCornerButton = Instance.new("UICorner")
-uiCornerButton.CornerRadius = UDim.new(0, 17.5)
+uiCornerButton.CornerRadius = UDim.new(1, 0)
 uiCornerButton.Parent = sendButton
 
 local uiStrokeButton = Instance.new("UIStroke")
