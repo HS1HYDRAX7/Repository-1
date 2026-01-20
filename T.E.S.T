@@ -35,8 +35,8 @@ screenGui.Parent = playerGui
 screenGui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 500, 0, 60)
-frame.Position = UDim2.new(0.5, -250, 1, 60)
+frame.Size = UDim2.new(0, 520, 0, 70)
+frame.Position = UDim2.new(0.5, -260, 1, 80)
 frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 frame.BorderSizePixel = 0
 frame.Parent = screenGui
@@ -49,7 +49,7 @@ ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 15))
 uiGradient.Parent = frame
 
 local uiCornerFrame = Instance.new("UICorner")
-uiCornerFrame.CornerRadius = UDim.new(0, 28)
+uiCornerFrame.CornerRadius = UDim.new(0, 30)
 uiCornerFrame.Parent = frame
 
 local uiStrokeFrame = Instance.new("UIStroke")
@@ -59,16 +59,16 @@ uiStrokeFrame.Transparency = 0.7
 uiStrokeFrame.Parent = frame
 
 local dragHandle = Instance.new("Frame")
-dragHandle.Size = UDim2.new(1, 0, 0, 4)
+dragHandle.Size = UDim2.new(1, 0, 0, 6)
 dragHandle.Position = UDim2.new(0, 0, 0, 0)
 dragHandle.BackgroundTransparency = 1
 dragHandle.Parent = frame
 
 for i = 1, 5 do
 local gripDot = Instance.new("Frame")
-gripDot.Size = UDim2.new(0, 3, 0, 3)
-gripDot.Position = UDim2.new(0.5, -30 + (i * 12), 0, 1)
-gripDot.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+gripDot.Size = UDim2.new(0, 4, 0, 4)
+gripDot.Position = UDim2.new(0.5, -32 + (i * 14), 0, 1)
+gripDot.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
 gripDot.BorderSizePixel = 0
 gripDot.Parent = dragHandle
 
@@ -78,38 +78,40 @@ gripCorner.Parent = gripDot
 end
 
 local textBox = Instance.new("TextBox")
-textBox.Size = UDim2.new(0.85, -50, 0, 35)
-textBox.Position = UDim2.new(0.05, 0, 0.5, -17.5)
+textBox.Size = UDim2.new(0.82, -40, 0, 46)
+textBox.Position = UDim2.new(0.05, 0, 0.5, -23)
 textBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-textBox.BackgroundTransparency = 0.5
+textBox.BackgroundTransparency = 0.4
 textBox.TextColor3 = Color3.fromRGB(220, 220, 220)
 textBox.PlaceholderText = "Search Something"
-textBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+textBox.PlaceholderColor3 = Color3.fromRGB(130, 130, 130)
 textBox.Font = Enum.Font.Gotham
-textBox.TextSize = 14
+textBox.TextSize = 15
 textBox.TextXAlignment = Enum.TextXAlignment.Left
+textBox.TextYAlignment = Enum.TextYAlignment.Center
+textBox.ClearTextOnFocus = false
 textBox.Text = ""
 textBox.Parent = frame
 
 local uiCornerTextBox = Instance.new("UICorner")
-uiCornerTextBox.CornerRadius = UDim.new(0, 20)
+uiCornerTextBox.CornerRadius = UDim.new(0, 24)
 uiCornerTextBox.Parent = textBox
 
 local uiStrokeTextBox = Instance.new("UIStroke")
 uiStrokeTextBox.Thickness = 1
-uiStrokeTextBox.Color = Color3.fromRGB(50, 50, 50)
+uiStrokeTextBox.Color = Color3.fromRGB(55, 55, 55)
 uiStrokeTextBox.Transparency = 0.3
 uiStrokeTextBox.Parent = textBox
 
 local sendButton = Instance.new("TextButton")
-sendButton.Size = UDim2.new(0, 35, 0, 35)
-sendButton.Position = UDim2.new(0.9, -10, 0.5, -17.5)
-sendButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-sendButton.BackgroundTransparency = 0.7
+sendButton.Size = UDim2.new(0, 46, 0, 46)
+sendButton.Position = UDim2.new(0.9, -6, 0.5, -23)
+sendButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+sendButton.BackgroundTransparency = 0.6
 sendButton.Text = "↑"
-sendButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+sendButton.TextColor3 = Color3.fromRGB(210, 210, 210)
 sendButton.Font = Enum.Font.GothamBold
-sendButton.TextSize = 16
+sendButton.TextSize = 18
 sendButton.Parent = frame
 
 local uiCornerButton = Instance.new("UICorner")
@@ -118,13 +120,13 @@ uiCornerButton.Parent = sendButton
 
 local uiStrokeButton = Instance.new("UIStroke")
 uiStrokeButton.Thickness = 1
-uiStrokeButton.Color = Color3.fromRGB(100, 100, 100)
+uiStrokeButton.Color = Color3.fromRGB(110, 110, 110)
 uiStrokeButton.Transparency = 0.4
 uiStrokeButton.Parent = sendButton
 
 local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(0.9, 0, 0, 20)
-statusLabel.Position = UDim2.new(0.05, 0, 0.85, 0)
+statusLabel.Size = UDim2.new(0.9, 0, 0, 18)
+statusLabel.Position = UDim2.new(0.05, 0, 1, -20)
 statusLabel.BackgroundTransparency = 1
 statusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
 statusLabel.Font = Enum.Font.Gotham
@@ -136,7 +138,7 @@ statusLabel.Parent = frame
 TweenService:Create(
 frame,
 TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-{Position = UDim2.new(0.5, -250, 0.9, -30)}
+{Position = UDim2.new(0.5, -260, 0.9, -35)}
 ):Play()
 
 local dragging = false
