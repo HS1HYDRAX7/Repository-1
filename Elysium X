@@ -24,9 +24,9 @@ local FONT = Font.new("rbxassetid://12187368843")
 local DEFAULT_GRAVITY = workspace.Gravity
 
 local Window = WindUI:CreateWindow({
-	Title = "Nexus Hub",
-	Author = "by Hydra",
-	Folder = "NexusHub",
+	Title = "Elysium X",
+	Author = "By Hydra",
+	Folder = "Elysium",
 	Transparent = true,
 	Theme = "Dark",
 	Resizable = true,
@@ -35,7 +35,7 @@ local Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-	Title = "v2.0.8",
+	Title = "v0.1",
 	Color = Color3.fromRGB(149, 21, 41),
 	Radius = 100,
 })
