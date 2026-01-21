@@ -1,0 +1,102 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "HealthGUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local FONT = Font.new("rbxassetid://12187368843")
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Parent = screenGui
+mainFrame.AnchorPoint = Vector2.new(0, 0.5)
+mainFrame.Position = UDim2.new(0.015, 0, 0.5, 0)
+mainFrame.Size = UDim2.new(0, 220, 0, 46)
+mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+mainFrame.BackgroundTransparency = 0.4
+mainFrame.BorderSizePixel = 0
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 14)
+corner.Parent = mainFrame
+
+local heart = Instance.new("ImageLabel")
+heart.Parent = mainFrame
+heart.BackgroundTransparency = 1
+heart.Position = UDim2.new(0, 8, 0.5, -16)
+heart.Size = UDim2.new(0, 32, 0, 32)
+heart.Image = "rbxassetid://129352925579546"
+
+local barBack = Instance.new("Frame")
+barBack.Parent = mainFrame
+barBack.Position = UDim2.new(0, 48, 0.5, -9)
+barBack.Size = UDim2.new(0, 160, 0, 18)
+barBack.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+barBack.BorderSizePixel = 0
+
+local barBackCorner = Instance.new("UICorner")
+barBackCorner.CornerRadius = UDim.new(0, 9)
+barBackCorner.Parent = barBack
+
+local barFill = Instance.new("Frame")
+barFill.Parent = barBack
+barFill.Size = UDim2.new(1, 0, 1, 0)
+barFill.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+barFill.BorderSizePixel = 0
+
+local barFillCorner = Instance.new("UICorner")
+barFillCorner.CornerRadius = UDim.new(0, 9)
+barFillCorner.Parent = barFill
+
+local percent = Instance.new("TextLabel")
+percent.Parent = barBack
+percent.BackgroundTransparency = 1
+percent.Size = UDim2.new(1, 0, 1, 0)
+percent.Text = "100%"
+percent.TextColor3 = Color3.fromRGB(0, 255, 0)
+percent.TextScaled = true
+percent.FontFace = FONT
+percent.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+percent.TextStrokeTransparency = 0
+
+local function hookCharacter(character)
+	local humanoid = character:WaitForChild("Humanoid")
+
+	local function update()
+		local hp = humanoid.Health
+		local max = humanoid.MaxHealth
+		local ratio = math.clamp(hp / max, 0, 1)
+
+		barFill.Size = UDim2.new(ratio, 0, 1, 0)
+
+		if hp <= 0 then
+			percent.Text = "DEAD"
+			percent.TextColor3 = Color3.fromRGB(255, 0, 0)
+			heart.Image = "rbxassetid://110987638564119"
+			barFill.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
+			return
+		end
+
+		percent.Text = math.floor(ratio * 100) .. "%"
+
+		if ratio < 0.5 then
+			heart.Image = "rbxassetid://110987638564119"
+			percent.TextColor3 = Color3.fromRGB(255, 60, 60)
+			barFill.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+		else
+			heart.Image = "rbxassetid://129352925579546"
+			percent.TextColor3 = Color3.fromRGB(0, 255, 0)
+			barFill.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+		end
+	end
+
+	humanoid.HealthChanged:Connect(update)
+	update()
+end
+
+if player.Character then
+	hookCharacter(player.Character)
+end
+
+player.CharacterAdded:Connect(hookCharacter)
