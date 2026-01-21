@@ -1,6 +1,5 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local cam = workspace.CurrentCamera
@@ -99,43 +98,21 @@ sprintBtn.BackgroundTransparency = 1
 sprintBtn.Image = "rbxassetid://111292680671790"
 sprintBtn.Parent = screenGui
 
-local walkSpeed = 5
-local sprintSpeed = 25
+local walkSpeed = 16
+local sprintSpeed = 32
 local accelRate = 20
 local decelRate = 15
-local maxStamina = 100
+local maxStamina = 300
 local staminaDrainRate = 20
-local staminaRegenRate = 20
-local fovSprint = 85
+local staminaRegenRate = 45
+local fovSprint = 70
 local fovNormal = 70
-local fovExhausted = 50
+local fovExhausted = 70
 
 local stamina = maxStamina
 local sprinting = false
 local isExhausted = false
 local currentWalkSpeed = walkSpeed
-
-local tweenInfo = TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-
-local function animateSprintButton(active)
-	local targetSize
-	if active then
-		targetSize = UDim2.new(
-			sprintBtn.Size.X.Scale,
-			sprintBtn.Size.X.Offset - 4,
-			sprintBtn.Size.Y.Scale,
-			sprintBtn.Size.Y.Offset - 4
-		)
-	else
-		targetSize = UDim2.new(
-			sprintBtn.Size.X.Scale,
-			sprintBtn.Size.X.Offset + 4,
-			sprintBtn.Size.Y.Scale,
-			sprintBtn.Size.Y.Offset + 4
-		)
-	end
-	TweenService:Create(sprintBtn, tweenInfo, {Size = targetSize}):Play()
-end
 
 local function hookCharacter(character)
 	local humanoid = character:WaitForChild("Humanoid")
@@ -174,7 +151,6 @@ player.CharacterAdded:Connect(hookCharacter)
 sprintBtn.MouseButton1Click:Connect(function()
 	if stamina > 0 and not isExhausted then
 		sprinting = not sprinting
-		animateSprintButton(sprinting)
 	end
 end)
 
@@ -233,7 +209,6 @@ RunService.RenderStepped:Connect(function(dt)
 	if stamina <= 0 then
 		isExhausted = true
 		sprinting = false
-		animateSprintButton(false)
 	elseif stamina >= maxStamina * 0.5 then
 		isExhausted = false
 	end
