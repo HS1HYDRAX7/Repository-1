@@ -1,4 +1,5 @@
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
@@ -8,7 +9,10 @@ local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "HealthAndStaminaGUI"
 screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local FONT = Font.new("rbxassetid://12187368843")
 
 local mainFrame = Instance.new("Frame")
 mainFrame.Parent = screenGui
@@ -18,6 +22,7 @@ mainFrame.Size = UDim2.new(0, 220, 0, 82)
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 mainFrame.BackgroundTransparency = 0.4
 mainFrame.BorderSizePixel = 0
+mainFrame.ZIndex = 10
 
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 14)
@@ -29,6 +34,7 @@ heart.BackgroundTransparency = 1
 heart.Position = UDim2.new(0, 8, 0, 8)
 heart.Size = UDim2.new(0, 32, 0, 32)
 heart.Image = "rbxassetid://129352925579546"
+heart.ZIndex = 11
 
 local healthBack = Instance.new("Frame")
 healthBack.Parent = mainFrame
@@ -36,20 +42,22 @@ healthBack.Position = UDim2.new(0, 48, 0, 16)
 healthBack.Size = UDim2.new(0, 160, 0, 18)
 healthBack.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 healthBack.BorderSizePixel = 0
+healthBack.ZIndex = 11
 
-local hbc = Instance.new("UICorner")
-hbc.CornerRadius = UDim.new(0, 9)
-hbc.Parent = healthBack
+local healthBackCorner = Instance.new("UICorner")
+healthBackCorner.CornerRadius = UDim.new(0, 9)
+healthBackCorner.Parent = healthBack
 
 local healthFill = Instance.new("Frame")
 healthFill.Parent = healthBack
 healthFill.Size = UDim2.new(1, 0, 1, 0)
 healthFill.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
 healthFill.BorderSizePixel = 0
+healthFill.ZIndex = 12
 
-local hfc = Instance.new("UICorner")
-hfc.CornerRadius = UDim.new(0, 9)
-hfc.Parent = healthFill
+local healthFillCorner = Instance.new("UICorner")
+healthFillCorner.CornerRadius = UDim.new(0, 9)
+healthFillCorner.Parent = healthFill
 
 local healthText = Instance.new("TextLabel")
 healthText.Parent = healthBack
@@ -58,9 +66,10 @@ healthText.Size = UDim2.new(1, 0, 1, 0)
 healthText.Text = "100%"
 healthText.TextColor3 = Color3.fromRGB(0, 255, 0)
 healthText.TextScaled = true
-healthText.Font = Enum.Font.GothamBold
-healthText.TextStrokeColor3 = Color3.new(0, 0, 0)
+healthText.FontFace = FONT
+healthText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 healthText.TextStrokeTransparency = 0
+healthText.ZIndex = 13
 
 local staminaIcon = Instance.new("ImageLabel")
 staminaIcon.Parent = mainFrame
@@ -68,6 +77,7 @@ staminaIcon.BackgroundTransparency = 1
 staminaIcon.Position = UDim2.new(0, 8, 0, 48)
 staminaIcon.Size = UDim2.new(0, 24, 0, 24)
 staminaIcon.Image = "rbxassetid://18909062370"
+staminaIcon.ZIndex = 11
 
 local staminaBack = Instance.new("Frame")
 staminaBack.Parent = mainFrame
@@ -75,46 +85,77 @@ staminaBack.Position = UDim2.new(0, 48, 0, 52)
 staminaBack.Size = UDim2.new(0, 160, 0, 18)
 staminaBack.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 staminaBack.BorderSizePixel = 0
+staminaBack.ZIndex = 11
 
-local sbc = Instance.new("UICorner")
-sbc.CornerRadius = UDim.new(0, 9)
-sbc.Parent = staminaBack
+local staminaBackCorner = Instance.new("UICorner")
+staminaBackCorner.CornerRadius = UDim.new(0, 9)
+staminaBackCorner.Parent = staminaBack
 
 local staminaFill = Instance.new("Frame")
 staminaFill.Parent = staminaBack
 staminaFill.Size = UDim2.new(1, 0, 1, 0)
 staminaFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 staminaFill.BorderSizePixel = 0
+staminaFill.ZIndex = 12
 
-local sfc = Instance.new("UICorner")
-sfc.CornerRadius = UDim.new(0, 9)
-sfc.Parent = staminaFill
+local staminaFillCorner = Instance.new("UICorner")
+staminaFillCorner.CornerRadius = UDim.new(0, 9)
+staminaFillCorner.Parent = staminaFill
 
 local sprintBtn = Instance.new("ImageButton")
-sprintBtn.Parent = screenGui
+sprintBtn.Name = "SprintButton"
+sprintBtn.AnchorPoint = Vector2.new(0.5, 1)
 sprintBtn.BackgroundTransparency = 1
 sprintBtn.Image = "rbxassetid://111292680671790"
 sprintBtn.Size = UDim2.new(0, 80, 0, 80)
-sprintBtn.AnchorPoint = Vector2.new(0.5, 1)
+sprintBtn.ZIndex = 20
+sprintBtn.Parent = screenGui
 
-local walkSpeed = 5
-local sprintSpeed = 25
-local maxStamina = 100
+local blurEffect = Instance.new("BlurEffect")
+blurEffect.Size = 0
+blurEffect.Parent = cam
+
+local walkSpeed = 16
+local sprintSpeed = 32
+local accelRate = 20
+local decelRate = 15
+local maxStamina = 300
+local staminaDrainRate = 20
+local staminaRegenRate = 35
+local fovSprint = 70
+local fovNormal = 70
+local fovExhausted = 70
+
 local stamina = maxStamina
 local sprinting = false
-local exhausted = false
-local currentSpeed = walkSpeed
+local isExhausted = false
+local currentWalkSpeed = walkSpeed
 
-local function hookCharacter(char)
-	local hum = char:WaitForChild("Humanoid")
+local function hookCharacter(character)
+	local humanoid = character:WaitForChild("Humanoid")
 
 	local function updateHealth()
-		local r = math.clamp(hum.Health / hum.MaxHealth, 0, 1)
-		healthFill.Size = UDim2.new(r, 0, 1, 0)
-		healthText.Text = math.floor(r * 100) .. "%"
+		local ratio = math.clamp(humanoid.Health / humanoid.MaxHealth, 0, 1)
+		healthFill.Size = UDim2.new(ratio, 0, 1, 0)
+		healthText.Text = math.floor(ratio * 100) .. "%"
+
+		if humanoid.Health <= 0 then
+			healthText.Text = "DEAD"
+			healthText.TextColor3 = Color3.fromRGB(255, 0, 0)
+			healthFill.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
+			heart.Image = "rbxassetid://110987638564119"
+		elseif ratio < 0.5 then
+			healthText.TextColor3 = Color3.fromRGB(255, 60, 60)
+			healthFill.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+			heart.Image = "rbxassetid://110987638564119"
+		else
+			healthText.TextColor3 = Color3.fromRGB(0, 255, 0)
+			healthFill.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+			heart.Image = "rbxassetid://129352925579546"
+		end
 	end
 
-	hum.HealthChanged:Connect(updateHealth)
+	humanoid.HealthChanged:Connect(updateHealth)
 	updateHealth()
 end
 
@@ -125,59 +166,65 @@ end
 player.CharacterAdded:Connect(hookCharacter)
 
 sprintBtn.MouseButton1Click:Connect(function()
-	if stamina > 0 and not exhausted then
+	if stamina > 0 and not isExhausted then
 		sprinting = not sprinting
 	end
 end)
 
 RunService.RenderStepped:Connect(function()
-	local tg = player.PlayerGui:FindFirstChild("TouchGui")
-	if tg then
-		local tcf = tg:FindFirstChild("TouchControlFrame")
-		if tcf then
-			local jump = tcf:FindFirstChild("JumpButton")
-			if jump then
-				jump.BackgroundTransparency = 0.75
-				sprintBtn.Size = jump.Size * 1.15
-				local p = jump.AbsolutePosition
-				local s = jump.AbsoluteSize
-				sprintBtn.Position = UDim2.new(0, p.X + s.X / 2, 0, p.Y - s.Y + 60)
-			end
-		end
+	local jumpBtn = player.PlayerGui:FindFirstChild("TouchGui")
+		and player.PlayerGui.TouchGui:FindFirstChild("TouchControlFrame")
+		and player.PlayerGui.TouchGui.TouchControlFrame:FindFirstChild("JumpButton")
+
+	if jumpBtn then
+		jumpBtn.BackgroundTransparency = 0.75
+		sprintBtn.Size = jumpBtn.Size * 1.15
+		local pos = jumpBtn.AbsolutePosition
+		local size = jumpBtn.AbsoluteSize
+		sprintBtn.Position = UDim2.new(0, pos.X + size.X / 2, 0, pos.Y - size.Y + 60)
 	end
 end)
 
 RunService.RenderStepped:Connect(function(dt)
-	local char = player.Character
-	if not char then return end
-	local hum = char:FindFirstChildOfClass("Humanoid")
-	if not hum then return end
+	local character = player.Character
+	if not character then return end
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if not humanoid then return end
 
-	local moving = hum.MoveDirection.Magnitude > 0.1
-	local target = (sprinting and stamina > 0 and moving and not exhausted) and sprintSpeed or walkSpeed
+	local isMoving = humanoid.MoveDirection.Magnitude > 0.1
+	local targetSpeed = (sprinting and stamina > 0 and isMoving and not isExhausted) and sprintSpeed or walkSpeed
+	local rate = (currentWalkSpeed < targetSpeed) and accelRate or decelRate
 
-	if currentSpeed < target then
-		currentSpeed = math.min(currentSpeed + 40 * dt, target)
-	else
-		currentSpeed = math.max(currentSpeed - 30 * dt, target)
+	if currentWalkSpeed < targetSpeed then
+		currentWalkSpeed = math.min(currentWalkSpeed + rate * dt, targetSpeed)
+	elseif currentWalkSpeed > targetSpeed then
+		currentWalkSpeed = math.max(currentWalkSpeed - rate * dt, targetSpeed)
 	end
 
-	hum.WalkSpeed = currentSpeed
+	humanoid.WalkSpeed = currentWalkSpeed
 
-	if sprinting and moving and stamina > 0 then
-		stamina = math.max(0, stamina - 20 * dt)
+	if sprinting and stamina > 0 and isMoving and not isExhausted then
+		stamina = math.max(0, stamina - staminaDrainRate * dt)
 	else
-		stamina = math.min(maxStamina, stamina + 20 * dt)
+		stamina = math.min(maxStamina, stamina + staminaRegenRate * dt)
 	end
 
 	if stamina <= 0 then
-		exhausted = true
+		isExhausted = true
 		sprinting = false
 	elseif stamina >= maxStamina * 0.5 then
-		exhausted = false
+		isExhausted = false
 	end
 
 	staminaFill.Size = UDim2.new(stamina / maxStamina, 0, 1, 0)
+
+	if isExhausted then
+		cam.FieldOfView = fovExhausted
+	elseif sprinting then
+		cam.FieldOfView = fovSprint
+	else
+		cam.FieldOfView = fovNormal
+	end
 end)
 
-cam.FieldOfView = 70
+cam.FieldOfView = fovNormal
