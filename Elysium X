@@ -329,7 +329,7 @@ OthersTab:Button({
     end
 })
 OthersTab:Button({
-	Title="Health Gui And Stamina Gui",
+	Title="Health & Stamina",
 	Callback=function()
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/HS1HYDRAX7/Repository-1/refs/heads/main/T.E.S.T.2"))()
     end
