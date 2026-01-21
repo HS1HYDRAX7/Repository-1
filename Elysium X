@@ -20,7 +20,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 local LocalPlayer = Players.LocalPlayer
-local FONT = Font.new("rbxassetid://12187368843")
+local FONT = Font.new("rbxassetid://12187360881")
 local DEFAULT_GRAVITY = workspace.Gravity
 
 local Window = WindUI:CreateWindow({
