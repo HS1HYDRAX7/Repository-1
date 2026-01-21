@@ -25,7 +25,7 @@ local DEFAULT_GRAVITY = workspace.Gravity
 
 local Window = WindUI:CreateWindow({
 	Title = "Elysium X",
-	Author = "By Hydra",
+	Author = "By Scorpion",
 	Folder = "Elysium",
 	Transparent = true,
 	Theme = "Crimson",
@@ -342,6 +342,6 @@ task.spawn(function()
 	end
 end)
 
-InfoTab:Paragraph({ Title="Creators", Desc="Hydra (Owner)" })
+InfoTab:Paragraph({ Title="Creators", Desc="Scorpion & SubZero" })
 
 Window:Init()
