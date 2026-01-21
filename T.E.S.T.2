@@ -16,7 +16,7 @@ local mainFrame = Instance.new("Frame")
 mainFrame.Parent = screenGui
 mainFrame.AnchorPoint = Vector2.new(0, 0.5)
 mainFrame.Position = UDim2.new(0.015, 0, 0.5, 0)
-mainFrame.Size = UDim2.new(0, 220, 0, 70)
+mainFrame.Size = UDim2.new(0, 220, 0, 82)
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 mainFrame.BackgroundTransparency = 0.4
 mainFrame.BorderSizePixel = 0
@@ -28,13 +28,13 @@ corner.Parent = mainFrame
 local heart = Instance.new("ImageLabel")
 heart.Parent = mainFrame
 heart.BackgroundTransparency = 1
-heart.Position = UDim2.new(0, 8, 0, 7)
+heart.Position = UDim2.new(0, 8, 0, 8)
 heart.Size = UDim2.new(0, 32, 0, 32)
 heart.Image = "rbxassetid://129352925579546"
 
 local healthBack = Instance.new("Frame")
 healthBack.Parent = mainFrame
-healthBack.Position = UDim2.new(0, 48, 0, 14)
+healthBack.Position = UDim2.new(0, 48, 0, 16)
 healthBack.Size = UDim2.new(0, 160, 0, 18)
 healthBack.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 healthBack.BorderSizePixel = 0
@@ -67,13 +67,13 @@ healthText.TextStrokeTransparency = 0
 local staminaIcon = Instance.new("ImageLabel")
 staminaIcon.Parent = mainFrame
 staminaIcon.BackgroundTransparency = 1
-staminaIcon.Position = UDim2.new(0, 8, 0, 40)
+staminaIcon.Position = UDim2.new(0, 8, 0, 48)
 staminaIcon.Size = UDim2.new(0, 24, 0, 24)
 staminaIcon.Image = "rbxassetid://18909062370"
 
 local staminaBack = Instance.new("Frame")
 staminaBack.Parent = mainFrame
-staminaBack.Position = UDim2.new(0, 48, 0, 45)
+staminaBack.Position = UDim2.new(0, 48, 0, 52)
 staminaBack.Size = UDim2.new(0, 160, 0, 18)
 staminaBack.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 staminaBack.BorderSizePixel = 0
@@ -165,7 +165,8 @@ RunService.RenderStepped:Connect(function()
 		and player.PlayerGui.TouchGui.TouchControlFrame:FindFirstChild("JumpButton")
 
 	if jumpBtn then
-		sprintBtn.Size = jumpBtn.Size
+		jumpBtn.BackgroundTransparency = 0.75
+		sprintBtn.Size = jumpBtn.Size * 1.15
 		local pos = jumpBtn.AbsolutePosition
 		local size = jumpBtn.AbsoluteSize
 		sprintBtn.Position = UDim2.new(0, pos.X + size.X / 2, 0, pos.Y - size.Y + 60)
@@ -212,6 +213,9 @@ RunService.RenderStepped:Connect(function(dt)
 	else
 		cam.FieldOfView = fovNormal
 	end
+end)
+
+cam.FieldOfView = fovNormal	end
 end)
 
 cam.FieldOfView = fovNormal
