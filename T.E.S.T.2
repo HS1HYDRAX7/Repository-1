@@ -8,8 +8,6 @@ local cam = workspace.CurrentCamera
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "HealthAndStaminaGUI"
 screenGui.ResetOnSpawn = false
-screenGui.IgnoreGuiInset = true
-screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
 local FONT = Font.new("rbxassetid://12187368843")
@@ -22,7 +20,6 @@ mainFrame.Size = UDim2.new(0, 220, 0, 82)
 mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 mainFrame.BackgroundTransparency = 0.4
 mainFrame.BorderSizePixel = 0
-mainFrame.ZIndex = 10
 
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 14)
@@ -34,7 +31,6 @@ heart.BackgroundTransparency = 1
 heart.Position = UDim2.new(0, 8, 0, 8)
 heart.Size = UDim2.new(0, 32, 0, 32)
 heart.Image = "rbxassetid://129352925579546"
-heart.ZIndex = 11
 
 local healthBack = Instance.new("Frame")
 healthBack.Parent = mainFrame
@@ -42,7 +38,6 @@ healthBack.Position = UDim2.new(0, 48, 0, 16)
 healthBack.Size = UDim2.new(0, 160, 0, 18)
 healthBack.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 healthBack.BorderSizePixel = 0
-healthBack.ZIndex = 11
 
 local healthBackCorner = Instance.new("UICorner")
 healthBackCorner.CornerRadius = UDim.new(0, 9)
@@ -53,7 +48,6 @@ healthFill.Parent = healthBack
 healthFill.Size = UDim2.new(1, 0, 1, 0)
 healthFill.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
 healthFill.BorderSizePixel = 0
-healthFill.ZIndex = 12
 
 local healthFillCorner = Instance.new("UICorner")
 healthFillCorner.CornerRadius = UDim.new(0, 9)
@@ -69,7 +63,6 @@ healthText.TextScaled = true
 healthText.FontFace = FONT
 healthText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 healthText.TextStrokeTransparency = 0
-healthText.ZIndex = 13
 
 local staminaIcon = Instance.new("ImageLabel")
 staminaIcon.Parent = mainFrame
@@ -77,7 +70,6 @@ staminaIcon.BackgroundTransparency = 1
 staminaIcon.Position = UDim2.new(0, 8, 0, 48)
 staminaIcon.Size = UDim2.new(0, 24, 0, 24)
 staminaIcon.Image = "rbxassetid://18909062370"
-staminaIcon.ZIndex = 11
 
 local staminaBack = Instance.new("Frame")
 staminaBack.Parent = mainFrame
@@ -85,7 +77,6 @@ staminaBack.Position = UDim2.new(0, 48, 0, 52)
 staminaBack.Size = UDim2.new(0, 160, 0, 18)
 staminaBack.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 staminaBack.BorderSizePixel = 0
-staminaBack.ZIndex = 11
 
 local staminaBackCorner = Instance.new("UICorner")
 staminaBackCorner.CornerRadius = UDim.new(0, 9)
@@ -96,7 +87,6 @@ staminaFill.Parent = staminaBack
 staminaFill.Size = UDim2.new(1, 0, 1, 0)
 staminaFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 staminaFill.BorderSizePixel = 0
-staminaFill.ZIndex = 12
 
 local staminaFillCorner = Instance.new("UICorner")
 staminaFillCorner.CornerRadius = UDim.new(0, 9)
@@ -107,24 +97,22 @@ sprintBtn.Name = "SprintButton"
 sprintBtn.AnchorPoint = Vector2.new(0.5, 1)
 sprintBtn.BackgroundTransparency = 1
 sprintBtn.Image = "rbxassetid://111292680671790"
-sprintBtn.Size = UDim2.new(0, 80, 0, 80)
-sprintBtn.ZIndex = 20
 sprintBtn.Parent = screenGui
 
 local blurEffect = Instance.new("BlurEffect")
 blurEffect.Size = 0
 blurEffect.Parent = cam
 
-local walkSpeed = 16
-local sprintSpeed = 32
+local walkSpeed = 5
+local sprintSpeed = 25
 local accelRate = 20
 local decelRate = 15
-local maxStamina = 300
+local maxStamina = 100
 local staminaDrainRate = 20
-local staminaRegenRate = 35
-local fovSprint = 70
+local staminaRegenRate = 20
+local fovSprint = 85
 local fovNormal = 70
-local fovExhausted = 70
+local fovExhausted = 50
 
 local stamina = maxStamina
 local sprinting = false
