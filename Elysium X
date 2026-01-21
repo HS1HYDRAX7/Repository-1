@@ -328,6 +328,12 @@ OthersTab:Button({
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/HS1HYDRAX7/Repository-1/refs/heads/main/T.E.S.T"))()
     end
 })
+OthersTab:Button({
+	Title="Heatlh Gui",
+	Callback=function()
+		loadstring(game:HttpGet("https://github.com/HS1HYDRAX7/Repository-1/blob/main/T.E.S.T.2"))()
+    end
+})
 
 local clockParagraph = InfoTab:Paragraph({ Title="Clock", Desc="--:--:--" })
 task.spawn(function()
