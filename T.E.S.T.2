@@ -1,5 +1,4 @@
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
@@ -66,7 +65,7 @@ healthText.TextStrokeTransparency = 0
 
 local staminaIcon = Instance.new("ImageLabel")
 staminaIcon.Parent = mainFrame
-
+staminaIcon.BackgroundTransparency = 1
 staminaIcon.Position = UDim2.new(0, 8, 0, 52)
 staminaIcon.Size = UDim2.new(0, 24, 0, 24)
 staminaIcon.Image = "rbxassetid://18909062370"
@@ -99,17 +98,13 @@ sprintBtn.BackgroundTransparency = 1
 sprintBtn.Image = "rbxassetid://111292680671790"
 sprintBtn.Parent = screenGui
 
-local blurEffect = Instance.new("BlurEffect")
-blurEffect.Size = 0
-blurEffect.Parent = cam
-
 local walkSpeed = 16
 local sprintSpeed = 32
 local accelRate = 20
 local decelRate = 15
 local maxStamina = 300
-local staminaDrainRate = 20
-local staminaRegenRate = 35
+local staminaDrainRate = 30
+local staminaRegenRate = 45
 local fovSprint = 70
 local fovNormal = 70
 local fovExhausted = 70
@@ -168,11 +163,22 @@ RunService.RenderStepped:Connect(function()
 
 	local jumpBtn = controlFrame:FindFirstChild("JumpButton")
 	if jumpBtn then
-		jumpBtn.BackgroundTransparency = 0.75
-		sprintBtn.Size = jumpBtn.Size
+		jumpBtn.BackgroundTransparency = 1
+		sprintBtn.Size = UDim2.new(
+			jumpBtn.Size.X.Scale,
+			jumpBtn.Size.X.Offset + 6,
+			jumpBtn.Size.Y.Scale,
+			jumpBtn.Size.Y.Offset + 6
+		)
+
 		local pos = jumpBtn.AbsolutePosition
 		local size = jumpBtn.AbsoluteSize
-		sprintBtn.Position = UDim2.new(0, pos.X + size.X / 2, 0, pos.Y - size.Y + 60)
+		sprintBtn.Position = UDim2.new(
+			0,
+			pos.X + size.X / 2,
+			0,
+			pos.Y - size.Y + 60
+		)
 	end
 end)
 
