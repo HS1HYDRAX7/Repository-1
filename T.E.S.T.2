@@ -74,31 +74,30 @@ staminaIcon.Image = "rbxassetid://18909062370"
 local staminaBack = Instance.new("Frame")
 staminaBack.Parent = mainFrame
 staminaBack.Position = UDim2.new(0, 48, 0, 45)
-staminaBack.Size = UDim2.new(0, 160, 0, 12)
+staminaBack.Size = UDim2.new(0, 160, 0, 18)
 staminaBack.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 staminaBack.BorderSizePixel = 0
 
 local staminaBackCorner = Instance.new("UICorner")
-staminaBackCorner.CornerRadius = UDim.new(0, 6)
+staminaBackCorner.CornerRadius = UDim.new(0, 9)
 staminaBackCorner.Parent = staminaBack
 
 local staminaFill = Instance.new("Frame")
 staminaFill.Parent = staminaBack
 staminaFill.Size = UDim2.new(1, 0, 1, 0)
-staminaFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+staminaFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 staminaFill.BorderSizePixel = 0
 
 local staminaFillCorner = Instance.new("UICorner")
-staminaFillCorner.CornerRadius = UDim.new(0, 6)
+staminaFillCorner.CornerRadius = UDim.new(0, 9)
 staminaFillCorner.Parent = staminaFill
 
 local sprintBtn = Instance.new("ImageButton")
-sprintBtn.Parent = screenGui
+sprintBtn.Name = "SprintButton"
+sprintBtn.AnchorPoint = Vector2.new(0.5, 1)
 sprintBtn.BackgroundTransparency = 1
 sprintBtn.Image = "rbxassetid://111292680671790"
-sprintBtn.AnchorPoint = Vector2.new(0.5, 1)
-sprintBtn.Position = UDim2.new(0.5, 0, 0.95, 0)
-sprintBtn.Size = UDim2.new(0, 70, 0, 70)
+sprintBtn.Parent = screenGui
 
 local blurEffect = Instance.new("BlurEffect")
 blurEffect.Size = 0
@@ -111,9 +110,9 @@ local decelRate = 15
 local maxStamina = 300
 local staminaDrainRate = 20
 local staminaRegenRate = 35
-local fovSprint = 85
+local fovSprint = 70
 local fovNormal = 70
-local fovExhausted =70
+local fovExhausted = 70
 
 local stamina = maxStamina
 local sprinting = false
@@ -122,9 +121,8 @@ local currentWalkSpeed = walkSpeed
 
 local function hookCharacter(character)
 	local humanoid = character:WaitForChild("Humanoid")
-	humanoid.WalkSpeed = walkSpeed
 
-	humanoid.HealthChanged:Connect(function()
+	local function updateHealth()
 		local ratio = math.clamp(humanoid.Health / humanoid.MaxHealth, 0, 1)
 		healthFill.Size = UDim2.new(ratio, 0, 1, 0)
 		healthText.Text = math.floor(ratio * 100) .. "%"
@@ -143,7 +141,10 @@ local function hookCharacter(character)
 			healthFill.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
 			heart.Image = "rbxassetid://129352925579546"
 		end
-	end)
+	end
+
+	humanoid.HealthChanged:Connect(updateHealth)
+	updateHealth()
 end
 
 if player.Character then
@@ -152,14 +153,23 @@ end
 
 player.CharacterAdded:Connect(hookCharacter)
 
-sprintBtn.MouseButton1Down:Connect(function()
+sprintBtn.MouseButton1Click:Connect(function()
 	if stamina > 0 and not isExhausted then
-		sprinting = true
+		sprinting = not sprinting
 	end
 end)
 
-sprintBtn.MouseButton1Up:Connect(function()
-	sprinting = false
+RunService.RenderStepped:Connect(function()
+	local jumpBtn = player.PlayerGui:FindFirstChild("TouchGui")
+		and player.PlayerGui.TouchGui:FindFirstChild("TouchControlFrame")
+		and player.PlayerGui.TouchGui.TouchControlFrame:FindFirstChild("JumpButton")
+
+	if jumpBtn then
+		sprintBtn.Size = jumpBtn.Size
+		local pos = jumpBtn.AbsolutePosition
+		local size = jumpBtn.AbsoluteSize
+		sprintBtn.Position = UDim2.new(0, pos.X + size.X / 2, 0, pos.Y - size.Y + 60)
+	end
 end)
 
 RunService.RenderStepped:Connect(function(dt)
@@ -188,6 +198,7 @@ RunService.RenderStepped:Connect(function(dt)
 
 	if stamina <= 0 then
 		isExhausted = true
+		sprinting = false
 	elseif stamina >= maxStamina * 0.5 then
 		isExhausted = false
 	end
