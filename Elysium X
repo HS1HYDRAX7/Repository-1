@@ -40,18 +40,6 @@ Window:Tag({
 	Radius = 100,
 })
 
-WindUI:Popup({
-	Title = "Welcome to Elysium X 🎉",
-	Icon = "info",
-	Buttons = {
-		{
-			Title = "Continue",
-			Variant = "Primary",
-			Callback = function() end,
-		}
-	}
-})
-
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user" })
 local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "layers" })
