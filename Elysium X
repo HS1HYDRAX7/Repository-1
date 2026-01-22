@@ -53,6 +53,7 @@ WindUI:Popup({
 })
 
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user" })
+local CWTab = Window:Tab({ Title = "CW", Icon = "skull" })
 local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "layers" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
@@ -314,6 +315,50 @@ task.spawn(function()
 		end
 	end
 end)
+
+CWTab:Toggle({
+    Title="Infinite Stamina",
+    Value=false,
+    Callback=function(v)
+        infStamina=v
+        if staminaConn then staminaConn:Disconnect() staminaConn=nil end
+        if v then
+            for i,v in pairs(getgc(true)) do
+                if typeof(v)=="table" then
+                    if rawget(v,"_setStamina") then
+                        local old = v._setStamina
+                        v._setStamina = function(self, amount)
+                            self._stamina = math.huge
+                            if self._staminaChangedSignal then
+                                self._staminaChangedSignal:Fire(99)
+                            end
+                        end
+                        staminaModule = v
+                        staminaConn = RunService.Heartbeat:Connect(function()
+                            if infStamina then
+                                v._stamina = math.huge
+                                if v._staminaChangedSignal then
+                                    v._staminaChangedSignal:Fire(99)
+                                end
+                            end
+                        end)
+                    end
+                    if rawget(v,"getIsMaxed") then
+                        v.getIsMaxed = function() return false end
+                        v.getFlags = function() return 1 end
+                        v.addFlags = function(a,b) a:setFlags(0) end
+                    end
+                    if rawget(v,"getCanJump") then
+                        v.getCanJump = function() return true end
+                    end
+                    if rawget(v,"JUMP_DELAY_ADD") then
+                        v.JUMP_DELAY_ADD = 0.5
+                    end
+                end
+            end
+        end
+    end
+})
 
 OthersTab:Button({
 	Title="Smart IY",
