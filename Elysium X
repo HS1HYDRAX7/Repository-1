@@ -40,8 +40,8 @@ Window:Tag({
 	Radius = 100,
 })
 
-local PlayerTab = Window:Tab({ Title = "Player", Icon = "user" })
-local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "rbxassetid://8797391485" })
+local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
+local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "layers" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -272,7 +272,7 @@ ForsakenTab:Toggle({ Title="Auto Generator", Value=false, Callback=function(v) a
 ForsakenTab:Slider({
 	Title="Auto Generator Speed",
 	Step=1,
-	Value={Min=1,Max=5,Default=5},
+	Value={Min=1,Max=5,Default=1},
 	Callback=function(v) genDelay=v end
 })
 
