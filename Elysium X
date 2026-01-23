@@ -41,7 +41,7 @@ Window:Tag({
 })
 
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user" })
-local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
+local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "rbxassetid://8797391485" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "layers" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
