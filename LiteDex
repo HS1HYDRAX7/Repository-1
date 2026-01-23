@@ -1,0 +1,237 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local GuiService = game:GetService("GuiService")
+local LocalPlayer = Players.LocalPlayer
+
+-- Biblioteca de Ícones Aprimorada
+local Icons = {
+	Workspace = "rbxassetid://10734898475",
+	Players = "rbxassetid://10747373176",
+	Folder = "rbxassetid://10734774348",
+	Model = "rbxassetid://10734949056",
+	Part = "rbxassetid://10734946452",
+	Script = "rbxassetid://10734943604",
+	Sound = "rbxassetid://10734941011",
+	Storage = "rbxassetid://10734942251",
+	Default = "rbxassetid://10747362105",
+	ChevronDown = "rbxassetid://10709790934",
+	ChevronRight = "rbxassetid://10709791523",
+	Delete = "rbxassetid://10709819149",
+	Copy = "rbxassetid://10709804257",
+	Paste = "rbxassetid://10709804163"
+}
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "LiteDex_V2"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Frame Principal
+local Main = Instance.new("Frame")
+Main.Size = UDim2.fromOffset(400, 500)
+Main.Position = UDim2.fromScale(0.5, 0.5)
+Main.AnchorPoint = Vector2.new(0.5, 0.5)
+Main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Main.BorderSizePixel = 0
+Main.Parent = ScreenGui
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
+
+-- TopBar
+local TopBar = Instance.new("Frame")
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+TopBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+TopBar.BorderSizePixel = 0
+TopBar.Parent = Main
+Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 10)
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -20, 1, 0)
+Title.Position = UDim2.new(0, 15, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "LITE DEX PRO"
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 14
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = TopBar
+
+-- Container da Lista
+local Body = Instance.new("ScrollingFrame")
+Body.Size = UDim2.new(1, -10, 1, -50)
+Body.Position = UDim2.new(0, 5, 0, 45)
+Body.BackgroundTransparency = 1
+Body.ScrollBarThickness = 2
+Body.CanvasSize = UDim2.new(0, 0, 0, 0)
+Body.Parent = Main
+
+local Layout = Instance.new("UIListLayout", Body)
+Layout.Padding = UDim.new(0, 2)
+Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	Body.CanvasSize = UDim2.new(0, 0, 0, Layout.AbsoluteContentSize.Y + 10)
+end)
+
+-- Sistema de Drag (Arrastar) Corrigido
+local function MakeDraggable(frame, handle)
+	local dragging, dragInput, dragStart, startPos
+	handle.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragging = true
+			dragStart = input.Position
+			startPos = frame.Position
+		end
+	end)
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+			local delta = input.Position - dragStart
+			frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		end
+	end)
+	UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+	end)
+end
+MakeDraggable(Main, TopBar)
+
+-- Menu de Contexto
+local Context = Instance.new("Frame")
+Context.Size = UDim2.fromOffset(150, 100)
+Context.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Context.Visible = false
+Context.ZIndex = 100
+Context.Parent = ScreenGui
+Instance.new("UICorner", Context).CornerRadius = UDim.new(0, 6)
+Instance.new("UIStroke", Context).Color = Color3.fromRGB(60, 60, 60)
+
+local function CtxButton(text, icon, y)
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.new(1, -10, 0, 28)
+	b.Position = UDim2.new(0, 5, 0, y + 5)
+	b.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	b.Text = text
+	b.Font = Enum.Font.Gotham
+	b.TextSize = 12
+	b.TextColor3 = Color3.fromRGB(255, 255, 255)
+	b.TextXAlignment = Enum.TextXAlignment.Left
+	b.AutoButtonColor = true
+	b.ZIndex = 101
+	b.Parent = Context
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0, 4)
+	
+	local i = Instance.new("ImageLabel")
+	i.Size = UDim2.fromOffset(16, 16)
+	i.Position = UDim2.fromOffset(8, 6)
+	i.BackgroundTransparency = 1
+	i.Image = icon
+	i.ZIndex = 102
+	i.Parent = b
+	
+	local pad = Instance.new("UIPadding", b)
+	pad.PaddingLeft = UDim.new(0, 30)
+	
+	return b
+end
+
+local BtnDelete = CtxButton("Deletar", Icons.Delete, 0)
+local BtnCopy = CtxButton("Copiar", Icons.Copy, 32)
+local BtnPaste = CtxButton("Colar", Icons.Paste, 64)
+
+-- Logica de Ícones Dinâmicos
+local function GetIcon(inst)
+	if inst == workspace then return Icons.Workspace end
+	if inst:IsA("Player") or inst:IsA("Players") then return Icons.Players end
+	if inst:IsA("Folder") then return Icons.Folder end
+	if inst:IsA("Model") then return Icons.Model end
+	if inst:IsA("BasePart") then return Icons.Part end
+	if inst:IsA("LuaSourceContainer") then return Icons.Script end
+	if inst:IsA("Sound") then return Icons.Sound end
+	if inst.Name:lower():find("storage") then return Icons.Storage end
+	return Icons.Default
+end
+
+local Clipboard
+local function CreateItem(inst, depth)
+	local Row = Instance.new("Frame")
+	Row.Name = inst.Name
+	Row.Size = UDim2.new(1, 0, 0, 28)
+	Row.BackgroundTransparency = 1
+	Row.Parent = Body
+
+	local Arrow = Instance.new("ImageButton")
+	Arrow.Size = UDim2.fromOffset(14, 14)
+	Arrow.Position = UDim2.fromOffset(depth * 18 + 5, 7)
+	Arrow.BackgroundTransparency = 1
+	Arrow.Image = (#inst:GetChildren() > 0) and Icons.ChevronRight or ""
+	Arrow.ImageColor3 = Color3.fromRGB(150, 150, 150)
+	Arrow.Parent = Row
+
+	local Icon = Instance.new("ImageLabel")
+	Icon.Size = UDim2.fromOffset(18, 18)
+	Icon.Position = UDim2.fromOffset(depth * 18 + 24, 5)
+	Icon.BackgroundTransparency = 1
+	Icon.Image = GetIcon(inst)
+	Icon.Parent = Row
+
+	local Button = Instance.new("TextButton")
+	Button.Size = UDim2.new(1, -(depth * 18 + 50), 1, 0)
+	Button.Position = UDim2.fromOffset(depth * 18 + 48, 0)
+	Button.BackgroundTransparency = 1
+	Button.Text = inst.Name
+	Button.Font = Enum.Font.Gotham
+	Button.TextSize = 13
+	Button.TextColor3 = Color3.fromRGB(220, 220, 220)
+	Button.TextXAlignment = Enum.TextXAlignment.Left
+	Button.Parent = Row
+
+	-- Menu de Contexto (Clique Direito)
+	Button.MouseButton2Click:Connect(function()
+		local mousePos = UserInputService:GetMouseLocation()
+		Context.Position = UDim2.fromOffset(mousePos.X, mousePos.Y - 36)
+		Context.Visible = true
+		
+		-- Limpar conexões antigas para não deletar objetos errados
+		local dConn, cConn, pConn
+		dConn = BtnDelete.MouseButton1Click:Connect(function()
+			pcall(function() inst:Destroy() end)
+			Row:Destroy()
+			Context.Visible = false
+			dConn:Disconnect()
+		end)
+	end)
+
+	local expanded = false
+	local childrenRows = {}
+
+	local function Toggle()
+		expanded = not expanded
+		Arrow.Image = expanded and Icons.ChevronDown or Icons.ChevronRight
+		if expanded then
+			for _, child in ipairs(inst:GetChildren()) do
+				local sub = CreateItem(child, depth + 1)
+				table.insert(childrenRows, sub)
+			end
+		else
+			for _, r in ipairs(childrenRows) do r:Destroy() end
+			childrenRows = {}
+		end
+	end
+
+	Arrow.MouseButton1Click:Connect(Toggle)
+	return Row
+end
+
+-- Fechar menu ao clicar fora
+UserInputService.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 and Context.Visible then
+		Context.Visible = false
+	end
+end)
+
+-- Inicialização com Pcall para evitar erros de permissão
+local Roots = {workspace, Players, game:GetService("ReplicatedStorage")}
+pcall(function() table.insert(Roots, game:GetService("Selection")) end)
+
+for _, v in ipairs(Roots) do
+	pcall(function()
+		CreateItem(v, 0)
+	end)
+end
