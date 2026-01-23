@@ -3,7 +3,7 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
--- Importação dos ícones via Lucide (IDs atualizados conforme o RAW)
+-- Ícones do RAW Lucide (IDs atualizados)
 local Icons = {
 	Workspace = "rbxassetid://10734898475",
 	Players = "rbxassetid://10747373176",
@@ -19,162 +19,128 @@ local Icons = {
 }
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "LiteDexMobile"
+ScreenGui.Name = "LiteDex_Mobile_Final"
 ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true -- Melhor para mobile (usa a tela toda)
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
--- Frame Principal (Tamanho Mobile)
+-- Frame Principal
 local Main = Instance.new("Frame")
-Main.Size = UDim2.fromScale(0.8, 0.6) -- Ocupa 80% da largura, 60% da altura
-Main.Position = UDim2.fromScale(0.5, 0.5)
+Main.Size = UDim2.fromScale(0.7, 0.5)
+Main.Position = UDim2.fromScale(0.5, -0.6) -- Começa fora da tela para animar
 Main.AnchorPoint = Vector2.new(0.5, 0.5)
-Main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 Main.BorderSizePixel = 0
-Main.ClipsDescendants = true
 Main.Parent = ScreenGui
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
-
--- Animação de Entrada
-Main.GroupTransparency = 1
-TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quart), {Size = UDim2.fromScale(0.85, 0.65)}):Play()
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
 
 -- TopBar
 local TopBar = Instance.new("Frame")
-TopBar.Size = UDim2.new(1, 0, 0, 45)
-TopBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+TopBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+TopBar.BorderSizePixel = 0
 TopBar.Parent = Main
+Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 10)
 
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -20, 1, 0)
 Title.Position = UDim2.fromOffset(15, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "Lite Dex Mobile"
+Title.Text = "LITE DEX MOBILE"
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 16
+Title.TextSize = 14
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TopBar
 
--- Lista de Itens (Corrigida para Mobile)
+-- Container da Lista
 local Body = Instance.new("ScrollingFrame")
-Body.Size = UDim2.new(1, -10, 1, -55)
-Body.Position = UDim2.fromOffset(5, 50)
+Body.Size = UDim2.new(1, -10, 1, -50)
+Body.Position = UDim2.fromOffset(5, 45)
 Body.BackgroundTransparency = 1
-Body.ScrollBarThickness = 3
+Body.ScrollBarThickness = 2
 Body.CanvasSize = UDim2.new(0, 0, 0, 0)
+Body.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
 Body.Parent = Main
 
 local Layout = Instance.new("UIListLayout", Body)
-Layout.Padding = UDim.new(0, 4) -- Mais espaço para não clicar errado
+Layout.Padding = UDim.new(0, 3)
 Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-	Body.CanvasSize = UDim2.new(0, 0, 0, Layout.AbsoluteContentSize.Y + 20)
+	Body.CanvasSize = UDim2.new(0, 0, 0, Layout.AbsoluteContentSize.Y + 10)
 end)
 
--- Menu de Contexto (Adaptado para Touch)
+-- Menu de Contexto (Ajustado)
 local Context = Instance.new("Frame")
-Context.Size = UDim2.fromOffset(160, 120)
-Context.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Context.Size = UDim2.fromOffset(140, 110)
+Context.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Context.Visible = false
 Context.ZIndex = 100
 Context.Parent = ScreenGui
 Instance.new("UICorner", Context).CornerRadius = UDim.new(0, 8)
+Instance.new("UIStroke", Context).Color = Color3.fromRGB(50, 50, 50)
 
 local function CtxButton(text, icon, y)
 	local b = Instance.new("TextButton")
-	b.Size = UDim2.new(1, -10, 0, 35) -- Botão mais alto para dedo
+	b.Size = UDim2.new(1, -10, 0, 30)
 	b.Position = UDim2.new(0, 5, 0, y + 5)
-	b.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+	b.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 	b.Text = text
 	b.Font = Enum.Font.GothamMedium
-	b.TextSize = 14
+	b.TextSize = 12
 	b.TextColor3 = Color3.fromRGB(255, 255, 255)
 	b.TextXAlignment = Enum.TextXAlignment.Left
+	b.ZIndex = 101
 	b.Parent = Context
-	Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0, 5)
 	
 	local i = Instance.new("ImageLabel")
-	i.Size = UDim2.fromOffset(20, 20)
-	i.Position = UDim2.fromOffset(10, 7.5)
+	i.Size = UDim2.fromOffset(16, 16)
+	i.Position = UDim2.fromOffset(8, 7)
 	i.BackgroundTransparency = 1
 	i.Image = icon
+	i.ZIndex = 102
 	i.Parent = b
 	
-	Instance.new("UIPadding", b).PaddingLeft = UDim.new(0, 40)
+	Instance.new("UIPadding", b).PaddingLeft = UDim.new(0, 32)
 	return b
 end
 
-local BtnDelete = CtxButton("Apagar", Icons.Delete, 0)
-local BtnCopy = CtxButton("Copiar", Icons.Copy, 38)
-local BtnPaste = CtxButton("Colar", Icons.Paste, 76)
+local BtnDel = CtxButton("Apagar", Icons.Delete, 0)
+local BtnCopy = CtxButton("Copiar", Icons.Copy, 34)
+local BtnPaste = CtxButton("Colar", Icons.Paste, 68)
 
--- Lógica de Ícones
-local function GetIcon(inst)
-	if inst == workspace then return Icons.Workspace end
-	if inst:IsA("Player") then return Icons.Players end
-	if inst:IsA("Folder") then return Icons.Folder end
-	if inst:IsA("Model") then return Icons.Model end
-	if inst:IsA("LuaSourceContainer") then return Icons.Script end
-	return Icons.Default
-end
-
+-- Função para criar itens
 local function CreateItem(inst, depth)
 	local Row = Instance.new("Frame")
-	Row.Size = UDim2.new(1, 0, 0, 32)
+	Row.Size = UDim2.new(1, 0, 0, 30)
 	Row.BackgroundTransparency = 1
 	Row.Parent = Body
 
 	local Arrow = Instance.new("ImageButton")
-	Arrow.Size = UDim2.fromOffset(20, 20) -- Aumentado para Mobile
-	Arrow.Position = UDim2.fromOffset(depth * 20 + 5, 6)
+	Arrow.Size = UDim2.fromOffset(18, 18)
+	Arrow.Position = UDim2.fromOffset(depth * 15 + 5, 6)
 	Arrow.BackgroundTransparency = 1
 	Arrow.Image = (#inst:GetChildren() > 0) and Icons.ChevronRight or ""
+	Arrow.ImageColor3 = Color3.fromRGB(200, 200, 200)
 	Arrow.Parent = Row
 
 	local Icon = Instance.new("ImageLabel")
-	Icon.Size = UDim2.fromOffset(20, 20)
-	Icon.Position = UDim2.fromOffset(depth * 20 + 30, 6)
+	Icon.Size = UDim2.fromOffset(18, 18)
+	Icon.Position = UDim2.fromOffset(depth * 15 + 25, 6)
 	Icon.BackgroundTransparency = 1
-	Icon.Image = GetIcon(inst)
+	Icon.Image = (inst:IsA("Workspace") and Icons.Workspace) or (inst:IsA("Player") and Icons.Players) or (inst:IsA("Folder") and Icons.Folder) or (inst:IsA("Model") and Icons.Model) or (inst:IsA("LuaSourceContainer") and Icons.Script) or Icons.Default
 	Icon.Parent = Row
 
 	local Button = Instance.new("TextButton")
-	Button.Size = UDim2.new(1, -(depth * 20 + 60), 1, 0)
-	Button.Position = UDim2.fromOffset(depth * 20 + 55, 0)
+	Button.Size = UDim2.new(1, -(depth * 15 + 50), 1, 0)
+	Button.Position = UDim2.fromOffset(depth * 15 + 48, 0)
 	Button.BackgroundTransparency = 1
 	Button.Text = inst.Name
 	Button.Font = Enum.Font.Gotham
-	Button.TextSize = 14
-	Button.TextColor3 = Color3.fromRGB(230, 230, 230)
+	Button.TextSize = 13
+	Button.TextColor3 = Color3.fromRGB(220, 220, 220)
 	Button.TextXAlignment = Enum.TextXAlignment.Left
 	Button.Parent = Row
-
-	-- Animação de Clique (Feedback visual)
-	Button.MouseButton1Click:Connect(function()
-		local tween = TweenService:Create(Row, TweenInfo.new(0.2), {BackgroundTransparency = 0.8, BackgroundColor3 = Color3.fromRGB(255,255,255)})
-		tween:Play()
-		tween.Completed:Connect(function() Row.BackgroundTransparency = 1 end)
-	end)
-
-	-- Clique longo para Menu (Mobile friendly)
-	local connection
-	Button.MouseButton1Down:Connect(function()
-		local holding = true
-		task.delay(0.6, function()
-			if holding then
-				Context.Position = UDim2.fromOffset(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y - 40)
-				Context.Visible = true
-				if connection then connection:Disconnect() end
-				connection = BtnDelete.MouseButton1Click:Connect(function()
-					pcall(function() inst:Destroy() end)
-					Row:Destroy()
-					Context.Visible = false
-				end)
-			end
-		end)
-		UserInputService.InputEnded:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.MouseButton1 then holding = false end
-		end)
-	end)
 
 	local expanded = false
 	local childrenRows = {}
@@ -194,18 +160,44 @@ local function CreateItem(inst, depth)
 	end
 
 	Arrow.MouseButton1Click:Connect(Toggle)
+	
+	-- Clique Longo para Context Menu
+	Button.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			local pressTime = tick()
+			local connection
+			connection = input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					if tick() - pressTime > 0.5 then
+						Context.Position = UDim2.fromOffset(input.Position.X, input.Position.Y)
+						Context.Visible = true
+					else
+						Toggle()
+					end
+					connection:Disconnect()
+				end
+			end)
+		end
+	end)
+
 	return Row
 end
 
--- Iniciar Explorer
-local Roots = {workspace, Players, game:GetService("ReplicatedStorage")}
-for _, v in ipairs(Roots) do
-	pcall(function() CreateItem(v, 0) end)
+-- Inicialização
+local function Init()
+	local Roots = {workspace, Players, game:GetService("ReplicatedStorage")}
+	for _, v in ipairs(Roots) do
+		pcall(function() CreateItem(v, 0) end)
+	end
+	-- Animação de Entrada
+	TweenService:Create(Main, TweenInfo.new(0.6, Enum.EasingStyle.Back), {Position = UDim2.fromScale(0.5, 0.5)}):Play()
 end
+
+Init()
 
 -- Fechar menu ao tocar fora
 UserInputService.InputBegan:Connect(function(i)
-	if i.UserInputType == Enum.UserInputType.MouseButton1 and Context.Visible then
-		Context.Visible = false
+	if i.UserInputType == Enum.UserInputType.MouseButton1 or i.UserInputType == Enum.UserInputType.Touch then
+		if Context.Visible then Context.Visible = false end
 	end
 end)
