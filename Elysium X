@@ -43,7 +43,6 @@ Window:Tag({
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
 local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
 local EternityTab = Window:Tab({ Title = "Eternity", Icon = "infinity" })
-local AimbotTab = Window:Tab({ Title = "Aimbot", Icon = "target" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "layers" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -320,17 +319,6 @@ EternityTab:Toggle({
 			local max = Character_upvr:GetAttribute("MaxStamina") or 100
 			Character_upvr:SetAttribute("Stamina", max)
 
-			local playerItem = workspace:FindFirstChild(Players.LocalPlayer.Name)
-			if playerItem then
-				local staminaScript = playerItem:FindFirstChild("Stamina")
-				if staminaScript then
-					local gui = staminaScript:FindFirstChild("BillboardGui")
-					if gui then
-						gui:Destroy()
-					end
-				end
-			end
-
 			staminaConn = RunService.Heartbeat:Connect(function()
 				if not infStamina then return end
 				if Character_upvr and Character_upvr.Parent then
@@ -423,70 +411,6 @@ EternityTab:Toggle({
 			end
 		end)
 	end
-})
-
-AimbotTab:Toggle({
-    Title = "Aimbot",
-    Default = false,
-    Callback = function(v)
-        AimbotEnabled = v
-
-        if AimbotConnection then
-            AimbotConnection:Disconnect()
-            AimbotConnection = nil
-        end
-
-        if v then
-            AimbotConnection = game:GetService("RunService").RenderStepped:Connect(function()
-                if not AimbotEnabled then return end
-                if not game:GetService("UserInputService"):IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then return end
-
-                local Players = game:GetService("Players")
-                local Camera = workspace.CurrentCamera
-                local LocalPlayer = Players.LocalPlayer
-                local Closest, Distance = nil, math.huge
-
-                for _, p in ipairs(Players:GetPlayers()) do
-                    if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
-                        local part = p.Character.HumanoidRootPart
-                        local pos, onscreen = Camera:WorldToViewportPoint(part.Position)
-                        if onscreen then
-                            local mag = (Vector2.new(pos.X, pos.Y) - Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)).Magnitude
-                            if mag < Distance then
-                                local allow = true
-                                if WallCheckEnabled then
-                                    local params = RaycastParams.new()
-                                    params.FilterType = Enum.RaycastFilterType.Blacklist
-                                    params.FilterDescendantsInstances = { LocalPlayer.Character }
-                                    local direction = (part.Position - Camera.CFrame.Position)
-                                    local ray = workspace:Raycast(Camera.CFrame.Position, direction, params)
-                                    if ray and not ray.Instance:IsDescendantOf(p.Character) then
-                                        allow = false
-                                    end
-                                end
-                                if allow then
-                                    Distance = mag
-                                    Closest = part
-                                end
-                            end
-                        end
-                    end
-                end
-
-                if Closest then
-                    Camera.CFrame = CFrame.new(Camera.CFrame.Position, Closest.Position)
-                end
-            end)
-        end
-    end
-})
-
-AimbotTab:Toggle({
-    Title = "Wall Check",
-    Default = false,
-    Callback = function(v)
-        WallCheckEnabled = v
-    end
 })
 
 OthersTab:Button({
