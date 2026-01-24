@@ -308,15 +308,27 @@ EternityTab:Toggle({
 	Title = "Infinite Stamina",
 	Value = false,
 	Callback = function(v)
-		if staminaConn then staminaConn:Disconnect() staminaConn = nil end
 		infStamina = v
+		if staminaConn then
+			staminaConn:Disconnect()
+			staminaConn = nil
+		end
 		if v then
-			local Character_upvr = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
-			local max = Character_upvr:GetAttribute("MaxStamina") or 100
-			Character_upvr:SetAttribute("Stamina", max)
-			staminaConn = RunService.Heartbeat:Connect(function()
-				if infStamina and Character_upvr and Character_upvr.Parent then
-					Character_upvr:SetAttribute("Stamina", max)
+			local function applyInfStamina()
+				local Character_upvr = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+				local max = Character_upvr:GetAttribute("MaxStamina") or 100
+				Character_upvr:SetAttribute("Stamina", max)
+				if staminaConn then staminaConn:Disconnect() end
+				staminaConn = RunService.Heartbeat:Connect(function()
+					if infStamina and Character_upvr and Character_upvr.Parent then
+						Character_upvr:SetAttribute("Stamina", max)
+					end
+				end)
+			end
+			applyInfStamina()
+			Players.LocalPlayer.CharacterAdded:Connect(function()
+				if infStamina then
+					applyInfStamina()
 				end
 			end)
 		end
@@ -328,37 +340,30 @@ EternityTab:Toggle({
 	Value = false,
 	Callback = function(v)
 		espKillers = v
-		if espKillLoop then espKillLoop:Disconnect() espKillLoop = nil end
-		if espKillCache then
-			for _,d in pairs(espKillCache) do d:Destroy() end
+		if not v then
+			for _,obj in ipairs(workspace:GetDescendants()) do
+				if obj:IsA("Highlight") and obj.Name == "EternityESP_K" then
+					obj:Destroy()
+				end
+			end
+			return
 		end
-		espKillCache = {}
-		if not v then return end
-		local function apply(model)
-			if not model:FindFirstChild("HumanoidRootPart") then return end
-			if model:FindFirstChild("ESP_KILL") then return end
-			local bb = Instance.new("BillboardGui")
-			bb.Name = "ESP_KILL"
-			bb.Size = UDim2.new(0,200,0,40)
-			bb.AlwaysOnTop = true
-			bb.Adornee = model.HumanoidRootPart
-			bb.Parent = model
-			local txt = Instance.new("TextLabel")
-			txt.Size = UDim2.new(1,0,1,0)
-			txt.BackgroundTransparency = 1
-			txt.Text = model.Name
-			txt.TextColor3 = Color3.fromRGB(255,60,60)
-			txt.TextScaled = true
-			txt.FontFace = FONT
-			txt.Parent = bb
-			table.insert(espKillCache, bb)
-		end
-		espKillLoop = RunService.Heartbeat:Connect(function()
+		staminaConn = RunService.Heartbeat:Connect(function()
 			if not espKillers then return end
 			local folder = workspace:FindFirstChild("Killers")
-			if folder then
-				for _,m in ipairs(folder:GetChildren()) do
-					apply(m)
+			if not folder then return end
+			for _,char in ipairs(folder:GetChildren()) do
+				if char:IsA("Model") and char:FindFirstChild("HumanoidRootPart") then
+					if not char:FindFirstChild("EternityESP_K") then
+						local hl = Instance.new("Highlight")
+						hl.Name = "EternityESP_K"
+						hl.Adornee = char
+						hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+						hl.FillTransparency = 0.45
+						hl.FillColor = Color3.fromRGB(255,0,0)
+						hl.OutlineColor = Color3.fromRGB(255,0,0)
+						hl.Parent = char
+					end
 				end
 			end
 		end)
@@ -370,37 +375,30 @@ EternityTab:Toggle({
 	Value = false,
 	Callback = function(v)
 		espSurvivors = v
-		if espSurvLoop then espSurvLoop:Disconnect() espSurvLoop = nil end
-		if espSurvCache then
-			for _,d in pairs(espSurvCache) do d:Destroy() end
+		if not v then
+			for _,obj in ipairs(workspace:GetDescendants()) do
+				if obj:IsA("Highlight") and obj.Name == "EternityESP_S" then
+					obj:Destroy()
+				end
+			end
+			return
 		end
-		espSurvCache = {}
-		if not v then return end
-		local function apply(model)
-			if not model:FindFirstChild("HumanoidRootPart") then return end
-			if model:FindFirstChild("ESP_SURV") then return end
-			local bb = Instance.new("BillboardGui")
-			bb.Name = "ESP_SURV"
-			bb.Size = UDim2.new(0,200,0,40)
-			bb.AlwaysOnTop = true
-			bb.Adornee = model.HumanoidRootPart
-			bb.Parent = model
-			local txt = Instance.new("TextLabel")
-			txt.Size = UDim2.new(1,0,1,0)
-			txt.BackgroundTransparency = 1
-			txt.Text = model.Name
-			txt.TextColor3 = Color3.fromRGB(60,255,60)
-			txt.TextScaled = true
-			txt.FontFace = FONT
-			txt.Parent = bb
-			table.insert(espSurvCache, bb)
-		end
-		espSurvLoop = RunService.Heartbeat:Connect(function()
+		staminaConn = RunService.Heartbeat:Connect(function()
 			if not espSurvivors then return end
 			local folder = workspace:FindFirstChild("Survivors")
-			if folder then
-				for _,m in ipairs(folder:GetChildren()) do
-					apply(m)
+			if not folder then return end
+			for _,char in ipairs(folder:GetChildren()) do
+				if char:IsA("Model") and char:FindFirstChild("HumanoidRootPart") then
+					if not char:FindFirstChild("EternityESP_S") then
+						local hl = Instance.new("Highlight")
+						hl.Name = "EternityESP_S"
+						hl.Adornee = char
+						hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+						hl.FillTransparency = 0.45
+						hl.FillColor = Color3.fromRGB(0,255,0)
+						hl.OutlineColor = Color3.fromRGB(0,255,0)
+						hl.Parent = char
+					end
 				end
 			end
 		end)
