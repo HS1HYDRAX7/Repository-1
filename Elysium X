@@ -43,6 +43,7 @@ Window:Tag({
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
 local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
 local EternityTab = Window:Tab({ Title = "Eternity", Icon = "infinity" })
+local AimbotTab = Window:Tab({ Title = "Aimbot", Icon = "target" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "layers" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -422,6 +423,58 @@ EternityTab:Toggle({
 			end
 		end)
 	end
+})
+
+AimbotTab:Toggle({
+    Title = "Aimbot",
+    Default = false,
+    Callback = function(v)
+        AimbotEnabled = v
+
+        if AimbotConnection then
+            AimbotConnection:Disconnect()
+            AimbotConnection = nil
+        end
+
+        if v then
+            AimbotConnection = game:GetService("RunService").RenderStepped:Connect(function()
+                if not AimbotEnabled then return end
+                if not game:GetService("UserInputService"):IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then return end
+
+                local Players = game:GetService("Players")
+                local Camera = workspace.CurrentCamera
+                local LocalPlayer = Players.LocalPlayer
+                local Closest, Distance = nil, math.huge
+
+                for _, p in ipairs(Players:GetPlayers()) do
+                    if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
+                        local pos, onscreen = Camera:WorldToViewportPoint(p.Character.Head.Position)
+                        if onscreen then
+                            local mag = (Vector2.new(pos.X, pos.Y) - Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)).Magnitude
+                            if mag < Distance then
+                                if not WallCheckEnabled or workspace:Raycast(Camera.CFrame.Position, p.Character.Head.Position - Camera.CFrame.Position, RaycastParams.new()) == nil then
+                                    Distance = mag
+                                    Closest = p.Character.Head
+                                end
+                            end
+                        end
+                    end
+                end
+
+                if Closest then
+                    Camera.CFrame = CFrame.new(Camera.CFrame.Position, Closest.Position)
+                end
+            end)
+        end
+    end
+})
+
+AimbotTab:Toggle({
+    Title = "Wall Check",
+    Default = false,
+    Callback = function(v)
+        WallCheckEnabled = v
+    end
 })
 
 OthersTab:Button({
