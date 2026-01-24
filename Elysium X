@@ -443,44 +443,11 @@ OthersTab:Button({
 	end
 })
 
-local Input = Others:Input({
-	Title = "Browser",
-	Desc = "Search or open URL",
-	Value = "",
-	InputIcon = "search",
-	Type = "Input",
-	Placeholder = "Search Something...",
-	Callback = function(input)
-		local GuiService = game:GetService("GuiService")
-		local HttpService = game:GetService("HttpService")
-
-		local function formatUrl(text)
-			text = text:match("^%s*(.-)%s*$")
-			if text == "" then
-				return nil, "Enter a URL or search term."
-			end
-			if text:match("^https?://") then
-				return text, nil
-			end
-			return "https://www.startpage.com/search?q=" .. text:gsub(" ", "+"), nil
-		end
-
-		local info, err = formatUrl(input)
-		if err then
-			GuiService:BroadcastNotification(err, 3)
-			return
-		end
-
-		GuiService:BroadcastNotification(
-			HttpService:JSONEncode({
-				presentationStyle = 2,
-				url = tostring(info),
-				title = "Startpage Browser",
-				visible = true
-			}),
-			20
-		)
-	end
+OthersTab:Button({
+	Title="Web Browser",
+	Callback=function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/HS1HYDRAX7/Repository-1/refs/heads/main/T.E.S.T"))()
+    end
 })
 
 local clockParagraph = InfoTab:Paragraph({ Title="Clock", Desc="--:--:--" })
