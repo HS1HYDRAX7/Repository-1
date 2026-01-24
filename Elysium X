@@ -363,6 +363,7 @@ EternityTab:Toggle({
 	Value = false,
 	Callback = function(v)
 		espSurvivors = v
+
 		if not v then
 			for _,obj in ipairs(workspace:GetDescendants()) do
 				if obj:IsA("Highlight") and obj.Name == "EternityESP_S" then
@@ -371,13 +372,29 @@ EternityTab:Toggle({
 			end
 			return
 		end
+
 		RunService.Heartbeat:Connect(function()
 			if not espSurvivors then return end
 			local folder = workspace:FindFirstChild("Survivors")
 			if not folder then return end
+
 			for _,char in ipairs(folder:GetChildren()) do
 				if char:IsA("Model") and char:FindFirstChild("HumanoidRootPart") then
-					if not char:FindFirstChild("EternityESP
+					if not char:FindFirstChild("EternityESP_S") then
+						local hl = Instance.new("Highlight")
+						hl.Name = "EternityESP_S"
+						hl.Adornee = char
+						hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+						hl.FillTransparency = 0.45
+						hl.FillColor = Color3.fromRGB(0,255,0)
+						hl.OutlineColor = Color3.fromRGB(0,255,0)
+						hl.Parent = char
+					end
+				end
+			end
+		end)
+	end
+})
 
 OthersTab:Button({
 	Title="Smart IY",
