@@ -447,14 +447,26 @@ AimbotTab:Toggle({
                 local Closest, Distance = nil, math.huge
 
                 for _, p in ipairs(Players:GetPlayers()) do
-                    if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
-                        local pos, onscreen = Camera:WorldToViewportPoint(p.Character.Head.Position)
+                    if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
+                        local part = p.Character.HumanoidRootPart
+                        local pos, onscreen = Camera:WorldToViewportPoint(part.Position)
                         if onscreen then
-                            local mag = (Vector2.new(pos.X, pos.Y) - Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)).Magnitude
+                            local mag = (Vector2.new(pos.X, pos.Y) - Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)).Magnitude
                             if mag < Distance then
-                                if not WallCheckEnabled or workspace:Raycast(Camera.CFrame.Position, p.Character.Head.Position - Camera.CFrame.Position, RaycastParams.new()) == nil then
+                                local allow = true
+                                if WallCheckEnabled then
+                                    local params = RaycastParams.new()
+                                    params.FilterType = Enum.RaycastFilterType.Blacklist
+                                    params.FilterDescendantsInstances = { LocalPlayer.Character }
+                                    local direction = (part.Position - Camera.CFrame.Position)
+                                    local ray = workspace:Raycast(Camera.CFrame.Position, direction, params)
+                                    if ray and not ray.Instance:IsDescendantOf(p.Character) then
+                                        allow = false
+                                    end
+                                end
+                                if allow then
                                     Distance = mag
-                                    Closest = p.Character.Head
+                                    Closest = part
                                 end
                             end
                         end
