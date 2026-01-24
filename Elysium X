@@ -348,6 +348,9 @@ EternityTab:Toggle({
 	Value = false,
 	Callback = function(v)
 		espKillers = v
+		local Players = game:GetService("Players")
+		local LocalPlayer = Players.LocalPlayer
+
 		if not v then
 			for _,obj in ipairs(workspace:GetDescendants()) do
 				if obj:IsA("Highlight") and obj.Name == "EternityESP_K" then
@@ -356,12 +359,17 @@ EternityTab:Toggle({
 			end
 			return
 		end
+
 		staminaConn = RunService.Heartbeat:Connect(function()
 			if not espKillers then return end
 			local folder = workspace:FindFirstChild("Killers")
 			if not folder then return end
+
 			for _,char in ipairs(folder:GetChildren()) do
-				if char:IsA("Model") and char:FindFirstChild("HumanoidRootPart") then
+				if char:IsA("Model")
+					and char ~= LocalPlayer.Character
+					and char:FindFirstChild("HumanoidRootPart") then
+
 					if not char:FindFirstChild("EternityESP_K") then
 						local hl = Instance.new("Highlight")
 						hl.Name = "EternityESP_K"
@@ -383,6 +391,9 @@ EternityTab:Toggle({
 	Value = false,
 	Callback = function(v)
 		espSurvivors = v
+		local Players = game:GetService("Players")
+		local LocalPlayer = Players.LocalPlayer
+
 		if not v then
 			for _,obj in ipairs(workspace:GetDescendants()) do
 				if obj:IsA("Highlight") and obj.Name == "EternityESP_S" then
@@ -391,12 +402,17 @@ EternityTab:Toggle({
 			end
 			return
 		end
+
 		staminaConn = RunService.Heartbeat:Connect(function()
 			if not espSurvivors then return end
 			local folder = workspace:FindFirstChild("Survivors")
 			if not folder then return end
+
 			for _,char in ipairs(folder:GetChildren()) do
-				if char:IsA("Model") and char:FindFirstChild("HumanoidRootPart") then
+				if char:IsA("Model")
+					and char ~= LocalPlayer.Character
+					and char:FindFirstChild("HumanoidRootPart") then
+
 					if not char:FindFirstChild("EternityESP_S") then
 						local hl = Instance.new("Highlight")
 						hl.Name = "EternityESP_S"
