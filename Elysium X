@@ -42,7 +42,7 @@ Window:Tag({
 
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
 local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
-local EternitysTab = Window:Tab({ Title = "Eternity", Icon = "skull" })
+local EternitysTab = Window:Tab({ Title = "Eternity", Icon = "infinity" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "layers" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -303,6 +303,81 @@ task.spawn(function()
 		end
 	end
 end)
+
+EternityTab:Toggle({
+	Title = "Infinite Stamina",
+	Value = false,
+	Callback = function(v)
+		if staminaConn then staminaConn:Disconnect() staminaConn = nil end
+		infStamina = v
+		if v then
+			local Character_upvr = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+			local max = Character_upvr:GetAttribute("MaxStamina") or 100
+			Character_upvr:SetAttribute("Stamina", max)
+			staminaConn = RunService.Heartbeat:Connect(function()
+				if infStamina and Character_upvr and Character_upvr.Parent then
+					Character_upvr:SetAttribute("Stamina", max)
+				end
+			end)
+		end
+	end
+})
+
+EternityTab:Toggle({
+	Title = "ESP Killers",
+	Value = false,
+	Callback = function(v)
+		espKillers = v
+		if not v then
+			for _,obj in ipairs(workspace:GetDescendants()) do
+				if obj:IsA("Highlight") and obj.Name == "EternityESP_K" then
+					obj:Destroy()
+				end
+			end
+			return
+		end
+		RunService.Heartbeat:Connect(function()
+			if not espKillers then return end
+			local folder = workspace:FindFirstChild("Killers")
+			if not folder then return end
+			for _,char in ipairs(folder:GetChildren()) do
+				if char:IsA("Model") and char:FindFirstChild("HumanoidRootPart") then
+					if not char:FindFirstChild("EternityESP_K") then
+						local hl = Instance.new("Highlight")
+						hl.Name = "EternityESP_K"
+						hl.Adornee = char
+						hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+						hl.FillTransparency = 0.45
+						hl.FillColor = Color3.fromRGB(255,0,0)
+						hl.OutlineColor = Color3.fromRGB(255,0,0)
+						hl.Parent = char
+					end
+				end
+			end
+		end)
+	end
+})
+
+EternityTab:Toggle({
+	Title = "ESP Survivors",
+	Value = false,
+	Callback = function(v)
+		espSurvivors = v
+		if not v then
+			for _,obj in ipairs(workspace:GetDescendants()) do
+				if obj:IsA("Highlight") and obj.Name == "EternityESP_S" then
+					obj:Destroy()
+				end
+			end
+			return
+		end
+		RunService.Heartbeat:Connect(function()
+			if not espSurvivors then return end
+			local folder = workspace:FindFirstChild("Survivors")
+			if not folder then return end
+			for _,char in ipairs(folder:GetChildren()) do
+				if char:IsA("Model") and char:FindFirstChild("HumanoidRootPart") then
+					if not char:FindFirstChild("EternityESP
 
 OthersTab:Button({
 	Title="Smart IY",
