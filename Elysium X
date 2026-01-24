@@ -313,24 +313,59 @@ EternityTab:Toggle({
 			staminaConn:Disconnect()
 			staminaConn = nil
 		end
-		if v then
-			local function applyInfStamina()
-				local Character_upvr = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
-				local max = Character_upvr:GetAttribute("MaxStamina") or 100
-				Character_upvr:SetAttribute("Stamina", max)
-				if staminaConn then staminaConn:Disconnect() end
-				staminaConn = RunService.Heartbeat:Connect(function()
-					if infStamina and Character_upvr and Character_upvr.Parent then
-						Character_upvr:SetAttribute("Stamina", max)
-					end
-				end)
+
+		local function applyInfStamina()
+			local Character_upvr = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+			local max = Character_upvr:GetAttribute("MaxStamina") or 100
+			Character_upvr:SetAttribute("Stamina", max)
+
+			if guiClone then
+				guiClone:Destroy()
+				guiClone = nil
 			end
+
+			staminaConn = RunService.Heartbeat:Connect(function()
+				if not infStamina then return end
+				if Character_upvr and Character_upvr.Parent then
+					Character_upvr:SetAttribute("Stamina", max)
+
+					local hrp = Character_upvr:FindFirstChild("HumanoidRootPart")
+					local hum = Character_upvr:FindFirstChildOfClass("Humanoid")
+					if hrp and hum and hum.MoveDirection.Magnitude > 0 then
+						if not guiClone then
+							local originalGui = script:FindFirstChild("BillboardGui")
+							if originalGui then
+								guiClone = originalGui:Clone()
+								guiClone.Parent = hrp
+								guiClone.Enabled = true
+							end
+						end
+					else
+						if guiClone then
+							guiClone:Destroy()
+							guiClone = nil
+						end
+					end
+				end
+			end)
+		end
+
+		if v then
 			applyInfStamina()
 			Players.LocalPlayer.CharacterAdded:Connect(function()
 				if infStamina then
 					applyInfStamina()
 				end
 			end)
+		else
+			if guiClone then
+				guiClone:Destroy()
+				guiClone = nil
+			end
+			if staminaConn then
+				staminaConn:Disconnect()
+				staminaConn = nil
+			end
 		end
 	end
 })
