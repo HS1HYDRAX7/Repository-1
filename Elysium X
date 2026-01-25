@@ -494,6 +494,17 @@ OthersTab:Input({
     end
 })
 
+local Paragraph = OthersTab:Paragraph({
+    Title = "Now Playing",
+    Desc = "00:00/00:00",
+    Color = "Red",
+    Image = "",
+    ImageSize = 30,
+    Thumbnail = "",
+    ThumbnailSize = 80,
+    Locked = false,
+})
+
 OthersTab:Button({
     Title = "Play",
     Callback = function()
@@ -504,36 +515,23 @@ OthersTab:Button({
             getgenv().Sound = sound
         end
         if getgenv().MusicId then
-            getgenv().Sound.SoundId = "rbxassetid://" .. getgenv().MusicId
-            getgenv().Sound:Play()
+            local sound = getgenv().Sound
+            sound.SoundId = "rbxassetid://" .. getgenv().MusicId
+            sound:Play()
             task.spawn(function()
-                while getgenv().Sound and getgenv().Sound.IsPlaying do
-                    if getgenv().SliderSet then
-                        getgenv().SliderSet(math.floor(getgenv().Sound.TimePosition))
+                while sound and sound.IsPlaying do
+                    local current = math.floor(sound.TimePosition)
+                    local total = math.floor(sound.TimeLength)
+                    local function fmt(t)
+                        return string.format("%02d:%02d", math.floor(t / 60), t % 60)
+                    end
+                    if Paragraph and Paragraph.SetDesc then
+                        Paragraph:SetDesc(fmt(current) .. "/" .. fmt(total))
                     end
                     task.wait(1)
                 end
             end)
         end
-    end
-})
-
-OthersTab:Slider({
-    Title = "Progress",
-    Desc = "Music time",
-    Step = 1,
-    Value = {
-        Min = 0,
-        Max = 300,
-        Default = 0,
-    },
-    Callback = function(value)
-        if getgenv().Sound then
-            getgenv().Sound.TimePosition = value
-        end
-    end,
-    OnCreated = function(setValue)
-        getgenv().SliderSet = setValue
     end
 })
 
