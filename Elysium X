@@ -43,7 +43,6 @@ Window:Tag({
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
 local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
 local EternityTab = Window:Tab({ Title = "Eternity", Icon = "infinity" })
-local PressureTab = Window:Tab({ Title = "Pressure", Icon = "sword" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "layers" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -428,71 +427,6 @@ EternityTab:Toggle({
 			end
 		end)
 	end
-})
-
-PressureTab:CreateToggle({
-	Name = "ESP Monsters",
-	Default = false,
-	Callback = function(state)
-		if state then
-			for _, obj in ipairs(MonstersFolder:GetChildren()) do
-				if not obj:FindFirstChildOfClass("Highlight") then
-					local h = Instance.new("Highlight")
-					h.Adornee = obj
-					h.FillColor = Color3.fromRGB(255, 0, 0)
-					h.OutlineColor = Color3.fromRGB(255, 0, 0)
-					h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-					h.Parent = obj
-				end
-			end
-			MonstersFolder.ChildAdded:Connect(function(child)
-				task.wait()
-				if not child:FindFirstChildOfClass("Highlight") then
-					local h = Instance.new("Highlight")
-					h.Adornee = child
-					h.FillColor = Color3.fromRGB(255, 0, 0)
-					h.OutlineColor = Color3.fromRGB(255, 0, 0)
-					h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-					h.Parent = child
-					WindUI:Notify({
-						Title = "ESP",
-						Content = child.Name .. " Spawned",
-						Duration = 3,
-						Icon = "bird",
-					})
-				end
-			end)
-		else
-			for _, obj in ipairs(MonstersFolder:GetChildren()) do
-				local h = obj:FindFirstChildOfClass("Highlight")
-				if h then
-					h:Destroy()
-				end
-			end
-		end
-	end,
-})
-
-PressureTab:CreateToggle({
-	Name = "ESP Doors",
-	Default = false,
-	Callback = function(state)
-		if state then
-			if not EndingBlock:FindFirstChildOfClass("Highlight") then
-				local h = Instance.new("Highlight")
-				h.Adornee = EndingBlock
-				h.FillColor = Color3.fromRGB(255, 255, 0)
-				h.OutlineColor = Color3.fromRGB(255, 255, 0)
-				h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-				h.Parent = EndingBlock
-			end
-		else
-			local h = EndingBlock:FindFirstChildOfClass("Highlight")
-			if h then
-				h:Destroy()
-			end
-		end
-	end,
 })
 
 OthersTab:Button({
