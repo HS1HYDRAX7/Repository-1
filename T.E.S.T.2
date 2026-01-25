@@ -1,1 +1,47 @@
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
+WindUI:AddTheme({
+	Name = "My Theme",
+	Accent = Color3.fromHex("#18181b"),
+	Background = Color3.fromHex("#101010"),
+	BackgroundImage = "rbxassetid://112516055804582",
+	Outline = Color3.fromHex("#FFFFFF"),
+	Text = Color3.fromHex("#FFFFFF"),
+	Placeholder = Color3.fromHex("#7a7a7a"),
+	Button = Color3.fromHex("#52525b"),
+	Icon = Color3.fromHex("#a1a1aa"),
+})
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextChatService = game:GetService("TextChatService")
+local StarterGui = game:GetService("StarterGui")
+
+pcall(function()
+	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true)
+end)
+
+local chatConfig = TextChatService:WaitForChild("ChatWindowConfiguration")
+RunService.RenderStepped:Connect(function()
+	chatConfig.Enabled = true
+	chatConfig.ChatWindowVisible = true
+	chatConfig.ChatWindowActive = true
+	chatConfig.ChatInputBarConfiguration.Enabled = true
+end)
+
+local LocalPlayer = Players.LocalPlayer
+local FONT = Font.new("rbxassetid://12187360881")
+local DEFAULT_GRAVITY = workspace.Gravity
+
+local Window = WindUI:CreateWindow({
+	Title = "TEST",
+	Author = "TEST",
+	Folder = "TEST",
+	Transparent = true,
+	Theme = "My Theme",
+	Resizable = true,
+	HideSearchBar = false,
+	ScrollBarEnabled = true,
+})
