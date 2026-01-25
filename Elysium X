@@ -266,6 +266,92 @@ ForsakenTab:Toggle({ Title="Infinite Stamina", Value=false, Callback=function(v)
 	end
 end })
 
+ForsakenTab:Toggle({
+    Title = "Void Rush Control",
+    Icon = "zap",
+    Type = "Checkbox",
+    Value = false,
+    Callback = function(state)
+        local RunService = game:GetService("RunService")
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+
+        local ORIGINAL_DASH_SPEED = 60
+        local isOverrideActive = false
+        local connection
+        local mainConnection
+
+        local function setupCharacter(character)
+            _G.Humanoid = character:WaitForChild("Humanoid")
+            _G.HumanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        end
+
+        local function startOverride()
+            if isOverrideActive then return end
+            isOverrideActive = true
+
+            connection = RunService.RenderStepped:Connect(function()
+                local humanoid = _G.Humanoid
+                local rootPart = _G.HumanoidRootPart
+                if not humanoid or not rootPart then return end
+
+                humanoid.WalkSpeed = ORIGINAL_DASH_SPEED
+                humanoid.AutoRotate = false
+
+                local dir = rootPart.CFrame.LookVector
+                local horizontal = Vector3.new(dir.X, 0, dir.Z)
+                if horizontal.Magnitude > 0 then
+                    humanoid:Move(horizontal.Unit)
+                end
+            end)
+        end
+
+        local function stopOverride()
+            if not isOverrideActive then return end
+            isOverrideActive = false
+
+            local humanoid = _G.Humanoid
+            if humanoid then
+                humanoid.WalkSpeed = 16
+                humanoid.AutoRotate = true
+                humanoid:Move(Vector3.new())
+            end
+
+            if connection then
+                connection:Disconnect()
+                connection = nil
+            end
+        end
+
+        if state then
+            if LocalPlayer.Character then
+                setupCharacter(LocalPlayer.Character)
+            end
+
+            LocalPlayer.CharacterAdded:Connect(function(character)
+                setupCharacter(character)
+            end)
+
+            mainConnection = RunService.RenderStepped:Connect(function()
+                local char = _G.Humanoid and _G.Humanoid.Parent
+                local voidRushState = char and char:GetAttribute("VoidRushState")
+
+                if voidRushState == "Dashing" then
+                    startOverride()
+                else
+                    stopOverride()
+                end
+            end)
+        else
+            stopOverride()
+            if mainConnection then
+                mainConnection:Disconnect()
+                mainConnection = nil
+            end
+        end
+    end
+})
+
 ForsakenTab:Toggle({ Title="ESP Killers", Value=false, Callback=function(v) espKiller=v if not v then clearAllESP() end end })
 ForsakenTab:Toggle({ Title="ESP Survivors", Value=false, Callback=function(v) espSurvivor=v if not v then clearAllESP() end end })
 ForsakenTab:Toggle({ Title="ESP Generators", Value=false, Callback=function(v) espGen=v if not v then clearAllESP() end end })
