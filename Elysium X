@@ -456,10 +456,10 @@ OthersTab:Input({
     Value = "",
     InputIcon = "link",
     Type = "Input",
-    Placeholder = "https://www.roblox.com/games/PLACEID/...",
+    Placeholder = "https://www.roblox.com/games/PLACEID/ or PLACEID",
     Callback = function(input)
-        local id = string.match(input, "%d+")
-        getgenv().TargetPlaceId = tonumber(id)
+        local id = tonumber(input) or tonumber(string.match(input, "%d+"))
+        getgenv().TargetPlaceId = id
     end
 })
 
@@ -467,18 +467,20 @@ OthersTab:Button({
     Title = "Teleport",
     Callback = function()
         if getgenv().TargetPlaceId then
-            task.spawn(function()
-                for i = 7, 1, -1 do
-                    WindUI:Notify({
-                        Title = "TTPI NOTIFICATION",
-                        Content = "TELEPORTING IN (" .. i .. ")",
-                        Duration = 7,
-                        Icon = "target",
+            local notif = WindUI:Notify({
+                Title = "TTPI NOTIFICATION",
+                Content = "TELEPORTING IN (7)",
+                Duration = 7,
+                Icon = "target",
+            })
+            for i = 6, 1, -1 do
+                task.wait(1)
+                if notif and notif.Update then
+                    notif:Update({
+                        Content = "TELEPORTING IN (" .. i .. ")"
                     })
-                    task.wait(1)
                 end
-            end)
-            task.wait(7)
+            end
             game:GetService("TeleportService"):Teleport(
                 getgenv().TargetPlaceId,
                 game:GetService("Players").LocalPlayer
