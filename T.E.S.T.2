@@ -8,68 +8,42 @@ WorkspaceCodex.Name = "Codex"
 local photosFolder = WorkspaceCodex:FindFirstChild("Photos") or Instance.new("Folder", WorkspaceCodex)
 photosFolder.Name = "Photos"
 
--- Main Button Gui
+-- Botão principal
 local mainButtonGui = Instance.new("ScreenGui", playerGui)
 mainButtonGui.Name = "MainButtonGui"
 
-local toggleButton = Instance.new("Frame", mainButtonGui)
-toggleButton.Size = UDim2.new(0, 50, 0, 50)
-toggleButton.Position = UDim2.new(1, -60, 0.5, -75)
-toggleButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-toggleButton.BorderSizePixel = 0
+local toggleButton = Instance.new("TextButton", mainButtonGui)
+toggleButton.Size = UDim2.new(0,50,0,50)
+toggleButton.Position = UDim2.new(1,-60,0.5,-25)
 toggleButton.AnchorPoint = Vector2.new(1,0.5)
-toggleButton.Rotation = 0
-toggleButton.ClipsDescendants = true
+toggleButton.BackgroundColor3 = Color3.fromRGB(40,40,40)
+toggleButton.Text = ">"
+toggleButton.TextColor3 = Color3.fromRGB(255,255,255)
+toggleButton.Font = Enum.Font.SourceSansBold
+toggleButton.TextScaled = true
+toggleButton.AutoButtonColor = true
 
-local topBar = Instance.new("TextLabel", toggleButton)
-topBar.Text = "="
-topBar.Size = UDim2.new(1, 0, 0, 15)
-topBar.BackgroundTransparency = 1
-topBar.TextColor3 = Color3.fromRGB(255,255,255)
-topBar.Font = Enum.Font.SourceSansBold
-topBar.TextScaled = true
+local toggleCorner = Instance.new("UICorner", toggleButton)
+toggleCorner.CornerRadius = UDim.new(0,10)
 
-local middleBar = Instance.new("TextLabel", toggleButton)
-middleBar.Text = "<"
-middleBar.Size = UDim2.new(1, 0, 0, 20)
-middleBar.Position = UDim2.new(0,0,0,15)
-middleBar.BackgroundTransparency = 1
-middleBar.TextColor3 = Color3.fromRGB(255,255,255)
-middleBar.Font = Enum.Font.SourceSansBold
-middleBar.TextScaled = true
-
-local bottomBar = Instance.new("TextLabel", toggleButton)
-bottomBar.Text = "="
-bottomBar.Size = UDim2.new(1, 0, 0, 15)
-bottomBar.Position = UDim2.new(0,0,0,35)
-bottomBar.BackgroundTransparency = 1
-bottomBar.TextColor3 = Color3.fromRGB(255,255,255)
-bottomBar.Font = Enum.Font.SourceSansBold
-bottomBar.TextScaled = true
-
--- Gallery GUI
+-- GUI principal da galeria
 local galleryGui = Instance.new("ScreenGui", playerGui)
 galleryGui.Name = "GalleryGui"
 galleryGui.Enabled = false
 
 local galleryFrame = Instance.new("Frame", galleryGui)
-galleryFrame.Size = UDim2.new(0, 400, 0, 500)
-galleryFrame.Position = UDim2.new(1, -420, 0.5, -250)
+galleryFrame.Size = UDim2.new(0,400,0,500)
+galleryFrame.Position = UDim2.new(1,-420,0.5,-250)
 galleryFrame.AnchorPoint = Vector2.new(0,0.5)
 galleryFrame.BackgroundColor3 = Color3.fromRGB(50,50,50)
 galleryFrame.BorderSizePixel = 0
-galleryFrame.ClipsDescendants = true
-galleryFrame.AutoButtonColor = false
-galleryFrame.AnchorPoint = Vector2.new(1,0.5)
-galleryFrame.Rotation = 0
 
-local uiCorner = Instance.new("UICorner", galleryFrame)
-uiCorner.CornerRadius = UDim.new(0,15)
+local frameCorner = Instance.new("UICorner", galleryFrame)
+frameCorner.CornerRadius = UDim.new(0,15)
 
 local scrollFrame = Instance.new("ScrollingFrame", galleryFrame)
-scrollFrame.Size = UDim2.new(1, -20, 1, -20)
-scrollFrame.Position = UDim2.new(0, 10, 0, 10)
-scrollFrame.CanvasSize = UDim2.new(0,0,0,0)
+scrollFrame.Size = UDim2.new(1,-20,1,-20)
+scrollFrame.Position = UDim2.new(0,10,0,10)
 scrollFrame.BackgroundTransparency = 1
 scrollFrame.ScrollBarThickness = 8
 
@@ -96,14 +70,14 @@ expandedImage.ScaleType = Enum.ScaleType.Fit
 local closeButton = Instance.new("TextButton", expandedFrame)
 closeButton.Text = "X"
 closeButton.Size = UDim2.new(0,30,0,30)
-closeButton.Position = UDim2.new(1, -40, 0, 10)
+closeButton.Position = UDim2.new(1, -40,0,10)
 closeButton.BackgroundColor3 = Color3.fromRGB(200,50,50)
 local closeCorner = Instance.new("UICorner", closeButton)
 closeCorner.CornerRadius = UDim.new(0,10)
 
 local nextButton = Instance.new("ImageButton", expandedFrame)
 nextButton.Size = UDim2.new(0,50,0,50)
-nextButton.Position = UDim2.new(1, -60, 0.5, -25)
+nextButton.Position = UDim2.new(1,-60,0.5,-25)
 nextButton.BackgroundTransparency = 1
 nextButton.Image = "rbxassetid://153287089"
 
@@ -113,7 +87,7 @@ prevButton.Position = UDim2.new(0,10,0.5,-25)
 prevButton.BackgroundTransparency = 1
 prevButton.Image = "rbxassetid://153287192"
 
--- Function to update scrollFrame
+-- Função para atualizar a galeria
 local function updateGallery()
     for _, child in pairs(scrollFrame:GetChildren()) do
         if child:IsA("ImageButton") then
@@ -141,24 +115,23 @@ end
 
 updateGallery()
 
--- Toggle button functionality
+-- Toggle botão para abrir/fechar GUI
 toggleButton.MouseButton1Click:Connect(function()
-    if galleryGui.Enabled == false then
-        galleryGui.Enabled = true
-        middleBar.Text = ">"
+    galleryGui.Enabled = not galleryGui.Enabled
+    if galleryGui.Enabled then
+        toggleButton.Text = "<"
     else
-        galleryGui.Enabled = false
-        middleBar.Text = "<"
+        toggleButton.Text = ">"
         expandedFrame.Visible = false
     end
 end)
 
--- Close expanded image
+-- Fechar imagem expandida
 closeButton.MouseButton1Click:Connect(function()
     expandedFrame.Visible = false
 end)
 
--- Next and Previous Buttons
+-- Navegação entre imagens
 local function showNext()
     local photos = photosFolder:GetChildren()
     currentImageIndex = currentImageIndex + 1
