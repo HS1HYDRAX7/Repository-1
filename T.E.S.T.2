@@ -1,1 +1,82 @@
+lua
+-- Services
+local Players = game:GetService("Players")
+local ReplicatedFirst = game:GetService("ReplicatedFirst")
 
+-- Variables
+local LoadingTime = 12 -- Seconds to load
+local ImageName = "IMG1.png" -- Name of the accepted image
+local ImageFolderPath = "Codex/Workspace/Images" -- Path to the images folder
+
+-- Create the loading screen GUI
+local LoadingScreen = Instance.new("ScreenGui")
+LoadingScreen.Name = "LoadingScreen"
+LoadingScreen.ResetOnSpawn = false -- Important to keep the loading screen persistent
+LoadingScreen.Parent = ReplicatedFirst
+
+-- Create a frame for the background
+local BackgroundFrame = Instance.new("Frame")
+BackgroundFrame.Size = UDim2.new(1, 0, 1, 0) -- Cover the whole screen
+BackgroundFrame.Position = UDim2.new(0, 0, 0, 0)
+BackgroundFrame.BackgroundColor3 = Color3.new(0, 0, 0) -- Black background
+BackgroundFrame.Parent = LoadingScreen
+
+-- Create an ImageLabel to display the image
+local LoadingImage = Instance.new("ImageLabel")
+LoadingImage.Size = UDim2.new(0.5, 0, 0.5, 0) -- Image size (adjust as needed)
+LoadingImage.Position = UDim2.new(0.25, 0, 0.25, 0) -- Center the image (adjust as needed)
+LoadingImage.BackgroundTransparency = 1 -- Make the background of the ImageLabel transparent
+LoadingImage.Parent = BackgroundFrame
+
+-- Function to load the image
+local function LoadImage()
+    -- Find the image in Workspace/Codex/Images
+    local imageFolder = workspace:FindFirstChild(ImageFolderPath)
+    if not imageFolder then
+        print("Image folder '" .. ImageFolderPath .. "' not found in Workspace.")
+        LoadingImage.Text = "Image folder not found!"
+        LoadingImage.BackgroundTransparency = 0
+        LoadingImage.BackgroundColor3 = Color3.new(1,0,0)
+        LoadingImage.Size = UDim2.new(1,0,1,0)
+        LoadingImage.Position = UDim2.new(0,0,0,0)
+        LoadingImage.TextColor3 = Color3.new(1,1,1)
+        LoadingImage.TextScaled = true
+        LoadingImage.TextWrapped = true
+        LoadingImage.Font = Enum.Font.SourceSansBold
+        return
+    end
+    local imageObject = imageFolder:FindFirstChild(ImageName)
+
+    if imageObject and imageObject:IsA("ImageLabel") then -- Check if it's an ImageLabel
+        LoadingImage.Image = imageObject.Image -- Set the image
+    else
+        print("Image not found or is not an ImageLabel. Please ensure an ImageLabel named '" .. ImageName .. "' is present in " .. ImageFolderPath)
+        LoadingImage.Text = "Image not found!" -- Display an error message instead
+        LoadingImage.BackgroundTransparency = 0
+        LoadingImage.BackgroundColor3 = Color3.new(1,0,0)
+        LoadingImage.Size = UDim2.new(1,0,1,0)
+        LoadingImage.Position = UDim2.new(0,0,0,0)
+        LoadingImage.TextColor3 = Color3.new(1,1,1)
+        LoadingImage.TextScaled = true
+        LoadingImage.TextWrapped = true
+        LoadingImage.Font = Enum.Font.SourceSansBold
+    end
+end
+
+-- Call the LoadImage function
+LoadImage()
+
+-- Function to fade out the loading screen
+local function FadeOutLoadingScreen()
+    for i = 1, 10 do
+        BackgroundFrame.BackgroundTransparency = i / 10
+        wait(0.1)
+    end
+    LoadingScreen:Destroy()
+end
+
+-- Wait for the specified loading time
+wait(LoadingTime)
+
+-- Fade out and destroy the loading screen
+FadeOutLoadingScreen()
