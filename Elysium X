@@ -1,4 +1,4 @@
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+alocal WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -467,20 +467,13 @@ OthersTab:Button({
     Title = "Teleport",
     Callback = function()
         if getgenv().TargetPlaceId then
-            local notif = WindUI:Notify({
+            WindUI:Notify({
                 Title = "TTPI NOTIFICATION",
-                Content = "TELEPORTING IN (7)",
-                Duration = 7,
+                Content = "TELEPORTING...",
+                Duration = 5,
                 Icon = "target",
             })
-            for i = 6, 1, -1 do
-                task.wait(1)
-                if notif and notif.Update then
-                    notif:Update({
-                        Content = "TELEPORTING IN (" .. i .. ")"
-                    })
-                end
-            end
+            task.wait(5)
             game:GetService("TeleportService"):Teleport(
                 getgenv().TargetPlaceId,
                 game:GetService("Players").LocalPlayer
