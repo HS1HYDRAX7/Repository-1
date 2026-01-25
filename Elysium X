@@ -482,6 +482,70 @@ OthersTab:Button({
     end
 })
 
+OthersTab:Input({
+    Title = "Boombox",
+    Desc = "Music ID",
+    Value = "",
+    InputIcon = "music",
+    Type = "Input",
+    Placeholder = "MUSIC ID",
+    Callback = function(input)
+        getgenv().MusicId = tonumber(input)
+    end
+})
+
+OthersTab:Button({
+    Title = "Play",
+    Callback = function()
+        if not getgenv().Sound then
+            local sound = Instance.new("Sound")
+            sound.Name = "EmbeddedBoombox"
+            sound.Parent = game:GetService("SoundService")
+            getgenv().Sound = sound
+        end
+        if getgenv().MusicId then
+            getgenv().Sound.SoundId = "rbxassetid://" .. getgenv().MusicId
+            getgenv().Sound:Play()
+            task.spawn(function()
+                while getgenv().Sound and getgenv().Sound.IsPlaying do
+                    if getgenv().SliderSet then
+                        getgenv().SliderSet(math.floor(getgenv().Sound.TimePosition))
+                    end
+                    task.wait(1)
+                end
+            end)
+        end
+    end
+})
+
+OthersTab:Slider({
+    Title = "Progress",
+    Desc = "Music time",
+    Step = 1,
+    Value = {
+        Min = 0,
+        Max = 300,
+        Default = 0,
+    },
+    Callback = function(value)
+        if getgenv().Sound then
+            getgenv().Sound.TimePosition = value
+        end
+    end,
+    OnCreated = function(setValue)
+        getgenv().SliderSet = setValue
+    end
+})
+
+OthersTab:Button({
+    Title = "Pause",
+    Callback = function()
+        if getgenv().Sound then
+            getgenv().Sound:Pause()
+        end
+    end
+})
+
 local clockParagraph = InfoTab:Paragraph({ Title="Clock", Desc="--:--:--" })
 task.spawn(function()
 	while task.wait(1) do
