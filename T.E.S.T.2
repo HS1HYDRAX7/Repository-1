@@ -1,82 +1,97 @@
-lua
--- Services
 local Players = game:GetService("Players")
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
--- Variables
-local LoadingTime = 12 -- Seconds to load
-local ImageName = "IMG1.png" -- Name of the accepted image
-local ImageFolderPath = "Codex/Workspace/Images" -- Path to the images folder
+local LoadingTime = 12
+local ImageName = "IMG1.png"
+local ImageFolderPath = {"Codex", "Workspace", "Images"}
 
--- Create the loading screen GUI
 local LoadingScreen = Instance.new("ScreenGui")
 LoadingScreen.Name = "LoadingScreen"
-LoadingScreen.ResetOnSpawn = false -- Important to keep the loading screen persistent
+LoadingScreen.ResetOnSpawn = false
 LoadingScreen.Parent = ReplicatedFirst
 
--- Create a frame for the background
 local BackgroundFrame = Instance.new("Frame")
-BackgroundFrame.Size = UDim2.new(1, 0, 1, 0) -- Cover the whole screen
-BackgroundFrame.Position = UDim2.new(0, 0, 0, 0)
-BackgroundFrame.BackgroundColor3 = Color3.new(0, 0, 0) -- Black background
+BackgroundFrame.Size = UDim2.new(1,0,1,0)
+BackgroundFrame.Position = UDim2.new(0,0,0,0)
+BackgroundFrame.BackgroundColor3 = Color3.new(0,0,0)
+BackgroundFrame.BorderSizePixel = 0
 BackgroundFrame.Parent = LoadingScreen
 
--- Create an ImageLabel to display the image
 local LoadingImage = Instance.new("ImageLabel")
-LoadingImage.Size = UDim2.new(0.5, 0, 0.5, 0) -- Image size (adjust as needed)
-LoadingImage.Position = UDim2.new(0.25, 0, 0.25, 0) -- Center the image (adjust as needed)
-LoadingImage.BackgroundTransparency = 1 -- Make the background of the ImageLabel transparent
+LoadingImage.Size = UDim2.new(0.5,0,0.5,0)
+LoadingImage.AnchorPoint = Vector2.new(0.5,0.5)
+LoadingImage.Position = UDim2.new(0.5,0,0.5,0)
+LoadingImage.BackgroundTransparency = 1
 LoadingImage.Parent = BackgroundFrame
 
--- Function to load the image
-local function LoadImage()
-    -- Find the image in Workspace/Codex/Images
-    local imageFolder = workspace:FindFirstChild(ImageFolderPath)
-    if not imageFolder then
-        print("Image folder '" .. ImageFolderPath .. "' not found in Workspace.")
-        LoadingImage.Text = "Image folder not found!"
-        LoadingImage.BackgroundTransparency = 0
-        LoadingImage.BackgroundColor3 = Color3.new(1,0,0)
-        LoadingImage.Size = UDim2.new(1,0,1,0)
-        LoadingImage.Position = UDim2.new(0,0,0,0)
-        LoadingImage.TextColor3 = Color3.new(1,1,1)
-        LoadingImage.TextScaled = true
-        LoadingImage.TextWrapped = true
-        LoadingImage.Font = Enum.Font.SourceSansBold
-        return
-    end
-    local imageObject = imageFolder:FindFirstChild(ImageName)
+local LoadingText = Instance.new("TextLabel")
+LoadingText.Size = UDim2.new(1,0,0.1,0)
+LoadingText.Position = UDim2.new(0,0,0.85,0)
+LoadingText.BackgroundTransparency = 1
+LoadingText.TextColor3 = Color3.new(1,1,1)
+LoadingText.Font = Enum.Font.SourceSansBold
+LoadingText.TextScaled = true
+LoadingText.Text = "Loading..."
+LoadingText.Parent = BackgroundFrame
 
-    if imageObject and imageObject:IsA("ImageLabel") then -- Check if it's an ImageLabel
-        LoadingImage.Image = imageObject.Image -- Set the image
-    else
-        print("Image not found or is not an ImageLabel. Please ensure an ImageLabel named '" .. ImageName .. "' is present in " .. ImageFolderPath)
-        LoadingImage.Text = "Image not found!" -- Display an error message instead
-        LoadingImage.BackgroundTransparency = 0
-        LoadingImage.BackgroundColor3 = Color3.new(1,0,0)
-        LoadingImage.Size = UDim2.new(1,0,1,0)
-        LoadingImage.Position = UDim2.new(0,0,0,0)
-        LoadingImage.TextColor3 = Color3.new(1,1,1)
-        LoadingImage.TextScaled = true
-        LoadingImage.TextWrapped = true
-        LoadingImage.Font = Enum.Font.SourceSansBold
-    end
+local function FindFolder(parent, path)
+	local current = parent
+	for _, name in ipairs(path) do
+		current = current:FindFirstChild(name)
+		if not current then return nil end
+	end
+	return current
 end
 
--- Call the LoadImage function
+local function DisplayError(message)
+	LoadingImage.BackgroundTransparency = 0
+	LoadingImage.BackgroundColor3 = Color3.new(1,0,0)
+	LoadingImage.Size = UDim2.new(1,0,1,0)
+	LoadingImage.Position = UDim2.new(0,0,0,0)
+	LoadingImage.Text = message
+	LoadingImage.TextColor3 = Color3.new(1,1,1)
+	LoadingImage.TextScaled = true
+	LoadingImage.TextWrapped = true
+	LoadingImage.Font = Enum.Font.SourceSansBold
+end
+
+local function LoadImage()
+	local folder = FindFolder(workspace, ImageFolderPath)
+	if not folder then
+		DisplayError("Image folder not found!")
+		return
+	end
+	local imageObject = folder:FindFirstChild(ImageName)
+	if imageObject and imageObject:IsA("ImageLabel") then
+		LoadingImage.Image = imageObject.Image
+	else
+		DisplayError("Image not found!")
+	end
+end
+
 LoadImage()
 
--- Function to fade out the loading screen
-local function FadeOutLoadingScreen()
-    for i = 1, 10 do
-        BackgroundFrame.BackgroundTransparency = i / 10
-        wait(0.1)
-    end
-    LoadingScreen:Destroy()
+local function FadeOutScreen()
+	local tweenBg = TweenService:Create(BackgroundFrame,TweenInfo.new(1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{BackgroundTransparency = 1})
+	local tweenImg = TweenService:Create(LoadingImage,TweenInfo.new(1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{ImageTransparency = 1})
+	local tweenText = TweenService:Create(LoadingText,TweenInfo.new(1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{TextTransparency = 1})
+	tweenBg:Play()
+	tweenImg:Play()
+	tweenText:Play()
+	tweenBg.Completed:Wait()
+	LoadingScreen:Destroy()
 end
 
--- Wait for the specified loading time
-wait(LoadingTime)
+local startTime = tick()
+local function UpdateText()
+	local elapsed = tick() - startTime
+	LoadingText.Text = "Loading... "..math.floor(elapsed).. "s"
+end
 
--- Fade out and destroy the loading screen
-FadeOutLoadingScreen()
+local updateConnection
+updateConnection = RunService.RenderStepped:Connect(UpdateText)
+task.wait(LoadingTime)
+updateConnection:Disconnect()
+FadeOutScreen()
