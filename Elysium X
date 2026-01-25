@@ -450,6 +450,31 @@ OthersTab:Button({
     end
 })
 
+OthersTab:Input({
+    Title = "Input",
+    Desc = "Teleport to games using the Place links",
+    Value = "",
+    InputIcon = "link",
+    Type = "Input",
+    Placeholder = "https://www.roblox.com/games/PLACEID/...",
+    Callback = function(input)
+        local id = string.match(input, "%d+")
+        getgenv().TargetPlaceId = tonumber(id)
+    end
+})
+
+OthersTab:Button({
+    Title = "Teleport",
+    Callback = function()
+        if getgenv().TargetPlaceId then
+            game:GetService("TeleportService"):Teleport(
+                getgenv().TargetPlaceId,
+                game:GetService("Players").LocalPlayer
+            )
+        end
+    end
+})
+
 local clockParagraph = InfoTab:Paragraph({ Title="Clock", Desc="--:--:--" })
 task.spawn(function()
 	while task.wait(1) do
