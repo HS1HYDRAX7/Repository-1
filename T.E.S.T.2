@@ -1,0 +1,181 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local WorkspaceCodex = workspace:FindFirstChild("Codex") or Instance.new("Folder", workspace)
+WorkspaceCodex.Name = "Codex"
+
+local photosFolder = WorkspaceCodex:FindFirstChild("Photos") or Instance.new("Folder", WorkspaceCodex)
+photosFolder.Name = "Photos"
+
+-- Main Button Gui
+local mainButtonGui = Instance.new("ScreenGui", playerGui)
+mainButtonGui.Name = "MainButtonGui"
+
+local toggleButton = Instance.new("Frame", mainButtonGui)
+toggleButton.Size = UDim2.new(0, 50, 0, 50)
+toggleButton.Position = UDim2.new(1, -60, 0.5, -75)
+toggleButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+toggleButton.BorderSizePixel = 0
+toggleButton.AnchorPoint = Vector2.new(1,0.5)
+toggleButton.Rotation = 0
+toggleButton.ClipsDescendants = true
+
+local topBar = Instance.new("TextLabel", toggleButton)
+topBar.Text = "="
+topBar.Size = UDim2.new(1, 0, 0, 15)
+topBar.BackgroundTransparency = 1
+topBar.TextColor3 = Color3.fromRGB(255,255,255)
+topBar.Font = Enum.Font.SourceSansBold
+topBar.TextScaled = true
+
+local middleBar = Instance.new("TextLabel", toggleButton)
+middleBar.Text = "<"
+middleBar.Size = UDim2.new(1, 0, 0, 20)
+middleBar.Position = UDim2.new(0,0,0,15)
+middleBar.BackgroundTransparency = 1
+middleBar.TextColor3 = Color3.fromRGB(255,255,255)
+middleBar.Font = Enum.Font.SourceSansBold
+middleBar.TextScaled = true
+
+local bottomBar = Instance.new("TextLabel", toggleButton)
+bottomBar.Text = "="
+bottomBar.Size = UDim2.new(1, 0, 0, 15)
+bottomBar.Position = UDim2.new(0,0,0,35)
+bottomBar.BackgroundTransparency = 1
+bottomBar.TextColor3 = Color3.fromRGB(255,255,255)
+bottomBar.Font = Enum.Font.SourceSansBold
+bottomBar.TextScaled = true
+
+-- Gallery GUI
+local galleryGui = Instance.new("ScreenGui", playerGui)
+galleryGui.Name = "GalleryGui"
+galleryGui.Enabled = false
+
+local galleryFrame = Instance.new("Frame", galleryGui)
+galleryFrame.Size = UDim2.new(0, 400, 0, 500)
+galleryFrame.Position = UDim2.new(1, -420, 0.5, -250)
+galleryFrame.AnchorPoint = Vector2.new(0,0.5)
+galleryFrame.BackgroundColor3 = Color3.fromRGB(50,50,50)
+galleryFrame.BorderSizePixel = 0
+galleryFrame.ClipsDescendants = true
+galleryFrame.AutoButtonColor = false
+galleryFrame.AnchorPoint = Vector2.new(1,0.5)
+galleryFrame.Rotation = 0
+
+local uiCorner = Instance.new("UICorner", galleryFrame)
+uiCorner.CornerRadius = UDim.new(0,15)
+
+local scrollFrame = Instance.new("ScrollingFrame", galleryFrame)
+scrollFrame.Size = UDim2.new(1, -20, 1, -20)
+scrollFrame.Position = UDim2.new(0, 10, 0, 10)
+scrollFrame.CanvasSize = UDim2.new(0,0,0,0)
+scrollFrame.BackgroundTransparency = 1
+scrollFrame.ScrollBarThickness = 8
+
+local uiList = Instance.new("UIListLayout", scrollFrame)
+uiList.Padding = UDim.new(0,10)
+uiList.SortOrder = Enum.SortOrder.LayoutOrder
+
+local currentImageIndex = 1
+local expandedFrame = Instance.new("Frame", galleryGui)
+expandedFrame.Size = UDim2.new(0,600,0,400)
+expandedFrame.Position = UDim2.new(0.5, -300,0.5, -200)
+expandedFrame.BackgroundColor3 = Color3.fromRGB(35,35,35)
+expandedFrame.Visible = false
+expandedFrame.AnchorPoint = Vector2.new(0.5,0.5)
+local expandedUICorner = Instance.new("UICorner", expandedFrame)
+expandedUICorner.CornerRadius = UDim.new(0,20)
+
+local expandedImage = Instance.new("ImageLabel", expandedFrame)
+expandedImage.Size = UDim2.new(1, -20, 1, -20)
+expandedImage.Position = UDim2.new(0,10,0,10)
+expandedImage.BackgroundTransparency = 1
+expandedImage.ScaleType = Enum.ScaleType.Fit
+
+local closeButton = Instance.new("TextButton", expandedFrame)
+closeButton.Text = "X"
+closeButton.Size = UDim2.new(0,30,0,30)
+closeButton.Position = UDim2.new(1, -40, 0, 10)
+closeButton.BackgroundColor3 = Color3.fromRGB(200,50,50)
+local closeCorner = Instance.new("UICorner", closeButton)
+closeCorner.CornerRadius = UDim.new(0,10)
+
+local nextButton = Instance.new("ImageButton", expandedFrame)
+nextButton.Size = UDim2.new(0,50,0,50)
+nextButton.Position = UDim2.new(1, -60, 0.5, -25)
+nextButton.BackgroundTransparency = 1
+nextButton.Image = "rbxassetid://153287089"
+
+local prevButton = Instance.new("ImageButton", expandedFrame)
+prevButton.Size = UDim2.new(0,50,0,50)
+prevButton.Position = UDim2.new(0,10,0.5,-25)
+prevButton.BackgroundTransparency = 1
+prevButton.Image = "rbxassetid://153287192"
+
+-- Function to update scrollFrame
+local function updateGallery()
+    for _, child in pairs(scrollFrame:GetChildren()) do
+        if child:IsA("ImageButton") then
+            child:Destroy()
+        end
+    end
+    local photos = photosFolder:GetChildren()
+    for i, photo in ipairs(photos) do
+        if photo:IsA("ImageLabel") or photo:IsA("ImageButton") then
+            local imgButton = Instance.new("ImageButton", scrollFrame)
+            imgButton.Size = UDim2.new(0,100,0,100)
+            imgButton.Image = photo.Image
+            imgButton.BackgroundColor3 = Color3.fromRGB(70,70,70)
+            local corner = Instance.new("UICorner", imgButton)
+            corner.CornerRadius = UDim.new(0,10)
+            imgButton.MouseButton1Click:Connect(function()
+                expandedImage.Image = imgButton.Image
+                expandedFrame.Visible = true
+                currentImageIndex = i
+            end)
+        end
+    end
+    scrollFrame.CanvasSize = UDim2.new(0,0,0, uiList.AbsoluteContentSize.Y)
+end
+
+updateGallery()
+
+-- Toggle button functionality
+toggleButton.MouseButton1Click:Connect(function()
+    if galleryGui.Enabled == false then
+        galleryGui.Enabled = true
+        middleBar.Text = ">"
+    else
+        galleryGui.Enabled = false
+        middleBar.Text = "<"
+        expandedFrame.Visible = false
+    end
+end)
+
+-- Close expanded image
+closeButton.MouseButton1Click:Connect(function()
+    expandedFrame.Visible = false
+end)
+
+-- Next and Previous Buttons
+local function showNext()
+    local photos = photosFolder:GetChildren()
+    currentImageIndex = currentImageIndex + 1
+    if currentImageIndex > #photos then
+        currentImageIndex = 1
+    end
+    expandedImage.Image = photos[currentImageIndex].Image
+end
+
+local function showPrev()
+    local photos = photosFolder:GetChildren()
+    currentImageIndex = currentImageIndex - 1
+    if currentImageIndex < 1 then
+        currentImageIndex = #photos
+    end
+    expandedImage.Image = photos[currentImageIndex].Image
+end
+
+nextButton.MouseButton1Click:Connect(showNext)
+prevButton.MouseButton1Click:Connect(showPrev)
