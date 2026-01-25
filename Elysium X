@@ -451,7 +451,7 @@ OthersTab:Button({
 })
 
 OthersTab:Input({
-    Title = "Input",
+    Title = "TTPI",
     Desc = "Teleport to games using the Place links",
     Value = "",
     InputIcon = "link",
@@ -467,6 +467,18 @@ OthersTab:Button({
     Title = "Teleport",
     Callback = function()
         if getgenv().TargetPlaceId then
+            task.spawn(function()
+                for i = 7, 1, -1 do
+                    WindUI:Notify({
+                        Title = "TTPI NOTIFICATION",
+                        Content = "TELEPORTING IN (" .. i .. ")",
+                        Duration = 7,
+                        Icon = "target",
+                    })
+                    task.wait(1)
+                end
+            end)
+            task.wait(7)
             game:GetService("TeleportService"):Teleport(
                 getgenv().TargetPlaceId,
                 game:GetService("Players").LocalPlayer
