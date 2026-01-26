@@ -548,19 +548,19 @@ OthersTab:Input({
     Title = "Alize Executor",
     Desc = "A simple executor",
     Value = "",
-    InputIcon = "code-linear",
     Placeholder = "Script url or loadstring",
+    InputIcon = "code-linear",
     Callback = function(input)
         getgenv().TargetScriptInput = tostring(input or "")
     end
 })
 
 OthersTab:Button({
-    Title = "Execute script",
+    Title = "Execute"
     Callback = function()
         local input = getgenv().TargetScriptInput
 
-        if input == nil or input == "" then
+        if not input or input == "" then
             WindUI:Notify({
                 Title = "Executor notification",
                 Content = "Write or paste something...",
@@ -575,9 +575,7 @@ OthersTab:Button({
         if string.find(input, "loadstring", 1, true) then
             execSuccess = pcall(function()
                 local fn = loadstring(input)
-                if fn then
-                    fn()
-                end
+                if fn then fn() end
             end)
         else
             local success, result = pcall(function()
@@ -596,9 +594,7 @@ OthersTab:Button({
 
             execSuccess = pcall(function()
                 local fn = loadstring(result)
-                if fn then
-                    fn()
-                end
+                if fn then fn() end
             end)
         end
 
