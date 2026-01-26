@@ -450,114 +450,98 @@ OthersTab:Button({
     end
 })
 
-local Section = OthersTab:Section({ 
-    Title = "Main",
-    Box = false,
-    FontWeight = "SemiBold",
-    TextTransparency = 0.05,
-    TextXAlignment = "Left",
-    TextSize = 17,
-    Opened = false,
-})
-
 OthersTab:Input({
-    Title = "TTPI",
-    Desc = "Teleport to games using the Place links",
-    Value = "",
-    InputIcon = "link",
-    Type = "Input",
-    Placeholder = "https://www.roblox.com/games/PLACEID/ or PLACEID",
-    Section = Section,
-    Callback = function(input)
-        local id = tonumber(input) or tonumber(string.match(input, "%d+"))
-        getgenv().TargetPlaceId = id
-    end
+Title = "TTPI",
+Desc = "Teleport to games using the Place links",
+Value = "",
+InputIcon = "link",
+Type = "Input",
+Placeholder = "https://www.roblox.com/games/PLACEID/ or PLACEID",
+Callback = function(input)
+local id = tonumber(input) or tonumber(string.match(input, "%d+"))
+getgenv().TargetPlaceId = id
+end
 })
 
 OthersTab:Button({
-    Title = "Teleport",
-    Section = Section,
-    Callback = function()
-        if getgenv().TargetPlaceId then
-            WindUI:Notify({
-                Title = "TTPI NOTIFICATION",
-                Content = "TELEPORTING...",
-                Duration = 5,
-                Icon = "target",
-            })
-            task.wait(5)
-            game:GetService("TeleportService"):Teleport(
-                getgenv().TargetPlaceId,
-                game:GetService("Players").LocalPlayer
-            )
-        end
-    end
+Title = "Teleport",
+Callback = function()
+if getgenv().TargetPlaceId then
+WindUI:Notify({
+Title = "TTPI NOTIFICATION",
+Content = "TELEPORTING...",
+Duration = 5,
+Icon = "target",
+})
+task.wait(5)
+game:GetService("TeleportService"):Teleport(
+getgenv().TargetPlaceId,
+game:GetService("Players").LocalPlayer
+)
+end
+end
 })
 
 OthersTab:Input({
-    Title = "Boombox",
-    Desc = "Music ID",
-    Value = "",
-    InputIcon = "music",
-    Type = "Input",
-    Section = Section,
-    Placeholder = "MUSIC ID",
-    Callback = function(input)
-        getgenv().MusicId = tonumber(input)
-    end
+Title = "Boombox",
+Desc = "Music ID",
+Value = "",
+InputIcon = "music",
+Type = "Input",
+Placeholder = "MUSIC ID",
+Callback = function(input)
+getgenv().MusicId = tonumber(input)
+end
 })
 
 local Paragraph = OthersTab:Paragraph({
-    Title = "Now Playing",
-    Desc = "00:00/00:00",
-    Color = "Red",
-    Image = "",
-    ImageSize = 30,
-    Thumbnail = "",
-    ThumbnailSize = 80,
-    Locked = false,
-    Section = Section,
+Title = "Now Playing",
+Desc = "00:00/00:00",
+Color = "Red",
+Image = "",
+ImageSize = 30,
+Thumbnail = "",
+ThumbnailSize = 80,
+Locked = false,
 })
 
 OthersTab:Button({
-    Title = "Play",
-    Section = Section,
-    Callback = function()
-        if not getgenv().Sound then
-            local sound = Instance.new("Sound")
-            sound.Name = "EmbeddedBoombox"
-            sound.Parent = game:GetService("SoundService")
-            getgenv().Sound = sound
-        end
-        if getgenv().MusicId then
-            local sound = getgenv().Sound
-            sound.SoundId = "rbxassetid://" .. getgenv().MusicId
-            sound:Play()
-            task.spawn(function()
-                while sound and sound.IsPlaying do
-                    local current = math.floor(sound.TimePosition)
-                    local total = math.floor(sound.TimeLength)
-                    local function fmt(t)
-                        return string.format("%02d:%02d", math.floor(t / 60), t % 60)
-                    end
-                    if Paragraph and Paragraph.SetDesc then
-                        Paragraph:SetDesc(fmt(current) .. "/" .. fmt(total))
-                    end
-                    task.wait(1)
-                end
-            end)
-        end
-    end
+Title = "Play",
+Callback = function()
+if not getgenv().Sound then
+local sound = Instance.new("Sound")
+sound.Name = "EmbeddedBoombox"
+sound.Parent = game:GetService("SoundService")
+getgenv().Sound = sound
+end
+if getgenv().MusicId then
+local sound = getgenv().Sound
+sound.SoundId = "rbxassetid://" .. getgenv().MusicId
+sound:Play()
+task.spawn(function()
+while sound and sound.IsPlaying do
+local current = math.floor(sound.TimePosition)
+local total = math.floor(sound.TimeLength)
+local function fmt(t)
+return string.format("%02d:%02d", math.floor(t / 60), t % 60)
+end
+if Paragraph and Paragraph.SetDesc then
+Paragraph:SetDesc(fmt(current) .. "/" .. fmt(total))
+end
+task.wait(1)
+end
+end)
+end
+end
 })
 
 OthersTab:Button({
-    Title = "Pause",
-    Section = Section,
-    Callback = function()
-        if getgenv().Sound then
-            getgenv().Sound:Pause()
-        end
-    end
+Title = "Pause",
+Callback = function()
+if getgenv().Sound then
+getgenv().Sound:Pause()
+end
+end
 })
 
 local clockParagraph = InfoTab:Paragraph({ Title="Clock", Desc="--:--:--" })
