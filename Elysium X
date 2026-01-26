@@ -450,7 +450,17 @@ OthersTab:Button({
     end
 })
 
-OthersTab:Input({
+local Section = OthersTab:Section({ 
+    Title = "Main",
+    Box = false,
+    FontWeight = "SemiBold",
+    TextTransparency = 0.05,
+    TextXAlignment = "Left",
+    TextSize = 17,
+    Opened = false,
+})
+
+Section:Input({
     Title = "TTPI",
     Desc = "Teleport to games using the Place links",
     Value = "",
@@ -463,7 +473,7 @@ OthersTab:Input({
     end
 })
 
-OthersTab:Button({
+Section:Button({
     Title = "Teleport",
     Callback = function()
         if getgenv().TargetPlaceId then
@@ -482,7 +492,7 @@ OthersTab:Button({
     end
 })
 
-OthersTab:Input({
+Section:Input({
     Title = "Boombox",
     Desc = "Music ID",
     Value = "",
@@ -494,7 +504,7 @@ OthersTab:Input({
     end
 })
 
-local Paragraph = OthersTab:Paragraph({
+local Paragraph = Section:Paragraph({
     Title = "Now Playing",
     Desc = "00:00/00:00",
     Color = "Red",
@@ -505,7 +515,7 @@ local Paragraph = OthersTab:Paragraph({
     Locked = false,
 })
 
-OthersTab:Button({
+Section:Button({
     Title = "Play",
     Callback = function()
         if not getgenv().Sound then
@@ -535,7 +545,7 @@ OthersTab:Button({
     end
 })
 
-OthersTab:Button({
+Section:Button({
     Title = "Pause",
     Callback = function()
         if getgenv().Sound then
