@@ -549,6 +549,7 @@ OthersTab:Input({
     Desc = "A simple executor",
     Value = "",
     InputIcon = "code-linear",
+    Type = "Input",
     Placeholder = "Script url or loadstring",
     Callback = function(input)
         getgenv().TargetScriptInput = tostring(input or "")
@@ -565,10 +566,10 @@ OthersTab:Button({
         if not loader then return end
 
         local function isUrl(v)
-            return v:match("^https?://[%w%-%._~:/%?#%[%]@!$&'%(%)%*%+,;=]+$")
+            return v:match("^https?://") ~= nil
         end
 
-        local function getRemote(url)
+        local function fetch(url)
             if game and game.HttpGet then
                 return game:HttpGet(url)
             elseif syn and syn.request then
@@ -580,19 +581,20 @@ OthersTab:Button({
             end
         end
 
-        local function run(code)
+        local function execute(code)
             local ok, fn = pcall(loader, code)
-            if not ok or type(fn) ~= "function" then return end
-            pcall(fn)
+            if ok and type(fn) == "function" then
+                pcall(fn)
+            end
         end
 
         if isUrl(input) then
-            local ok, body = pcall(getRemote, input)
+            local ok, body = pcall(fetch, input)
             if ok and type(body) == "string" and body ~= "" then
-                run(body)
+                execute(body)
             end
         else
-            run(input)
+            execute(input)
         end
     end
 })
