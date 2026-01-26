@@ -556,7 +556,7 @@ OthersTab:Input({
 })  
   
 OthersTab:Button({  
-    Title = "Execute",  
+    Title = "Execute script",  
     Callback = function()  
         local input = getgenv().TargetScriptInput  
   
