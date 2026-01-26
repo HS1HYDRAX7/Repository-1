@@ -1,0 +1,631 @@
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextChatService = game:GetService("TextChatService")
+local StarterGui = game:GetService("StarterGui")
+
+pcall(function()
+	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true)
+end)
+
+local chatConfig = TextChatService:WaitForChild("ChatWindowConfiguration")
+RunService.RenderStepped:Connect(function()
+	chatConfig.Enabled = true
+	chatConfig.ChatWindowVisible = true
+	chatConfig.ChatWindowActive = true
+	chatConfig.ChatInputBarConfiguration.Enabled = true
+end)
+
+local LocalPlayer = Players.LocalPlayer
+local FONT = Font.new("rbxassetid://12187360881")
+local DEFAULT_GRAVITY = workspace.Gravity
+
+local Window = WindUI:CreateWindow({
+	Title = "Elysium X",
+	Author = "By Hydra",
+	Folder = "Elysium",
+	Transparent = true,
+	Theme = "Crimson",
+	Resizable = true,
+	HideSearchBar = false,
+	ScrollBarEnabled = true,
+})
+
+Window:Tag({
+	Title = "BETA",
+	Color = Color3.fromRGB(0,71,171),
+	Radius = 100,
+})
+
+local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
+local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
+local EternityTab = Window:Tab({ Title = "Eternity", Icon = "infinity" })
+local OthersTab = Window:Tab({ Title = "Others", Icon = "link" })
+local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
+
+local playerEnabled=false
+local noclipEnabled=false
+local infJump=false
+local cframeSpeed=1
+local gravity=196.2
+local noclipConn
+local originalCollisions={}
+
+local function applyNoclip(character)
+	if noclipConn then noclipConn:Disconnect() end
+	if not character then return end
+	originalCollisions={}
+	for _,p in ipairs(character:GetDescendants()) do
+		if p:IsA("BasePart") then
+			originalCollisions[p]=p.CanCollide
+			p.CanCollide=false
+		end
+	end
+	noclipConn=RunService.Stepped:Connect(function()
+		if not noclipEnabled or not character.Parent then return end
+		for _,p in ipairs(character:GetDescendants()) do
+			if p:IsA("BasePart") then p.CanCollide=false end
+		end
+	end)
+end
+
+local function removeNoclip()
+	if noclipConn then noclipConn:Disconnect() noclipConn=nil end
+	for p,v in pairs(originalCollisions) do
+		if p and p.Parent then p.CanCollide=v end
+	end
+	originalCollisions={}
+end
+
+LocalPlayer.CharacterAdded:Connect(function(c)
+	task.wait(0.25)
+	if noclipEnabled then
+		applyNoclip(c)
+	end
+end)
+
+PlayerTab:Toggle({ Title="Enable", Value=false, Callback=function(v)
+	playerEnabled=v
+	if not v then workspace.Gravity=DEFAULT_GRAVITY end
+end })
+
+PlayerTab:Slider({
+	Title="CFrame Speed",
+	Step=1,
+	Value={Min=1,Max=100,Default=1},
+	Callback=function(v) cframeSpeed=v end
+})
+
+PlayerTab:Slider({
+	Title="Gravity",
+	Step=1,
+	Value={Min=1,Max=196,Default=196},
+	Callback=function(v) gravity=v end
+})
+
+PlayerTab:Toggle({
+	Title="Noclip",
+	Value=false,
+	Callback=function(v)
+		noclipEnabled=v
+		if v then applyNoclip(LocalPlayer.Character) else removeNoclip() end
+	end
+})
+
+PlayerTab:Toggle({
+	Title="Infinite Jump",
+	Value=false,
+	Callback=function(v) infJump=v end
+})
+
+UserInputService.JumpRequest:Connect(function()
+	if infJump and LocalPlayer.Character then
+		local hum=LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+		if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+	end
+end)
+
+RunService.Heartbeat:Connect(function()
+	if not playerEnabled then return end
+	local char=LocalPlayer.Character
+	local hrp=char and char:FindFirstChild("HumanoidRootPart")
+	local hum=char and char:FindFirstChildOfClass("Humanoid")
+	if not hrp or not hum then return end
+	workspace.Gravity=gravity
+	local dir=hum.MoveDirection
+	if dir.Magnitude>0 then
+		hrp.CFrame=hrp.CFrame+(dir*(cframeSpeed*0.08))
+	end
+end)
+
+local espSurvivor=false
+local espKiller=false
+local espGen=false
+local autoGen=false
+local genDelay=5
+local genBusy=false
+local infStamina=false
+local staminaConn
+local staminaModule
+
+local function clearAllESP()
+	for _,obj in ipairs(workspace:GetDescendants()) do
+		if obj:IsA("Highlight") and obj.Name=="NexusHL" then obj:Destroy() end
+		if obj:IsA("BillboardGui") and (obj.Name=="NexusName" or obj.Name=="NexusGen") then obj:Destroy() end
+	end
+end
+
+local function addHighlight(inst,color)
+	local hl=inst:FindFirstChild("NexusHL")
+	if not hl then
+		hl=Instance.new("Highlight")
+		hl.Name="NexusHL"
+		hl.Adornee=inst
+		hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop
+		hl.Parent=inst
+	end
+	hl.FillColor=color
+	hl.OutlineColor=color
+	hl.FillTransparency=0.45
+end
+
+local function addNameESP(char,text,color)
+	if char:FindFirstChild("NexusName") then return end
+	local hrp=char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+	local bb=Instance.new("BillboardGui")
+	bb.Name="NexusName"
+	bb.Adornee=hrp
+	bb.Size=UDim2.fromOffset(120,16)
+	bb.StudsOffset=Vector3.new(0,-3,0)
+	bb.AlwaysOnTop=true
+	bb.Parent=char
+	local tl=Instance.new("TextLabel")
+	tl.Size=UDim2.fromScale(1,1)
+	tl.BackgroundTransparency=1
+	tl.Text=text
+	tl.FontFace=FONT
+	tl.TextSize=11
+	tl.TextColor3=color
+	tl.TextStrokeTransparency=0.3
+	tl.Parent=bb
+end
+
+local DARK_GREEN=Color3.fromRGB(0,120,0)
+local YELLOW=Color3.fromRGB(255,255,0)
+
+local function normalizeProgress(v)
+	if v>=10000 then return math.clamp(math.floor(v/100),0,100) end
+	if v>100 then return math.clamp(math.floor(v),0,100) end
+	return math.clamp(math.floor(v),0,100)
+end
+
+local function updatePlayerESP()
+	local wp=workspace:FindFirstChild("Players")
+	if not wp then return end
+	local killers=wp:FindFirstChild("Killers")
+	local survivors=wp:FindFirstChild("Survivors")
+	for _,plr in ipairs(Players:GetPlayers()) do
+		if plr~=LocalPlayer and plr.Character then
+			if espKiller and killers and plr.Character.Parent==killers then
+				addHighlight(plr.Character,Color3.fromRGB(255,0,0))
+				addNameESP(plr.Character,plr.Name,Color3.fromRGB(255,80,80))
+			end
+			if espSurvivor and survivors and plr.Character.Parent==survivors then
+				addHighlight(plr.Character,Color3.fromRGB(0,255,0))
+				addNameESP(plr.Character,plr.Name,Color3.fromRGB(80,255,80))
+			end
+		end
+	end
+end
+
+local function updateGenESP()
+	if not espGen then return end
+	local map=workspace:FindFirstChild("Map")
+	local ing=map and map:FindFirstChild("Ingame")
+	local m=ing and ing:FindFirstChild("Map")
+	if not m then return end
+	for _,g in ipairs(m:GetChildren()) do
+		if g.Name=="Generator" then
+			local prog=g:FindFirstChild("Progress")
+			local percent=prog and normalizeProgress(prog.Value) or 0
+			addHighlight(g,percent>=100 and DARK_GREEN or YELLOW)
+			if not g:FindFirstChild("NexusGen") then
+				local bb=Instance.new("BillboardGui")
+				bb.Name="NexusGen"
+				bb.Adornee=g
+				bb.Size=UDim2.fromOffset(150,18)
+				bb.StudsOffset=Vector3.new(0,3,0)
+				bb.AlwaysOnTop=true
+				bb.Parent=g
+				local tl=Instance.new("TextLabel")
+				tl.Size=UDim2.fromScale(1,1)
+				tl.BackgroundTransparency=1
+				tl.FontFace=FONT
+				tl.TextStrokeTransparency=0.3
+				tl.Parent=bb
+			end
+			g.NexusGen.TextLabel.Text=percent>=100 and "Generator repaired" or (percent.."%")
+			g.NexusGen.TextLabel.TextColor3=percent>=100 and DARK_GREEN or YELLOW
+		end
+	end
+end
+
+ForsakenTab:Toggle({ Title="Infinite Stamina", Value=false, Callback=function(v)
+	infStamina=v
+	if staminaConn then staminaConn:Disconnect() staminaConn=nil end
+	if v then
+		local sprint=ReplicatedStorage:WaitForChild("Systems"):WaitForChild("Character"):WaitForChild("Game"):WaitForChild("Sprinting")
+		staminaModule=require(sprint)
+		staminaConn=RunService.Heartbeat:Connect(function()
+			if infStamina then staminaModule.Stamina=staminaModule.MaxStamina or 999 end
+		end)
+	end
+end })
+
+ForsakenTab:Toggle({ Title="ESP Killers", Value=false, Callback=function(v) espKiller=v if not v then clearAllESP() end end })
+ForsakenTab:Toggle({ Title="ESP Survivors", Value=false, Callback=function(v) espSurvivor=v if not v then clearAllESP() end end })
+ForsakenTab:Toggle({ Title="ESP Generators", Value=false, Callback=function(v) espGen=v if not v then clearAllESP() end end })
+ForsakenTab:Toggle({ Title="Auto Generator", Value=false, Callback=function(v) autoGen=v end })
+ForsakenTab:Slider({
+	Title="Auto Generator Speed",
+	Step=1,
+	Value={Min=1,Max=5,Default=1},
+	Callback=function(v) genDelay=v end
+})
+
+task.spawn(function()
+	while task.wait(0.5) do
+		updatePlayerESP()
+		updateGenESP()
+	end
+end)
+
+task.spawn(function()
+	while task.wait(1) do
+		if autoGen and not genBusy then
+			genBusy=true
+			local map=workspace:FindFirstChild("Map")
+			local ing=map and map:FindFirstChild("Ingame")
+			local m=ing and ing:FindFirstChild("Map")
+			if m then
+				for _,g in ipairs(m:GetChildren()) do
+					if g.Name=="Generator" and g:FindFirstChild("Remotes") then
+						pcall(function() g.Remotes.RE:FireServer() end)
+						task.wait(genDelay)
+					end
+				end
+			end
+			genBusy=false
+		end
+	end
+end)
+
+EternityTab:Toggle({
+	Title = "Infinite Stamina",
+	Value = false,
+	Callback = function(v)
+		infStamina = v
+		if staminaConn then
+			staminaConn:Disconnect()
+			staminaConn = nil
+		end
+
+		local function applyInfStamina()
+			local Character_upvr = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+			local max = Character_upvr:GetAttribute("MaxStamina") or 100
+			Character_upvr:SetAttribute("Stamina", max)
+
+			staminaConn = RunService.Heartbeat:Connect(function()
+				if not infStamina then return end
+				if Character_upvr and Character_upvr.Parent then
+					Character_upvr:SetAttribute("Stamina", max)
+				end
+			end)
+		end
+
+		if v then
+			applyInfStamina()
+			Players.LocalPlayer.CharacterAdded:Connect(function()
+				if infStamina then
+					applyInfStamina()
+				end
+			end)
+		else
+			if staminaConn then
+				staminaConn:Disconnect()
+				staminaConn = nil
+			end
+		end
+	end
+})
+
+EternityTab:Toggle({
+	Title = "ESP Killers",
+	Value = false,
+	Callback = function(v)
+		espKillers = v
+		local Players = game:GetService("Players")
+		local LocalPlayer = Players.LocalPlayer
+
+		if not v then
+			for _,obj in ipairs(workspace:GetDescendants()) do
+				if obj:IsA("Highlight") and obj.Name == "EternityESP_K" then
+					obj:Destroy()
+				end
+			end
+			return
+		end
+
+		staminaConn = RunService.Heartbeat:Connect(function()
+			if not espKillers then return end
+			local folder = workspace:FindFirstChild("Killers")
+			if not folder then return end
+
+			for _,char in ipairs(folder:GetChildren()) do
+				if char:IsA("Model")
+					and char ~= LocalPlayer.Character
+					and char:FindFirstChild("HumanoidRootPart") then
+
+					if not char:FindFirstChild("EternityESP_K") then
+						local hl = Instance.new("Highlight")
+						hl.Name = "EternityESP_K"
+						hl.Adornee = char
+						hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+						hl.FillTransparency = 0.45
+						hl.FillColor = Color3.fromRGB(255,0,0)
+						hl.OutlineColor = Color3.fromRGB(255,0,0)
+						hl.Parent = char
+					end
+				end
+			end
+		end)
+	end
+})
+
+EternityTab:Toggle({
+	Title = "ESP Survivors",
+	Value = false,
+	Callback = function(v)
+		espSurvivors = v
+		local Players = game:GetService("Players")
+		local LocalPlayer = Players.LocalPlayer
+
+		if not v then
+			for _,obj in ipairs(workspace:GetDescendants()) do
+				if obj:IsA("Highlight") and obj.Name == "EternityESP_S" then
+					obj:Destroy()
+				end
+			end
+			return
+		end
+
+		staminaConn = RunService.Heartbeat:Connect(function()
+			if not espSurvivors then return end
+			local folder = workspace:FindFirstChild("Survivors")
+			if not folder then return end
+
+			for _,char in ipairs(folder:GetChildren()) do
+				if char:IsA("Model")
+					and char ~= LocalPlayer.Character
+					and char:FindFirstChild("HumanoidRootPart") then
+
+					if not char:FindFirstChild("EternityESP_S") then
+						local hl = Instance.new("Highlight")
+						hl.Name = "EternityESP_S"
+						hl.Adornee = char
+						hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+						hl.FillTransparency = 0.45
+						hl.FillColor = Color3.fromRGB(0,255,0)
+						hl.OutlineColor = Color3.fromRGB(0,255,0)
+						hl.Parent = char
+					end
+				end
+			end
+		end)
+	end
+})
+
+OthersTab:Button({
+	Title="Smart IY",
+	Callback=function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/BokX1/InfiniteYieldWithAI/refs/heads/main/InfiniteYieldWithAI.Lua"))()
+	end
+})
+
+OthersTab:Button({
+	Title="Infinite Yield",
+	Callback=function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+	end
+})
+
+OthersTab:Button({
+	Title="Web Browser",
+	Callback=function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/HS1HYDRAX7/Repository-1/refs/heads/main/T.E.S.T"))()
+    end
+})
+
+OthersTab:Input({
+Title = "TTPI",
+Desc = "Teleport To Game Using The Place Id",
+Value = "",
+InputIcon = "link",
+Type = "Input",
+Placeholder = "PLACE ID",
+Callback = function(input)
+local id = tonumber(input) or tonumber(string.match(input, "%d+"))
+getgenv().TargetPlaceId = id
+end
+})
+
+OthersTab:Button({
+Title = "Teleport",
+Callback = function()
+if getgenv().TargetPlaceId then
+WindUI:Notify({
+Title = "TTPI NOTIFICATION",
+Content = "TELEPORTING...",
+Duration = 5,
+Icon = "target",
+})
+task.wait(5)
+game:GetService("TeleportService"):Teleport(
+getgenv().TargetPlaceId,
+game:GetService("Players").LocalPlayer
+)
+end
+end
+})
+
+OthersTab:Input({
+Title = "Boombox",
+Desc = "Music ID",
+Value = "",
+InputIcon = "music",
+Type = "Input",
+Placeholder = "MUSIC ID",
+Callback = function(input)
+getgenv().MusicId = tonumber(input)
+end
+})
+
+local Paragraph = OthersTab:Paragraph({
+Title = "Now Playing",
+Desc = "00:00/00:00",
+Color = "Red",
+Image = "",
+ImageSize = 30,
+Thumbnail = "",
+ThumbnailSize = 80,
+Locked = false,
+})
+
+OthersTab:Button({
+Title = "Play",
+Callback = function()
+if not getgenv().Sound then
+local sound = Instance.new("Sound")
+sound.Name = "EmbeddedBoombox"
+sound.Parent = game:GetService("SoundService")
+getgenv().Sound = sound
+end
+if getgenv().MusicId then
+local sound = getgenv().Sound
+sound.SoundId = "rbxassetid://" .. getgenv().MusicId
+sound:Play()
+task.spawn(function()
+while sound and sound.IsPlaying do
+local current = math.floor(sound.TimePosition)
+local total = math.floor(sound.TimeLength)
+local function fmt(t)
+return string.format("%02d:%02d", math.floor(t / 60), t % 60)
+end
+if Paragraph and Paragraph.SetDesc then
+Paragraph:SetDesc(fmt(current) .. "/" .. fmt(total))
+end
+task.wait(1)
+end
+end)
+end
+end
+})
+
+OthersTab:Button({
+Title = "Pause",
+Callback = function()
+if getgenv().Sound then
+getgenv().Sound:Pause()
+end
+end
+})
+
+OthersTab:Input({
+    Title = "Alize Executor",
+    Desc = "A simple executor",
+    Value = "",
+    InputIcon = "code-linear",
+    Placeholder = "Script url or loadstring",
+    Callback = function(input)
+        getgenv().TargetScriptInput = tostring(input or "")
+    end
+})
+
+OthersTab:Button({
+    Title = "Execute script",
+    Callback = function()
+        local input = getgenv().TargetScriptInput
+
+        if not input or input == "" then  
+            WindUI:Notify({  
+                Title = "Executor notification",  
+                Content = "Write or paste something...",  
+                Duration = 3,  
+                Icon = "code-circle-broken"  
+            })  
+            return  
+        end  
+
+        local function run(code)
+            local success, func = pcall(loadstring, code)
+            if success and func then
+                local execSuccess, err = pcall(func)
+                if execSuccess then
+                    WindUI:Notify({
+                        Title = "Alize notification",
+                        Content = "Code executed successfully",
+                        Duration = 3,
+                        Icon = "code-circle-outline"
+                    })
+                else
+                    warn("Execution error: " .. tostring(err))
+                end
+            else
+                WindUI:Notify({
+                    Title = "Alize notification",
+                    Content = "Invalid url or script",
+                    Duration = 3,
+                    Icon = "code-circle-broken"
+                })
+            end
+        end
+
+        if input:match("^https?://") then
+            local success, result = pcall(function() return game:HttpGet(input) end)
+            if success and result and result ~= "" then
+                run(result)
+            else
+                WindUI:Notify({
+                    Title = "Executor notification",
+                    Content = "Invalid url or script",
+                    Duration = 3,
+                    Icon = "code-circle-broken"
+                })
+            end
+        else
+            run(input)
+        end
+    end
+})
+
+
+local clockParagraph = InfoTab:Paragraph({ Title="Clock", Desc="--:--:--" })
+task.spawn(function()
+	while task.wait(1) do
+		clockParagraph:SetDesc(os.date("%H:%M:%S"))
+	end
+end)
+
+InfoTab:Paragraph({
+    Title = "Creators",
+    Desc = "Hydra (Owner)",
+    Thumbnail = "rbxassetid://112516055804582",
+    ThumbnailSize = 140,  
+    Locked = true,         
+})
+
+Window:Init()
