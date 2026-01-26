@@ -452,11 +452,11 @@ OthersTab:Button({
 
 OthersTab:Input({
 Title = "TTPI",
-Desc = "Teleport to games using the Place links",
+Desc = "Teleport To Game Using The Place Id",
 Value = "",
 InputIcon = "link",
 Type = "Input",
-Placeholder = "https://www.roblox.com/games/PLACEID/ or PLACEID",
+Placeholder = "PLACEID",
 Callback = function(input)
 local id = tonumber(input) or tonumber(string.match(input, "%d+"))
 getgenv().TargetPlaceId = id
