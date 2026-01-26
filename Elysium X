@@ -555,7 +555,6 @@ InfoTab:Paragraph({ Title="FPS", Desc="0" }):SetDesc((function()
 	local RunService = game:GetService("RunService")
 	local frameCount = 0
 	local lastTime = tick()
-	local paragraph
 
 	RunService.RenderStepped:Connect(function()
 		frameCount = frameCount + 1
@@ -568,13 +567,11 @@ InfoTab:Paragraph({ Title="FPS", Desc="0" }):SetDesc((function()
 			local fps = math.floor(frameCount / dt)
 			lastTime = now
 			frameCount = 0
-			if paragraph then
-				paragraph:SetDesc(tostring(fps))
-			end
+			pcall(function() _G.FPSParagraph:SetDesc(tostring(fps)) end)
 		end
 	end)
 
-	paragraph = InfoTab:Paragraph({ Title="FPS", Desc="0" })
+	_G.FPSParagraph = InfoTab:Paragraph({ Title="FPS", Desc="0" })
 	return "0"
 end)())
 
