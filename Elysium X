@@ -551,6 +551,24 @@ task.spawn(function()
 	end
 end)
 
+local fpsParagraph = InfoTab:Paragraph({ Title="FPS", Desc="0" })
+local memParagraph = InfoTab:Paragraph({ Title="Memory", Desc="0 MB" })
+
+local lastFrameTime = tick()
+local fps = 0
+
+task.spawn(function()
+	while task.wait(0.5) do
+		local currentTime = tick()
+		fps = math.floor(1 / (currentTime - lastFrameTime))
+		lastFrameTime = currentTime
+		fpsParagraph:SetDesc(tostring(fps))
+
+		local mem = math.floor(collectgarbage("count") / 1024)
+		memParagraph:SetDesc(mem .. " MB")
+	end
+end)
+
 InfoTab:Paragraph({
     Title = "Creators",
     Desc = "Hydra (Owner)",
