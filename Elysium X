@@ -551,6 +551,12 @@ task.spawn(function()
 	end
 end)
 
-InfoTab:Paragraph({ Title="Creators", Desc="Hydra (Owner)" })
+InfoTab:Paragraph({
+    Title = "Creators",
+    Desc = "Hydra (Owner)",
+    Thumbnail = "rbxassetid://112516055804582",
+    ThumbnailSize = 140,  
+    Locked = true,         
+})
 
 Window:Init()
