@@ -3,14 +3,17 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
+local playerGui = player:FindFirstChildOfClass("PlayerGui")
+
+if not playerGui then return end
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AlizeExecutor"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = player:WaitForChild("PlayerGui")
+ScreenGui.Parent = playerGui
 
 local Main = Instance.new("Frame")
-Main.Size = UDim2.fromScale(0, 0)
+Main.Size = UDim2.fromScale(0.45, 0.5)
 Main.Position = UDim2.fromScale(0.5, 0.5)
 Main.AnchorPoint = Vector2.new(0.5, 0.5)
 Main.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
@@ -34,7 +37,7 @@ Title.Size = UDim2.new(1, -50, 1, 0)
 Title.Position = UDim2.new(0, 16, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "Alize Executor"
-Title.TextXAlignment = Left
+Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.GothamSemibold
 Title.TextSize = 16
 Title.TextColor3 = Color3.fromRGB(235, 235, 235)
@@ -65,8 +68,8 @@ CodeBox.Size = UDim2.new(1, 0, 1, -52)
 CodeBox.ClearTextOnFocus = false
 CodeBox.MultiLine = true
 CodeBox.TextWrapped = true
-CodeBox.TextXAlignment = Left
-CodeBox.TextYAlignment = Top
+CodeBox.TextXAlignment = Enum.TextXAlignment.Left
+CodeBox.TextYAlignment = Enum.TextYAlignment.Top
 CodeBox.Font = Enum.Font.Code
 CodeBox.TextSize = 14
 CodeBox.TextColor3 = Color3.fromRGB(235, 235, 235)
@@ -136,18 +139,10 @@ Execute.MouseButton1Click:Connect(function()
 end)
 
 Close.MouseButton1Click:Connect(function()
-	TweenService:Create(Main, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-		Size = UDim2.fromScale(0,0)
-	}):Play()
-	task.delay(0.25, function()
-		ScreenGui:Destroy()
-	end)
+	ScreenGui:Destroy()
 end)
 
-TweenService:Create(Main, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-	Size = UDim2.fromScale(0.45, 0.5)
-}):Play()
-
+-- Drag
 local dragging
 local dragStart
 local startPos
