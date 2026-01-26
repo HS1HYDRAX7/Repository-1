@@ -460,21 +460,23 @@ local Section = OthersTab:Section({
     Opened = false,
 })
 
-Section:Input({
+OthersTab:Input({
     Title = "TTPI",
     Desc = "Teleport to games using the Place links",
     Value = "",
     InputIcon = "link",
     Type = "Input",
     Placeholder = "https://www.roblox.com/games/PLACEID/ or PLACEID",
+    Section = Section,
     Callback = function(input)
         local id = tonumber(input) or tonumber(string.match(input, "%d+"))
         getgenv().TargetPlaceId = id
     end
 })
 
-Section:Button({
+OthersTab:Button({
     Title = "Teleport",
+    Section = Section,
     Callback = function()
         if getgenv().TargetPlaceId then
             WindUI:Notify({
@@ -492,19 +494,20 @@ Section:Button({
     end
 })
 
-Section:Input({
+OthersTab:Input({
     Title = "Boombox",
     Desc = "Music ID",
     Value = "",
     InputIcon = "music",
     Type = "Input",
+    Section = Section,
     Placeholder = "MUSIC ID",
     Callback = function(input)
         getgenv().MusicId = tonumber(input)
     end
 })
 
-local Paragraph = Section:Paragraph({
+local Paragraph = OthersTab:Paragraph({
     Title = "Now Playing",
     Desc = "00:00/00:00",
     Color = "Red",
@@ -513,10 +516,12 @@ local Paragraph = Section:Paragraph({
     Thumbnail = "",
     ThumbnailSize = 80,
     Locked = false,
+    Section = Section,
 })
 
-Section:Button({
+OthersTab:Button({
     Title = "Play",
+    Section = Section,
     Callback = function()
         if not getgenv().Sound then
             local sound = Instance.new("Sound")
@@ -545,8 +550,9 @@ Section:Button({
     end
 })
 
-Section:Button({
+OthersTab:Button({
     Title = "Pause",
+    Section = Section,
     Callback = function()
         if getgenv().Sound then
             getgenv().Sound:Pause()
