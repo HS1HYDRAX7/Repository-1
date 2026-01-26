@@ -1,11 +1,25 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
 
 local player = Players.LocalPlayer
 local playerGui = player:FindFirstChildOfClass("PlayerGui")
-
 if not playerGui then return end
+
+local workspaceFolder = workspace:FindFirstChild("Elysium") or Instance.new("Folder", workspace)
+workspaceFolder.Name = "Elysium"
+local assetsFolder = workspaceFolder:FindFirstChild("assets") or Instance.new("Folder", workspaceFolder)
+assetsFolder.Name = "assets"
+
+local jsonFile = assetsFolder:FindFirstChild("scripts_json")
+if not jsonFile then
+	jsonFile = Instance.new("StringValue", assetsFolder)
+	jsonFile.Name = "scripts_json"
+	jsonFile.Value = "[]"
+end
+
+local scriptsData = HttpService:JSONDecode(jsonFile.Value)
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AlizeExecutor"
@@ -13,133 +27,205 @@ ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = playerGui
 
 local Main = Instance.new("Frame")
-Main.Size = UDim2.fromScale(0.45, 0.5)
-Main.Position = UDim2.fromScale(0.5, 0.5)
-Main.AnchorPoint = Vector2.new(0.5, 0.5)
-Main.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+Main.Size = UDim2.fromScale(0.45,0.5)
+Main.Position = UDim2.fromScale(0.5,0.5)
+Main.AnchorPoint = Vector2.new(0.5,0.5)
+Main.BackgroundColor3 = Color3.fromRGB(20,20,25)
 Main.Parent = ScreenGui
-
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 18)
-MainCorner.Parent = Main
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0,18)
 
 local TopBar = Instance.new("Frame")
-TopBar.Size = UDim2.new(1, 0, 0, 42)
-TopBar.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
+TopBar.Size = UDim2.new(1,0,0,42)
+TopBar.BackgroundColor3 = Color3.fromRGB(28,28,36)
 TopBar.Parent = Main
-
-local TopCorner = Instance.new("UICorner")
-TopCorner.CornerRadius = UDim.new(0, 18)
-TopCorner.Parent = TopBar
+Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0,18)
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -50, 1, 0)
-Title.Position = UDim2.new(0, 16, 0, 0)
+Title.Size = UDim2.new(1,-50,1,0)
+Title.Position = UDim2.new(0,16,0,0)
 Title.BackgroundTransparency = 1
 Title.Text = "Alize Executor"
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.GothamSemibold
 Title.TextSize = 16
-Title.TextColor3 = Color3.fromRGB(235, 235, 235)
+Title.TextColor3 = Color3.fromRGB(235,235,235)
 Title.Parent = TopBar
 
 local Close = Instance.new("TextButton")
-Close.Size = UDim2.new(0, 32, 0, 32)
-Close.Position = UDim2.new(1, -38, 0.5, -16)
-Close.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+Close.Size = UDim2.new(0,32,0,32)
+Close.Position = UDim2.new(1,-38,0.5,-16)
+Close.BackgroundColor3 = Color3.fromRGB(200,60,60)
 Close.Text = "X"
 Close.Font = Enum.Font.GothamBold
 Close.TextSize = 14
 Close.TextColor3 = Color3.new(1,1,1)
 Close.Parent = TopBar
+Instance.new("UICorner", Close).CornerRadius = UDim.new(0,10)
 
-local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 10)
-CloseCorner.Parent = Close
-
-local Body = Instance.new("Frame")
-Body.Size = UDim2.new(1, -24, 1, -66)
-Body.Position = UDim2.new(0, 12, 0, 54)
-Body.BackgroundTransparency = 1
-Body.Parent = Main
+local NameLabel = Instance.new("TextLabel")
+NameLabel.Size = UDim2.new(1, -24, 0, 28)
+NameLabel.Position = UDim2.new(0,12,0,52)
+NameLabel.BackgroundTransparency = 1
+NameLabel.Text = ""
+NameLabel.Font = Enum.Font.GothamSemibold
+NameLabel.TextSize = 14
+NameLabel.TextColor3 = Color3.fromRGB(235,235,235)
+NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+NameLabel.Parent = Main
 
 local CodeBox = Instance.new("TextBox")
-CodeBox.Size = UDim2.new(1, 0, 1, -52)
-CodeBox.ClearTextOnFocus = false
+CodeBox.Size = UDim2.new(1,-24,0,180)
+CodeBox.Position = UDim2.new(0,12,0,82)
+CodeBox.BackgroundColor3 = Color3.fromRGB(30,30,40)
+CodeBox.TextColor3 = Color3.fromRGB(235,235,235)
+CodeBox.Font = Enum.Font.Code
+CodeBox.TextSize = 14
 CodeBox.MultiLine = true
 CodeBox.TextWrapped = true
 CodeBox.TextXAlignment = Enum.TextXAlignment.Left
 CodeBox.TextYAlignment = Enum.TextYAlignment.Top
-CodeBox.Font = Enum.Font.Code
-CodeBox.TextSize = 14
-CodeBox.TextColor3 = Color3.fromRGB(235, 235, 235)
-CodeBox.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+CodeBox.ClearTextOnFocus = false
 CodeBox.Text = "-- Cole seu script aqui"
-CodeBox.Parent = Body
+CodeBox.Parent = Main
+Instance.new("UICorner", CodeBox).CornerRadius = UDim.new(0,16)
 
-local CodeCorner = Instance.new("UICorner")
-CodeCorner.CornerRadius = UDim.new(0, 16)
-CodeCorner.Parent = CodeBox
+local BottomBar = Instance.new("Frame")
+BottomBar.Size = UDim2.new(1, -24, 0, 44)
+BottomBar.Position = UDim2.new(0,12,1,-52)
+BottomBar.BackgroundTransparency = 1
+BottomBar.Parent = Main
 
-local Bottom = Instance.new("Frame")
-Bottom.Size = UDim2.new(1, 0, 0, 44)
-Bottom.Position = UDim2.new(0, 0, 1, -44)
-Bottom.BackgroundTransparency = 1
-Bottom.Parent = Body
+local TabsFrame = Instance.new("ScrollingFrame")
+TabsFrame.Size = UDim2.new(0.6,0,1,0)
+TabsFrame.BackgroundTransparency = 1
+TabsFrame.ScrollBarThickness = 6
+TabsFrame.Parent = BottomBar
 
-local Tabs = Instance.new("TextButton")
-Tabs.Size = UDim2.new(0, 80, 0, 36)
-Tabs.Position = UDim2.new(0, 0, 0.5, -18)
-Tabs.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
-Tabs.Text = "Tabs +"
-Tabs.Font = Enum.Font.Gotham
-Tabs.TextSize = 14
-Tabs.TextColor3 = Color3.fromRGB(235, 235, 235)
-Tabs.Parent = Bottom
+local TabsLayout = Instance.new("UIListLayout")
+TabsLayout.FillDirection = Enum.FillDirection.Horizontal
+TabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+TabsLayout.Parent = TabsFrame
 
-local TabsCorner = Instance.new("UICorner")
-TabsCorner.CornerRadius = UDim.new(0, 14)
-TabsCorner.Parent = Tabs
+local AddTab = Instance.new("TextButton")
+AddTab.Size = UDim2.new(0,60,0,36)
+AddTab.Position = UDim2.new(0.61,0,0.5,-18)
+AddTab.BackgroundColor3 = Color3.fromRGB(45,45,60)
+AddTab.Text = "+"
+AddTab.Font = Enum.Font.GothamBold
+AddTab.TextSize = 20
+AddTab.TextColor3 = Color3.fromRGB(235,235,235)
+AddTab.Parent = BottomBar
+Instance.new("UICorner", AddTab).CornerRadius = UDim.new(0,14)
 
 local Execute = Instance.new("TextButton")
-Execute.Size = UDim2.new(0, 120, 0, 36)
-Execute.Position = UDim2.new(1, -120, 0.5, -18)
-Execute.BackgroundColor3 = Color3.fromRGB(80, 120, 255)
+Execute.Size = UDim2.new(0,120,0,36)
+Execute.Position = UDim2.new(1,-120,0.5,-18)
+Execute.BackgroundColor3 = Color3.fromRGB(80,120,255)
 Execute.Text = "Execute"
 Execute.Font = Enum.Font.GothamSemibold
 Execute.TextSize = 14
 Execute.TextColor3 = Color3.new(1,1,1)
-Execute.Parent = Bottom
+Execute.Parent = BottomBar
+Instance.new("UICorner", Execute).CornerRadius = UDim.new(0,14)
 
-local ExecuteCorner = Instance.new("UICorner")
-ExecuteCorner.CornerRadius = UDim.new(0, 14)
-ExecuteCorner.Parent = Execute
+local currentTab
 
-local function hover(btn, c1, c2)
-	btn.MouseEnter:Connect(function()
-		TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = c2}):Play()
+local function saveScripts()
+	jsonFile.Value = HttpService:JSONEncode(scriptsData)
+end
+
+local function createTab(scriptData)
+	local tab = Instance.new("Frame")
+	tab.Size = UDim2.new(0,120,0,36)
+	tab.BackgroundColor3 = Color3.fromRGB(50,50,70)
+	tab.Parent = TabsFrame
+	Instance.new("UICorner", tab).CornerRadius = UDim.new(0,12)
+	
+	local tabName = Instance.new("TextLabel")
+	tabName.Size = UDim2.new(1,-28,1,0)
+	tabName.Position = UDim2.new(0,4,0,0)
+	tabName.BackgroundTransparency = 1
+	tabName.Text = scriptData.Name
+	tabName.Font = Enum.Font.Gotham
+	tabName.TextSize = 14
+	tabName.TextColor3 = Color3.fromRGB(235,235,235)
+	tabName.TextXAlignment = Enum.TextXAlignment.Left
+	tabName.Parent = tab
+	
+	local tabClose = Instance.new("TextButton")
+	tabClose.Size = UDim2.new(0,24,0,24)
+	tabClose.Position = UDim2.new(1,-28,0.5,-12)
+	tabClose.BackgroundColor3 = Color3.fromRGB(200,60,60)
+	tabClose.Text = "X"
+	tabClose.Font = Enum.Font.GothamBold
+	tabClose.TextSize = 14
+	tabClose.TextColor3 = Color3.new(1,1,1)
+	tabClose.Parent = tab
+	Instance.new("UICorner", tabClose).CornerRadius = UDim.new(0,8)
+	tabClose.Visible = false
+	
+	tab.MouseEnter:Connect(function() tabClose.Visible = true end)
+	tab.MouseLeave:Connect(function() if currentTab ~= tab then tabClose.Visible = false end end)
+	
+	tab.MouseButton1Click:Connect(function()
+		CodeBox.Text = scriptData.Src
+		NameLabel.Text = scriptData.Name
+		if currentTab then
+			currentTab.BackgroundColor3 = Color3.fromRGB(50,50,70)
+		end
+		tab.BackgroundColor3 = Color3.fromRGB(70,70,90)
+		currentTab = tab
 	end)
-	btn.MouseLeave:Connect(function()
-		TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = c1}):Play()
+	
+	tabClose.MouseButton1Click:Connect(function()
+		for i,s in pairs(scriptsData) do
+			if s.Name == scriptData.Name then
+				table.remove(scriptsData,i)
+				break
+			end
+		end
+		saveScripts()
+		tab:Destroy()
+		if currentTab == tab then
+			CodeBox.Text = ""
+			NameLabel.Text = ""
+			currentTab = nil
+		end
 	end)
 end
 
-hover(Execute, Execute.BackgroundColor3, Color3.fromRGB(100, 150, 255))
-hover(Tabs, Tabs.BackgroundColor3, Color3.fromRGB(65, 65, 85))
-hover(Close, Close.BackgroundColor3, Color3.fromRGB(220, 80, 80))
+for _,s in pairs(scriptsData) do
+	createTab(s)
+end
+
+AddTab.MouseButton1Click:Connect(function()
+	local name = "Script "..(#scriptsData+1)
+	local newScript = {Name=name,Src="-- Novo Script"}
+	table.insert(scriptsData,newScript)
+	saveScripts()
+	createTab(newScript)
+end)
 
 Execute.MouseButton1Click:Connect(function()
 	local src = CodeBox.Text
+	if currentTab then
+		for i,s in pairs(scriptsData) do
+			if s.Name == NameLabel.Text then
+				s.Src = src
+				break
+			end
+		end
+		saveScripts()
+	end
 	if loadstring then
 		local f = loadstring(src)
-		if f then
-			task.spawn(f)
-		end
+		if f then task.spawn(f) end
 	end
 end)
 
 Close.MouseButton1Click:Connect(function()
-	ScreenGui:Destroy()
+	TweenService:Create(Main,TweenInfo.new(0.25,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{Size=UDim2.fromScale(0,0)}):Play()
+	task.delay(0.25,function() ScreenGui:Destroy() end)
 end)
 
 -- Drag
@@ -156,14 +242,12 @@ TopBar.InputBegan:Connect(function(input)
 end)
 
 UserInputService.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = false
-	end
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
 	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
 		local delta = input.Position - dragStart
-		Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		Main.Position = UDim2.new(startPos.X.Scale,startPos.X.Offset+delta.X,startPos.Y.Scale,startPos.Y.Offset+delta.Y)
 	end
 end)
