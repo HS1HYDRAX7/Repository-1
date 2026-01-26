@@ -63,7 +63,7 @@ Close.Parent = TopBar
 Instance.new("UICorner", Close).CornerRadius = UDim.new(0,10)
 
 local NameLabel = Instance.new("TextLabel")
-NameLabel.Size = UDim2.new(1, -24, 0, 28)
+NameLabel.Size = UDim2.new(1,-24,0,28)
 NameLabel.Position = UDim2.new(0,12,0,52)
 NameLabel.BackgroundTransparency = 1
 NameLabel.Text = ""
@@ -73,9 +73,15 @@ NameLabel.TextColor3 = Color3.fromRGB(235,235,235)
 NameLabel.TextXAlignment = Enum.TextXAlignment.Left
 NameLabel.Parent = Main
 
+local BottomBar = Instance.new("Frame")
+BottomBar.Size = UDim2.new(1,-24,0,44)
+BottomBar.Position = UDim2.new(0,12,1,-52)
+BottomBar.BackgroundTransparency = 1
+BottomBar.Parent = Main
+
 local CodeBox = Instance.new("TextBox")
-CodeBox.Size = UDim2.new(1,-24,0,180)
-CodeBox.Position = UDim2.new(0,12,0,82)
+CodeBox.Position = UDim2.new(0,12,0,82) -- abaixo do NameLabel
+CodeBox.Size = UDim2.new(1,-24,1, -82 - 44 - 12) -- espaço entre NameLabel e BottomBar
 CodeBox.BackgroundColor3 = Color3.fromRGB(30,30,40)
 CodeBox.TextColor3 = Color3.fromRGB(235,235,235)
 CodeBox.Font = Enum.Font.Code
@@ -88,12 +94,6 @@ CodeBox.ClearTextOnFocus = false
 CodeBox.Text = "-- Cole seu script aqui"
 CodeBox.Parent = Main
 Instance.new("UICorner", CodeBox).CornerRadius = UDim.new(0,16)
-
-local BottomBar = Instance.new("Frame")
-BottomBar.Size = UDim2.new(1, -24, 0, 44)
-BottomBar.Position = UDim2.new(0,12,1,-52)
-BottomBar.BackgroundTransparency = 1
-BottomBar.Parent = Main
 
 local TabsFrame = Instance.new("ScrollingFrame")
 TabsFrame.Size = UDim2.new(0.6,0,1,0)
