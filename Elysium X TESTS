@@ -14,9 +14,7 @@ local Window = WindUI:CreateWindow({
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
 InfoTab:Paragraph({
-    Title = "Creators",
-    Desc = "Hydra (Owner)",
-    Image = "rbxassetid://112516055804582",
+    Thumbnail = "rbxassetid://112516055804582",
 })
 
 Window:Init()
