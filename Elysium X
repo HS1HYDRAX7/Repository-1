@@ -551,7 +551,7 @@ task.spawn(function()
 	end
 end)
 
-InfoTab:Paragraph({ Title="FPS", Desc="Calculating..." }):SetDesc((function()
+InfoTab:Paragraph({ Title="FPS", Desc="0" }):SetDesc((function()
 	local RunService = game:GetService("RunService")
 	local frameCount = 0
 	local lastTime = tick()
