@@ -29,7 +29,7 @@ local Window = WindUI:CreateWindow({
 	Folder = "Elysium",
 	Transparent = true,
 	Theme = "Crimson",
-	Resizable = true,
+	Resizable = false,
 	HideSearchBar = false,
 	ScrollBarEnabled = true,
 })
