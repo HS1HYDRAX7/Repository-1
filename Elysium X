@@ -551,23 +551,60 @@ task.spawn(function()
 	end
 end)
 
-local fpsParagraph = InfoTab:Paragraph({ Title="FPS", Desc="0" })
-local memParagraph = InfoTab:Paragraph({ Title="Memory", Desc="0 MB" })
+InfoTab:Paragraph({ Title="FPS", Desc="Calculating..." }):SetDesc((function()
+	local RunService = game:GetService("RunService")
+	local frameCount = 0
+	local lastTime = tick()
 
-local lastFrameTime = tick()
-local fps = 0
+	RunService.RenderStepped:Connect(function()
+		frameCount = frameCount + 1
+	end)
 
-task.spawn(function()
-	while task.wait(0.5) do
-		local currentTime = tick()
-		fps = math.floor(1 / (currentTime - lastFrameTime))
-		lastFrameTime = currentTime
-		fpsParagraph:SetDesc(tostring(fps))
+	task.spawn(function()
+		while task.wait(1) do
+			local now = tick()
+			local dt = now - lastTime
+			local fps = math.floor(frameCount / dt)
+			lastTime = now
+			frameCount = 0
+			pcall(function() _G.FPSParagraph:SetDesc(tostring(fps)) end)
+		end
+	end)
+	return "0"
+end)())
 
-		local mem = math.floor(collectgarbage("count") / 1024)
-		memParagraph:SetDesc(mem .. " MB")
-	end
-end)
+InfoTab:Paragraph({ Title="Memory", Desc="Calculating..." }):SetDesc((function()
+	local Stats = game:GetService("Stats")
+	task.spawn(function()
+		while task.wait(1) do
+			local mem = math.floor(Stats:GetTotalMemoryUsageMb())
+			pcall(function() _G.MemParagraph:SetDesc(mem.." MB") end)
+		end
+	end)
+	return "0 MB"
+end)())
+
+InfoTab:Paragraph({ Title="Ping", Desc="Calculating..." }):SetDesc((function()
+	local Players = game:GetService("Players")
+	local LocalPlayer = Players.LocalPlayer
+	task.spawn(function()
+		while task.wait(1) do
+			local ping = math.floor(LocalPlayer:GetNetworkPing()*1000)
+			pcall(function() _G.PingParagraph:SetDesc(ping.." ms") end)
+		end
+	end)
+	return "0 ms"
+end)())
+
+InfoTab:Paragraph({ Title="Objects", Desc="Calculating..." }):SetDesc((function()
+	task.spawn(function()
+		while task.wait(1) do
+			local totalObjects = #workspace:GetDescendants()
+			pcall(function() _G.ObjParagraph:SetDesc(tostring(totalObjects)) end)
+		end
+	end)
+	return "0"
+end)())
 
 InfoTab:Paragraph({
     Title = "Creators",
