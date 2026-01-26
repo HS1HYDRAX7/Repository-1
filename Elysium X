@@ -551,30 +551,6 @@ task.spawn(function()
 	end
 end)
 
-InfoTab:Paragraph({ Title="FPS", Desc="0" }):SetDesc((function()
-	local RunService = game:GetService("RunService")
-	local frameCount = 0
-	local lastTime = tick()
-
-	RunService.RenderStepped:Connect(function()
-		frameCount = frameCount + 1
-	end)
-
-	task.spawn(function()
-		while task.wait(1) do
-			local now = tick()
-			local dt = now - lastTime
-			local fps = math.floor(frameCount / dt)
-			lastTime = now
-			frameCount = 0
-			pcall(function() _G.FPSParagraph:SetDesc(tostring(fps)) end)
-		end
-	end)
-
-	_G.FPSParagraph = InfoTab:Paragraph({ Title="FPS", Desc="0" })
-	return "0"
-end)())
-
 InfoTab:Paragraph({
     Title = "Creators",
     Desc = "Hydra (Owner)",
