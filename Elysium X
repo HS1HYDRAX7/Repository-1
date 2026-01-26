@@ -43,6 +43,7 @@ Window:Tag({
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
 local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
 local EternityTab = Window:Tab({ Title = "Eternity", Icon = "infinity" })
+local AITab = Window:Tab({ Title = "AI", Icon = "rbxassetid://97427425213065" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "link" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -427,6 +428,126 @@ EternityTab:Toggle({
 			end
 		end)
 	end
+})
+
+local AIParagraph = AITab:Paragraph({
+    Title = "AI Response",
+    Desc = "Awaiting user input to generate a response.",
+    Color = "Red",
+    Image = "",
+    ImageSize = 30,
+    Thumbnail = "",
+    ThumbnailSize = 80,
+    Locked = false,
+    Buttons = {}
+})
+
+AITab:Input({
+    Title = "User Message",
+    Desc = "Please enter your message in the field provided.",
+    Value = "",
+    InputIcon = "bird",
+    Type = "Input",
+    Placeholder = "Enter your message...",
+    Callback = function(inputText)
+        -- No action required here; the Send Button will trigger the response
+    end
+})
+
+AITab:Button({
+    Title = "Send",
+    Desc = "Submit the entered message to the AI for processing.",
+    Locked = false,
+    Callback = function()
+        local inputText = Input.Value
+
+        -- Normalization
+        local function normalize(text)
+            text = string.lower(text)
+            text = text:gsub("[^%w%s]", "")
+            text = text:gsub("%s+", " ")
+            return text
+        end
+
+        -- Moderation rules
+        local MODERATION_RULES = {
+            {pattern = "suic", severity = 1},
+            {pattern = "kill", severity = 1},
+            {pattern = "drug", severity = 1},
+            {pattern = "hack", severity = 0.7},
+        }
+
+        local function moderate(text)
+            for _, rule in ipairs(MODERATION_RULES) do
+                if text:find(rule.pattern) then
+                    if rule.severity >= 1 then
+                        return false, "Content blocked due to security policies."
+                    else
+                        return true, "Sensitive content detected. Response will be cautious."
+                    end
+                end
+            end
+            return true, nil
+        end
+
+        -- Base responses
+        local RESPONSES = {
+            ["hi"] = {"Hello!", "Greetings, how may I assist you?", "Hi there, I hope you are well."},
+            ["help"] = {"Certainly, please provide more details regarding your request.", "I am available to assist you.", "Kindly elaborate on your inquiry."},
+            ["who"] = {"I am a basic AI implemented in Luau.", "I am an artificial intelligence created to converse in Luau."},
+            ["how"] = {"I am functioning optimally.", "All systems are operating correctly.", "Thank you for asking; everything is well."},
+        }
+
+        local SYNONYMS = {
+            ["hello"] = "hi",
+            ["hey"] = "hi",
+            ["assist"] = "help",
+            ["support"] = "help",
+        }
+
+        local function findKeyword(text)
+            for keyword, _ in pairs(RESPONSES) do
+                if text:find(keyword) then
+                    return keyword
+                end
+            end
+            for word, replacement in pairs(SYNONYMS) do
+                if text:find(word) then
+                    return replacement
+                end
+            end
+            return nil
+        end
+
+        local function chooseRandom(list)
+            return list[math.random(1, #list)]
+        end
+
+        local function generateResponse(text)
+            local norm = normalize(text)
+            local allowed, note = moderate(norm)
+            if not allowed then
+                return "I am unable to provide assistance with this content."
+            end
+
+            local key = findKeyword(norm)
+            if key then
+                return chooseRandom(RESPONSES[key])
+            end
+
+            local words = {}
+            for w in norm:gmatch("%S+") do
+                table.insert(words, w)
+            end
+            if #words == 0 then
+                return "I am unable to understand your message; please rephrase."
+            end
+
+            return "You mentioned: " .. table.concat(words, ", ") .. ". Could you provide further details?"
+        end
+
+        Paragraph.Desc = generateResponse(inputText)
+    end
 })
 
 OthersTab:Button({
