@@ -544,6 +544,69 @@ end
 end
 })
 
+OthersTab:Input({
+Title = "Alize Executor",
+Desc = "A simple executor",
+Value = "",
+InputIcon = "link",
+Type = "Input",
+Placeholder = "Script url",
+Callback = function(input)
+getgenv().TargetScriptURL = tostring(input)
+end
+})
+
+OthersTab:Button({
+Title = "Execute script",
+Callback = function()
+local url = getgenv().TargetScriptURL
+
+if not url or url == "" then
+WindUI:Notify({
+Title = "Executor notification",
+Content = "Invalid url",
+Duration = 3,
+Icon = "x",
+})
+return
+end
+
+local success, result = pcall(function()
+return game:HttpGet(url)
+end)
+
+if not success or not result or result == "" then
+WindUI:Notify({
+Title = "Executor notification",
+Content = "Invalid url",
+Duration = 3,
+Icon = "x",
+})
+return
+end
+
+local execSuccess = pcall(function()
+loadstring(result)()
+end)
+
+if execSuccess then
+WindUI:Notify({
+Title = "Alize notification",
+Content = "Code executed successfully ✅",
+Duration = 3,
+Icon = "check",
+})
+else
+WindUI:Notify({
+Title = "Alize notification",
+Content = "Invalid url or empty link",
+Duration = 3,
+Icon = "x",
+})
+end
+end
+})
+
 local clockParagraph = InfoTab:Paragraph({ Title="Clock", Desc="--:--:--" })
 task.spawn(function()
 	while task.wait(1) do
