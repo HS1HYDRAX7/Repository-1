@@ -559,75 +559,37 @@ OthersTab:Button({
     Title = "Execute script",
     Callback = function()
         local input = tostring(getgenv().TargetScriptInput or "")
-
-        if input == "" then
-            WindUI:Notify({
-                Title = "Executor notification",
-                Content = "Write or paste something...",
-                Duration = 3,
-                Icon = "code-circle-broken"
-            })
-            return
-        end
+        if input == "" then return end
 
         local loader = loadstring or load
-        if not loader then
-            WindUI:Notify({
-                Title = "Alize notification",
-                Content = "loadstring not supported",
-                Duration = 3,
-                Icon = "code-circle-broken"
-            })
-            return
+        if not loader then return end
+
+        local function isUrl(v)
+            return v:match("^https?://[%w%-%._~:/%?#%[%]@!$&'%(%)%*%+,;=]+$")
+        end
+
+        local function getRemote(url)
+            if game and game.HttpGet then
+                return game:HttpGet(url)
+            elseif syn and syn.request then
+                return syn.request({ Url = url, Method = "GET" }).Body
+            elseif http_request then
+                return http_request({ Url = url, Method = "GET" }).Body
+            elseif request then
+                return request({ Url = url, Method = "GET" }).Body
+            end
         end
 
         local function run(code)
             local ok, fn = pcall(loader, code)
-            if ok and fn then
-                local execOk, err = pcall(fn)
-                if execOk then
-                    WindUI:Notify({
-                        Title = "Alize notification",
-                        Content = "Code executed successfully",
-                        Duration = 3,
-                        Icon = "code-circle-outline"
-                    })
-                else
-                    warn(err)
-                end
-            else
-                WindUI:Notify({
-                    Title = "Alize notification",
-                    Content = "Invalid script",
-                    Duration = 3,
-                    Icon = "code-circle-broken"
-                })
-            end
+            if not ok or type(fn) ~= "function" then return end
+            pcall(fn)
         end
 
-        if input:match("^https?://") then
-            local body
-            local ok = pcall(function()
-                if game and game.HttpGet then
-                    body = game:HttpGet(input)
-                elseif syn and syn.request then
-                    body = syn.request({Url = input, Method = "GET"}).Body
-                elseif http_request then
-                    body = http_request({Url = input, Method = "GET"}).Body
-                elseif request then
-                    body = request({Url = input, Method = "GET"}).Body
-                end
-            end)
-
-            if ok and body and body ~= "" then
+        if isUrl(input) then
+            local ok, body = pcall(getRemote, input)
+            if ok and type(body) == "string" and body ~= "" then
                 run(body)
-            else
-                WindUI:Notify({
-                    Title = "Executor notification",
-                    Content = "Invalid url or script",
-                    Duration = 3,
-                    Icon = "code-circle-broken"
-                })
             end
         else
             run(input)
