@@ -548,31 +548,38 @@ OthersTab:Input({
 Title = "Alize Executor",
 Desc = "A simple executor",
 Value = "",
-InputIcon = "link",
+InputIcon = "code-linear",
 Type = "Input",
-Placeholder = "Script url",
+Placeholder = "Script url or loadstring",
 Callback = function(input)
-getgenv().TargetScriptURL = tostring(input)
+getgenv().TargetScriptInput = tostring(input)
 end
 })
 
 OthersTab:Button({
 Title = "Execute script",
 Callback = function()
-local url = getgenv().TargetScriptURL
+local input = getgenv().TargetScriptInput
 
-if not url or url == "" then
+if not input or input == "" then
 WindUI:Notify({
 Title = "Executor notification",
-Content = "Invalid url",
+Content = "Invalid input",
 Duration = 3,
-Icon = "x",
+Icon = "code-circle-broken",
 })
 return
 end
 
+local execSuccess = false
+
+if string.find(input, "loadstring", 1, true) then
+execSuccess = pcall(function()
+loadstring(input)()
+end)
+else
 local success, result = pcall(function()
-return game:HttpGet(url)
+return game:HttpGet(input)
 end)
 
 if not success or not result or result == "" then
@@ -580,28 +587,29 @@ WindUI:Notify({
 Title = "Executor notification",
 Content = "Invalid url",
 Duration = 3,
-Icon = "x",
+Icon = "code-circle-broken",
 })
 return
 end
 
-local execSuccess = pcall(function()
+execSuccess = pcall(function()
 loadstring(result)()
 end)
+end
 
 if execSuccess then
 WindUI:Notify({
 Title = "Alize notification",
 Content = "Code executed successfully ✅",
 Duration = 3,
-Icon = "check",
+Icon = "code-circle-outline",
 })
 else
 WindUI:Notify({
 Title = "Alize notification",
-Content = "Invalid url or empty link",
+Content = "Invalid code",
 Duration = 3,
-Icon = "x",
+Icon = "code-circle-broken",
 })
 end
 end
