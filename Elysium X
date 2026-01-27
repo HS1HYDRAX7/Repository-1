@@ -430,6 +430,33 @@ EternityTab:Toggle({
 	end
 })
 
+EvadeTab:Toggle({
+	Title = "Auto Bhop",
+	Value = false,
+	Callback = function(state)
+		local Players = game:GetService("Players")
+		local player = Players.LocalPlayer
+
+		if state then
+			getgenv().AutoJump = true
+			task.spawn(function()
+				while getgenv().AutoJump do
+					local character = player.Character
+					if character then
+						local humanoid = character:FindFirstChildOfClass("Humanoid")
+						if humanoid and humanoid.Health > 0 then
+							humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+						end
+					end
+					task.wait(1.5)
+				end
+			end)
+		else
+			getgenv().AutoJump = false
+		end
+	end
+})
+
 OthersTab:Button({
 	Title="Smart IY",
 	Callback=function()
@@ -543,50 +570,6 @@ if getgenv().Sound then
 getgenv().Sound:Pause()
 end
 end
-})
-
-OthersTab:Input({
-	Title = "FE Emotes",
-	Value = "",
-	Placeholder = "EMOTE ID OR LINK",
-	Callback = function(input)
-		local id = tonumber(input)
-		if not id then
-			id = tonumber(string.match(input, "%d+"))
-		end
-		getgenv().SelectedEmoteId = id
-	end
-})
-
-OthersTab:Toggle({
-	Title = "Play Emote",
-	Value = false,
-	Callback = function(state)
-		local Players = game:GetService("Players")
-		local player = Players.LocalPlayer
-		local character = player.Character or player.CharacterAdded:Wait()
-		local humanoid = character:WaitForChild("Humanoid")
-
-		if state then
-			if getgenv().SelectedEmoteId then
-				pcall(function()
-					humanoid:PlayEmoteById(getgenv().SelectedEmoteId)
-				end)
-			end
-		else
-			pcall(function()
-				humanoid:StopEmotes()
-			end)
-		end
-
-		humanoid.Running:Connect(function(speed)
-			if speed > 0 then
-				pcall(function()
-					humanoid:StopEmotes()
-				end)
-			end
-		end)
-	end
 })
 
 local clockParagraph = InfoTab:Paragraph({ Title="Clock", Desc="--:--:--" })
