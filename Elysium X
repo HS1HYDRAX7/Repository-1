@@ -548,6 +548,8 @@ end
 OthersTab:Input({
 	Title = "FE Emotes",
 	Value = "",
+    InputIcon = "code-circle-outline",
+    Type = "Input",
 	Placeholder = "EMOTE ID OR LINK",
 	Callback = function(input)
 		local id = tonumber(input)
@@ -563,32 +565,15 @@ OthersTab:Toggle({
 	Value = false,
 	Callback = function(state)
 		local Players = game:GetService("Players")
-		local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
 		local player = Players.LocalPlayer
 		local character = player.Character or player.CharacterAdded:Wait()
 		local humanoid = character:WaitForChild("Humanoid")
 
-		local Remote = ReplicatedStorage:FindFirstChild("WindEmoteRemote")
-		if not Remote then
-			Remote = Instance.new("RemoteEvent")
-			Remote.Name = "WindEmoteRemote"
-			Remote.Parent = ReplicatedStorage
-			Remote.OnServerEvent:Connect(function(plr, emoteId)
-				if typeof(emoteId) ~= "number" then return end
-				local char = plr.Character
-				if not char then return end
-				local hum = char:FindFirstChildOfClass("Humanoid")
-				if not hum then return end
-				pcall(function()
-					hum:PlayEmoteById(emoteId)
-				end)
-			end)
-		end
-
 		if state then
 			if getgenv().SelectedEmoteId then
-				Remote:FireServer(getgenv().SelectedEmoteId)
+				pcall(function()
+					humanoid:PlayEmoteById(getgenv().SelectedEmoteId)
+				end)
 			end
 		else
 			pcall(function()
