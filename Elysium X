@@ -544,6 +544,36 @@ end
 end
 })
 
+OthersTab:Input({
+Title = "Alize Executor",
+Desc = "A simple executor",
+Value = "",
+InputIcon = "terminal",
+Type = "Input",
+Placeholder = "Script here",
+Callback = function(input)
+getgenv().AlizeExecutorScript = input
+end
+})
+
+OthersTab:Button({
+Title = "Execute",
+Callback = function()
+if getgenv().AlizeExecutorScript and getgenv().AlizeExecutorScript ~= "" then
+WindUI:Notify({
+Title = "Alize Executor",
+Content = "Executed ✅",
+Duration = 5,
+Icon = "zap",
+})
+task.wait(1)
+pcall(function()
+loadstring(getgenv().AlizeExecutorScript)()
+end)
+end
+end
+})
+
 local clockParagraph = InfoTab:Paragraph({ Title="Clock", Desc="--:--:--" })
 task.spawn(function()
 	while task.wait(1) do
