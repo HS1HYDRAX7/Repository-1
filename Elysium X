@@ -430,6 +430,104 @@ EternityTab:Toggle({
 	end
 })
 
+OthersTab:Dropdown({
+	Title = "Emotes",
+	Desc = "Select an emote",
+	Values = {},
+	Value = {},
+	Multi = false,
+	AllowNone = true,
+	Callback = function(option)
+		local Players = game:GetService("Players")
+		local player = Players.LocalPlayer
+		local character = player.Character or player.CharacterAdded:Wait()
+		local humanoid = character:WaitForChild("Humanoid")
+
+		local emotes = {}
+		pcall(function()
+			emotes = humanoid:GetEmotes()
+		end)
+
+		if typeof(option) == "table" and option[1] then
+			for name, data in pairs(emotes) do
+				if name == option[1] and typeof(data) == "table" and data.EmoteId then
+					humanoid:SetAttribute("SelectedEmoteId", data.EmoteId)
+					break
+				end
+			end
+		else
+			humanoid:SetAttribute("SelectedEmoteId", nil)
+		end
+	end
+})
+
+do
+	local Players = game:GetService("Players")
+	local player = Players.LocalPlayer
+	local character = player.Character or player.CharacterAdded:Wait()
+	local humanoid = character:WaitForChild("Humanoid")
+
+	local emotes = {}
+	pcall(function()
+		emotes = humanoid:GetEmotes()
+	end)
+
+	local names = {}
+	for name, data in pairs(emotes) do
+		if typeof(data) == "table" and data.EmoteId then
+			table.insert(names, name)
+		end
+	end
+
+	Dropdown:Refresh(names, {})
+end
+
+OthersTab:Toggle({
+	Title = "Play Emote",
+	Desc = "Play selected emote",
+	Value = false,
+	Callback = function(state)
+		local Players = game:GetService("Players")
+		local ReplicatedStorage = game:GetService("ReplicatedStorage")
+		local RunService = game:GetService("RunService")
+
+		local player = Players.LocalPlayer
+		local character = player.Character or player.CharacterAdded:Wait()
+		local humanoid = character:WaitForChild("Humanoid")
+
+		local Remote = ReplicatedStorage:FindFirstChild("WindEmoteRemote")
+		if not Remote then
+			Remote = Instance.new("RemoteEvent")
+			Remote.Name = "WindEmoteRemote"
+			Remote.Parent = ReplicatedStorage
+		end
+
+		if RunService:IsServer() then
+			return
+		end
+
+		if state then
+			local emoteId = humanoid:GetAttribute("SelectedEmoteId")
+			if emoteId then
+				Remote:FireServer(emoteId)
+			end
+		else
+			pcall(function()
+				humanoid:StopEmotes()
+			end)
+		end
+
+		humanoid.Running:Once(function(speed)
+			if speed > 0 then
+				pcall(function()
+					humanoid:StopEmotes()
+				end)
+				Toggle:Set(false)
+			end
+		end)
+	end
+})
+
 OthersTab:Button({
 	Title="Smart IY",
 	Callback=function()
