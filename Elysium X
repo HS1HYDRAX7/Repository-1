@@ -545,10 +545,30 @@ end
 end
 })
 
-local Dropdown = Tab:Dropdown({
+OthersTab:Dropdown({
 	Title = "Emotes",
 	Desc = "Select an emote",
-	Values = {},
+	Values = (function()
+		local Players = game:GetService("Players")
+		local player = Players.LocalPlayer
+		local character = player.Character or player.CharacterAdded:Wait()
+		local humanoid = character:WaitForChild("Humanoid")
+
+		local list = {}
+		local emotes = {}
+
+		pcall(function()
+			emotes = humanoid:GetEmotes()
+		end)
+
+		for name, data in pairs(emotes) do
+			if typeof(data) == "table" and data.EmoteId then
+				table.insert(list, name)
+			end
+		end
+
+		return list
+	end)(),
 	Value = {},
 	Multi = false,
 	AllowNone = true,
@@ -563,48 +583,21 @@ local Dropdown = Tab:Dropdown({
 			emotes = humanoid:GetEmotes()
 		end)
 
-		if typeof(option) == "table" and option[1] then
-			for name, data in pairs(emotes) do
-				if name == option[1] and typeof(data) == "table" and data.EmoteId then
-					humanoid:SetAttribute("SelectedEmoteId", data.EmoteId)
-					break
-				end
-			end
+		if typeof(option) == "table" and option[1] and emotes[option[1]] and emotes[option[1]].EmoteId then
+			getgenv().SelectedEmoteId = emotes[option[1]].EmoteId
 		else
-			humanoid:SetAttribute("SelectedEmoteId", nil)
+			getgenv().SelectedEmoteId = nil
 		end
 	end
 })
 
-do
-	local Players = game:GetService("Players")
-	local player = Players.LocalPlayer
-	local character = player.Character or player.CharacterAdded:Wait()
-	local humanoid = character:WaitForChild("Humanoid")
-
-	local emotes = {}
-	pcall(function()
-		emotes = humanoid:GetEmotes()
-	end)
-
-	local names = {}
-	for name, data in pairs(emotes) do
-		if typeof(data) == "table" and data.EmoteId then
-			table.insert(names, name)
-		end
-	end
-
-	Dropdown:Refresh(names, {})
-end
-
-local Toggle = Tab:Toggle({
+OthersTab:Toggle({
 	Title = "Play Emote",
 	Desc = "Play selected emote",
 	Value = false,
 	Callback = function(state)
 		local Players = game:GetService("Players")
 		local ReplicatedStorage = game:GetService("ReplicatedStorage")
-		local RunService = game:GetService("RunService")
 
 		local player = Players.LocalPlayer
 		local character = player.Character or player.CharacterAdded:Wait()
@@ -617,14 +610,9 @@ local Toggle = Tab:Toggle({
 			Remote.Parent = ReplicatedStorage
 		end
 
-		if RunService:IsServer() then
-			return
-		end
-
 		if state then
-			local emoteId = humanoid:GetAttribute("SelectedEmoteId")
-			if emoteId then
-				Remote:FireServer(emoteId)
+			if getgenv().SelectedEmoteId then
+				Remote:FireServer(getgenv().SelectedEmoteId)
 			end
 		else
 			pcall(function()
@@ -632,12 +620,11 @@ local Toggle = Tab:Toggle({
 			end)
 		end
 
-		humanoid.Running:Once(function(speed)
+		humanoid.Running:Connect(function(speed)
 			if speed > 0 then
 				pcall(function()
 					humanoid:StopEmotes()
 				end)
-				Toggle:Set(false)
 			end
 		end)
 	end
