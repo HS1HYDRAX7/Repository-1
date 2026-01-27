@@ -545,55 +545,21 @@ end
 end
 })
 
-OthersTab:Dropdown({
-	Title = "Emotes",
-	Desc = "Select an emote",
-	Values = (function()
-		local Players = game:GetService("Players")
-		local player = Players.LocalPlayer
-		local character = player.Character or player.CharacterAdded:Wait()
-		local humanoid = character:WaitForChild("Humanoid")
-
-		local list = {}
-		local emotes = {}
-
-		pcall(function()
-			emotes = humanoid:GetEmotes()
-		end)
-
-		for name, data in pairs(emotes) do
-			if typeof(data) == "table" and data.EmoteId then
-				table.insert(list, name)
-			end
+OthersTab:Input({
+	Title = "FE Emotes",
+	Value = "",
+	Placeholder = "EMOTE ID OR LINK",
+	Callback = function(input)
+		local id = tonumber(input)
+		if not id then
+			id = tonumber(string.match(input, "%d+"))
 		end
-
-		return list
-	end)(),
-	Value = {},
-	Multi = false,
-	AllowNone = true,
-	Callback = function(option)
-		local Players = game:GetService("Players")
-		local player = Players.LocalPlayer
-		local character = player.Character or player.CharacterAdded:Wait()
-		local humanoid = character:WaitForChild("Humanoid")
-
-		local emotes = {}
-		pcall(function()
-			emotes = humanoid:GetEmotes()
-		end)
-
-		if typeof(option) == "table" and option[1] and emotes[option[1]] and emotes[option[1]].EmoteId then
-			getgenv().SelectedEmoteId = emotes[option[1]].EmoteId
-		else
-			getgenv().SelectedEmoteId = nil
-		end
+		getgenv().SelectedEmoteId = id
 	end
 })
 
 OthersTab:Toggle({
 	Title = "Play Emote",
-	Desc = "Play selected emote",
 	Value = false,
 	Callback = function(state)
 		local Players = game:GetService("Players")
@@ -608,6 +574,16 @@ OthersTab:Toggle({
 			Remote = Instance.new("RemoteEvent")
 			Remote.Name = "WindEmoteRemote"
 			Remote.Parent = ReplicatedStorage
+			Remote.OnServerEvent:Connect(function(plr, emoteId)
+				if typeof(emoteId) ~= "number" then return end
+				local char = plr.Character
+				if not char then return end
+				local hum = char:FindFirstChildOfClass("Humanoid")
+				if not hum then return end
+				pcall(function()
+					hum:PlayEmoteById(emoteId)
+				end)
+			end)
 		end
 
 		if state then
