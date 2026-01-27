@@ -450,7 +450,17 @@ OthersTab:Button({
     end
 })
 
-OthersTab:Input({
+local RandomSection = OthersTab:Section({ 
+    Title = "Random",
+    Box = false,
+    FontWeight = "SemiBold",
+    TextTransparency = 0.05,
+    TextXAlignment = "Left",
+    TextSize = 17,
+    Opened = true,
+})
+
+RandomSection:Input({
 Title = "TTPI",
 Desc = "Teleport To Game Using The Place Id",
 Value = "",
@@ -463,7 +473,7 @@ getgenv().TargetPlaceId = id
 end
 })
 
-OthersTab:Button({
+RandomSection:Button({
 Title = "Teleport",
 Callback = function()
 if getgenv().TargetPlaceId then
@@ -482,7 +492,7 @@ end
 end
 })
 
-OthersTab:Input({
+RandomSection:Input({
 Title = "Boombox",
 Desc = "Music ID",
 Value = "",
@@ -494,7 +504,7 @@ getgenv().MusicId = tonumber(input)
 end
 })
 
-local Paragraph = OthersTab:Paragraph({
+local Paragraph = RandomSection:Paragraph({
 Title = "Now Playing",
 Desc = "00:00/00:00",
 Color = "Red",
@@ -505,7 +515,7 @@ ThumbnailSize = 80,
 Locked = false,
 })
 
-OthersTab:Button({
+RandomSection:Button({
 Title = "Play",
 Callback = function()
 if not getgenv().Sound then
@@ -535,7 +545,7 @@ end
 end
 })
 
-OthersTab:Button({
+RandomSection:Button({
 Title = "Pause",
 Callback = function()
 if getgenv().Sound then
@@ -544,7 +554,7 @@ end
 end
 })
 
-OthersTab:Input({
+RandomSection:Input({
 Title = "Alize Executor",
 Desc = "A simple executor",
 Value = "",
@@ -556,7 +566,7 @@ getgenv().AlizeExecutorScript = input
 end
 })
 
-OthersTab:Button({
+RandomSection:Button({
 Title = "Execute",
 Callback = function()
 if getgenv().AlizeExecutorScript and getgenv().AlizeExecutorScript ~= "" then
