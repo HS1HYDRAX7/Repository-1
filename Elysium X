@@ -548,8 +548,6 @@ end
 OthersTab:Input({
 	Title = "FE Emotes",
 	Value = "",
-    InputIcon = "code-circle-outline",
-    Type = "Input",
 	Placeholder = "EMOTE ID OR LINK",
 	Callback = function(input)
 		local id = tonumber(input)
