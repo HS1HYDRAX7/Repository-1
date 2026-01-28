@@ -529,35 +529,32 @@ getgenv().VisualizerUI=gui
 local holder=Instance.new("Frame")
 holder.Parent=gui
 holder.BackgroundTransparency=1
-holder.Size=UDim2.new(0,300,0,260)
-holder.AnchorPoint=Vector2.new(1,0.5)
-holder.Position=UDim2.new(0,150,0.5,0)
+holder.Size=UDim2.new(0,320,0,260)
+holder.AnchorPoint=Vector2.new(0,0.5)
+holder.Position=UDim2.new(0,-160,0.5,0)
 
 local layout=Instance.new("UIListLayout",holder)
-layout.Padding=UDim.new(0,8)
+layout.Padding=UDim.new(0,6)
 layout.VerticalAlignment=Enum.VerticalAlignment.Center
 
 local bars={}
-local values={}
 for i=1,14 do
 local bar=Instance.new("Frame")
 bar.Parent=holder
-bar.Size=UDim2.new(0,30,0,12)
+bar.Size=UDim2.new(0,20,0,12)
 bar.BackgroundColor3=Color3.fromRGB(255,70,70)
 bar.AnchorPoint=Vector2.new(1,0.5)
+bar.Position=UDim2.new(1,0,0.5,0)
 Instance.new("UICorner",bar).CornerRadius=UDim.new(1,0)
-bars[i]=bar
-values[i]=30
+table.insert(bars,bar)
 end
 
-getgenv().VisualizerConn=RunService.RenderStepped:Connect(function(dt)
+getgenv().VisualizerConn=RunService.RenderStepped:Connect(function()
 local sound=getgenv().Sound
 if not sound or not sound.IsPlaying then return end
-local target=math.clamp(sound.PlaybackLoudness/400,0,1)
-for i,bar in ipairs(bars) do
-local goal=30+target*(80+(i%3)*40)
-values[i]=values[i]+(goal-values[i])*math.clamp(dt*5,0,1)
-bar.Size=UDim2.new(0,values[i],0,12)
+local level=math.clamp(sound.PlaybackLoudness/400,0,1)
+for _,bar in ipairs(bars) do
+bar.Size=UDim2.new(0,20+level*math.random(80,220),0,12)
 end
 end)
 end
