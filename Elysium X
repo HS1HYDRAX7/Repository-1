@@ -36,10 +36,8 @@ Window = WindUI:CreateWindow({
 	KeySystem = {
 		Key = { "260126" },
 		Note = "Currently in beta",
-		Thumbnail = {
-			Image = "rbxassetid://101052171885580",
 		},
-		SaveKey = true,
+		SaveKey = false,
 	},
 })
 
