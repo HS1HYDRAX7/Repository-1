@@ -34,7 +34,7 @@ Window = WindUI:CreateWindow({
 	ScrollBarEnabled = true,
 
 	KeySystem = {
-		Key = { "MRNEXUS" },
+		Key = { "260126" },
 		Note = "Currently in beta",
 		SaveKey = false,
 	},
