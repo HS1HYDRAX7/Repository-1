@@ -499,6 +499,74 @@ ThumbnailSize = 80,
 Locked = false,
 })
 
+OthersTab:Toggle({
+Title="Visualizer",
+Value=false,
+Callback=function(v)
+if not v then
+if getgenv().VisualizerConn then
+getgenv().VisualizerConn:Disconnect()
+getgenv().VisualizerConn=nil
+end
+if getgenv().VisualizerUI then
+getgenv().VisualizerUI:Destroy()
+getgenv().VisualizerUI=nil
+end
+return
+end
+
+if getgenv().VisualizerUI then return end
+
+local Players=game:GetService("Players")
+local RunService=game:GetService("RunService")
+
+local gui=Instance.new("ScreenGui")
+gui.Name="VisualizerUI"
+gui.ResetOnSpawn=false
+gui.Parent=Players.LocalPlayer:WaitForChild("PlayerGui")
+getgenv().VisualizerUI=gui
+
+local function CreateSide(x)
+local holder=Instance.new("Frame")
+holder.Parent=gui
+holder.BackgroundTransparency=1
+holder.Size=UDim2.new(0,120,0,280)
+holder.AnchorPoint=Vector2.new(x==0 and 0 or 1,0.5)
+holder.Position=UDim2.new(x,x==0 and 12 or -12,0.5,0)
+
+local layout=Instance.new("UIListLayout",holder)
+layout.Padding=UDim.new(0,6)
+layout.VerticalAlignment=Enum.VerticalAlignment.Center
+
+local bars={}
+for i=1,14 do
+local bar=Instance.new("Frame")
+bar.Parent=holder
+bar.Size=UDim2.new(1,0,0,10)
+bar.BackgroundColor3=Color3.fromRGB(255,70,70)
+Instance.new("UICorner",bar).CornerRadius=UDim.new(1,0)
+table.insert(bars,bar)
+end
+return bars
+end
+
+local leftBars=CreateSide(0)
+local rightBars=CreateSide(1)
+
+getgenv().VisualizerConn=RunService.RenderStepped:Connect(function()
+local sound=getgenv().Sound
+if not sound or not sound.IsPlaying then return end
+local level=math.clamp(sound.PlaybackLoudness/400,0,1)
+for _,bar in ipairs(leftBars) do
+bar.Size=UDim2.new(1,0,0,10+level*math.random(30,80))
+end
+for _,bar in ipairs(rightBars) do
+bar.Size=UDim2.new(1,0,0,10+level*math.random(30,80))
+end
+end)
+end
+})
+
 OthersTab:Button({
 Title = "Play",
 Callback = function()
