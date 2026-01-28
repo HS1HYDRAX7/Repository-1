@@ -7,18 +7,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TextChatService = game:GetService("TextChatService")
 local StarterGui = game:GetService("StarterGui")
 
-pcall(function()
-	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true)
-end)
-
-local chatConfig = TextChatService:WaitForChild("ChatWindowConfiguration")
-RunService.RenderStepped:Connect(function()
-	chatConfig.Enabled = true
-	chatConfig.ChatWindowVisible = true
-	chatConfig.ChatWindowActive = true
-	chatConfig.ChatInputBarConfiguration.Enabled = true
-end)
-
 local LocalPlayer = Players.LocalPlayer
 local FONT = Font.new("rbxassetid://12187360881")
 local DEFAULT_GRAVITY = workspace.Gravity
