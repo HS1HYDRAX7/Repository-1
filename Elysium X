@@ -459,6 +459,7 @@ OthersTab:Button({
 local Section = OthersTab:Section({
     Title = "Plus +",
     Opened = true,
+    Collapsible = false
 })
 
 Section:Input({
