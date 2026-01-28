@@ -526,44 +526,44 @@ gui.ResetOnSpawn=false
 gui.Parent=Players.LocalPlayer:WaitForChild("PlayerGui")
 getgenv().VisualizerUI=gui
 
-local function CreateSide(isLeft)
+local function CreateSide()
 local holder=Instance.new("Frame")
 holder.Parent=gui
 holder.BackgroundTransparency=1
-holder.Size=UDim2.new(0,300,0,260)
-holder.AnchorPoint=Vector2.new(isLeft and 0 or 1,0.5)
-holder.Position=UDim2.new(isLeft and 0 or 1,isLeft and -150 or 150,0.5,0)
+holder.Size=UDim2.new(0,320,0,260)
+holder.AnchorPoint=Vector2.new(1,0.5)
+holder.Position=UDim2.new(0,160,0.5,0)
 
 local layout=Instance.new("UIListLayout",holder)
-layout.Padding=UDim.new(0,6)
+layout.Padding=UDim.new(0,8)
 layout.VerticalAlignment=Enum.VerticalAlignment.Center
 
 local bars={}
+local values={}
 for i=1,14 do
 local bar=Instance.new("Frame")
 bar.Parent=holder
 bar.Size=UDim2.new(0,20,0,12)
 bar.BackgroundColor3=Color3.fromRGB(255,70,70)
-bar.AnchorPoint=Vector2.new(isLeft and 1 or 0,0.5)
-bar.Position=UDim2.new(isLeft and 1 or 0,0,0.5,0)
+bar.AnchorPoint=Vector2.new(1,0.5)
+bar.Position=UDim2.new(1,0,0.5,0)
 Instance.new("UICorner",bar).CornerRadius=UDim.new(1,0)
 table.insert(bars,bar)
+values[i]=20
 end
-return bars
+return bars,values
 end
 
-local leftBars=CreateSide(true)
-local rightBars=CreateSide(false)
+local bars,values=CreateSide()
 
-getgenv().VisualizerConn=RunService.RenderStepped:Connect(function()
+getgenv().VisualizerConn=RunService.RenderStepped:Connect(function(dt)
 local sound=getgenv().Sound
 if not sound or not sound.IsPlaying then return end
-local level=math.clamp(sound.PlaybackLoudness/400,0,1)
-for _,bar in ipairs(leftBars) do
-bar.Size=UDim2.new(0,20+level*math.random(80,200),0,12)
-end
-for _,bar in ipairs(rightBars) do
-bar.Size=UDim2.new(0,20+level*math.random(80,200),0,12)
+local target=math.clamp(sound.PlaybackLoudness/400,0,1)
+for i,bar in ipairs(bars) do
+local goal=20+target*math.random(60,180)
+values[i]=values[i]+(goal-values[i])*math.clamp(dt*6,0,1)
+bar.Size=UDim2.new(0,values[i],0,12)
 end
 end)
 end
