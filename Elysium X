@@ -23,7 +23,7 @@ local LocalPlayer = Players.LocalPlayer
 local FONT = Font.new("rbxassetid://12187360881")
 local DEFAULT_GRAVITY = workspace.Gravity
 
-local Window = WindUI:CreateWindow({
+Window = WindUI:CreateWindow({
 	Title = "Elysium X",
 	Author = "By Hydra",
 	Folder = "Elysium",
@@ -32,6 +32,15 @@ local Window = WindUI:CreateWindow({
 	Resizable = true,
 	HideSearchBar = false,
 	ScrollBarEnabled = true,
+
+	KeySystem = {
+		Key = { "260126" },
+		Note = "Currently in beta",
+		Thumbnail = {
+			Image = "rbxassetid://101052171885580",
+		},
+		SaveKey = true,
+	},
 })
 
 Window:Tag({
