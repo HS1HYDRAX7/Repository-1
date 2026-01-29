@@ -109,13 +109,23 @@ local IdleAnimId = "rbxassetid://507766666"
 
 local function getGroundPosition(origin)
 	local params = RaycastParams.new()
-	params.FilterType = Enum.RaycastFilterType.Blacklist
 	params.FilterDescendantsInstances = {Character}
-	local result = Workspace:Raycast(origin + Vector3.new(0, 5, 0), Vector3.new(0, -500, 0), params)
+	params.FilterType = Enum.RaycastFilterType.Blacklist
+
+	local result = Workspace:Raycast(origin + Vector3.new(0, 10, 0), Vector3.new(0, -100, 0), params)
 	if result then
 		return result.Position
 	end
 	return origin
+end
+
+local function playIdle(humanoid)
+	local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
+	local anim = Instance.new("Animation")
+	anim.AnimationId = IdleAnimId
+	local track = animator:LoadAnimation(anim)
+	track.Looped = true
+	track:Play()
 end
 
 local function createFakePlayer(username)
@@ -127,29 +137,23 @@ local function createFakePlayer(username)
 
 	local rig = Players:CreateHumanoidModelFromUserId(userId)
 	rig.Name = "FakePlayer"
-	rig.Parent = Workspace
+	rig.Parent = workspace
+
+	local offset = Vector3.new(math.random(-6,6), 0, math.random(-6,6))
+	local groundPos = getGroundPosition(Root.Position + offset)
+	rig:PivotTo(CFrame.new(groundPos))
 
 	local hum = rig:FindFirstChildOfClass("Humanoid")
 	local hrp = rig:FindFirstChild("HumanoidRootPart")
 
 	if hum then
-		local desc = hum:GetAppliedDescription()
-		desc.RigType = Enum.HumanoidRigType.R15
-		hum:ApplyDescription(desc)
 		hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
 		hum.WalkSpeed = 0
 		hum.JumpPower = 0
-		local idle = Instance.new("Animation")
-		idle.AnimationId = IdleAnimId
-		local track = hum:LoadAnimation(idle)
-		track.Looped = true
-		track:Play()
+		playIdle(hum)
 	end
 
-	if hrp and hum then
-		local basePos = Root.Position + Vector3.new(math.random(-6,6), 0, math.random(-6,6))
-		local ground = getGroundPosition(basePos)
-		hrp.CFrame = CFrame.new(ground + Vector3.new(0, hum.HipHeight + 1, 0))
+	if hrp then
 		hrp.Anchored = true
 	end
 
