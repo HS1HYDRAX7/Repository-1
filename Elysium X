@@ -49,6 +49,10 @@ local gravity=196.2
 local noclipConn
 local originalCollisions={}
 
+local DEFAULT_WALKSPEED=16
+local DEFAULT_JUMPPOWER=50
+local DEFAULT_GRAVITY=workspace.Gravity
+
 local function applyNoclip(character)
 	if noclipConn then noclipConn:Disconnect() end
 	if not character then return end
@@ -87,28 +91,36 @@ PlayerTab:Toggle({
 	Value=false,
 	Callback=function(v)
 		playerEnabled=v
-		if not v then workspace.Gravity=DEFAULT_GRAVITY end
+		if not v then
+			workspace.Gravity=DEFAULT_GRAVITY
+			local char=LocalPlayer.Character
+			local hum=char and char:FindFirstChildOfClass("Humanoid")
+			if hum then
+				hum.WalkSpeed=DEFAULT_WALKSPEED
+				hum.JumpPower=DEFAULT_JUMPPOWER
+			end
+		end
 	end
 })
 
 PlayerTab:Slider({
 	Title="CFrame Speed",
 	Step=1,
-	Value={Min=1,Max=100,Default=1},
+	Value={Min=0,Max=100,Default=1},
 	Callback=function(v) cframeSpeed=v end
 })
 
 PlayerTab:Slider({
 	Title="WalkSpeed",
 	Step=1,
-	Value={Min=1,Max=200,Default=16},
+	Value={Min=0,Max=200,Default=16},
 	Callback=function(v) walkSpeed=v end
 })
 
 PlayerTab:Slider({
 	Title="JumpPower",
 	Step=1,
-	Value={Min=1,Max=200,Default=50},
+	Value={Min=0,Max=200,Default=50},
 	Callback=function(v) jumpPower=v end
 })
 
@@ -147,12 +159,26 @@ RunService.Heartbeat:Connect(function()
 	local hrp=char and char:FindFirstChild("HumanoidRootPart")
 	local hum=char and char:FindFirstChildOfClass("Humanoid")
 	if not hrp or not hum then return end
+
 	workspace.Gravity=gravity
-	hum.WalkSpeed=walkSpeed
-	hum.JumpPower=jumpPower
-	local dir=hum.MoveDirection
-	if dir.Magnitude>0 then
-		hrp.CFrame=hrp.CFrame+(dir*(cframeSpeed*0.08))
+
+	if walkSpeed==0 then
+		hum.WalkSpeed=DEFAULT_WALKSPEED
+	else
+		hum.WalkSpeed=walkSpeed
+	end
+
+	if jumpPower==0 then
+		hum.JumpPower=DEFAULT_JUMPPOWER
+	else
+		hum.JumpPower=jumpPower
+	end
+
+	if cframeSpeed>0 then
+		local dir=hum.MoveDirection
+		if dir.Magnitude>0 then
+			hrp.CFrame=hrp.CFrame+(dir*(cframeSpeed*0.08))
+		end
 	end
 end)
 
