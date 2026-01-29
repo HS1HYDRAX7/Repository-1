@@ -525,17 +525,6 @@ end
 end
 })
 
-OthersTab:Slider({
-	Title="Volume",
-	Step=0.1,
-	Value={Min=0,Max=10,Default=5},
-	Callback=function(v)
-		local sound=getgenv().Sound
-		if not sound then return end
-		sound.Volume=v
-	end
-})
-
 OthersTab:Button({
 Title = "Play",
 Callback = function()
