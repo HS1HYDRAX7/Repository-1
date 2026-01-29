@@ -519,38 +519,29 @@ if getgenv().VisualizerUI then return end
 
 local Players=game:GetService("Players")
 local RunService=game:GetService("RunService")
-local Camera=workspace.CurrentCamera
-
-local viewport=Camera.ViewportSize
-local isMobile=viewport.X<900
 
 local gui=Instance.new("ScreenGui")
 gui.Name="VisualizerUI"
 gui.ResetOnSpawn=false
-gui.IgnoreGuiInset=true
 gui.Parent=Players.LocalPlayer:WaitForChild("PlayerGui")
 getgenv().VisualizerUI=gui
 
 local holder=Instance.new("Frame")
 holder.Parent=gui
 holder.BackgroundTransparency=1
-holder.Size=UDim2.fromScale(0.35,isMobile and 0.35 or 0.45)
-holder.AnchorPoint=Vector2.new(0,0.5)
-holder.Position=UDim2.fromScale(-0.18,0.5)
+holder.Size=UDim2.new(0,300,0,260)
+holder.AnchorPoint=Vector2.new(1,0.5)
+holder.Position=UDim2.new(0,0,0.5,0)
 
-local layout=Instance.new("UIListLayout")
-layout.Parent=holder
-layout.Padding=UDim.new(0,math.floor(viewport.Y*0.01))
+local layout=Instance.new("UIListLayout",holder)
+layout.Padding=UDim.new(0,6)
 layout.VerticalAlignment=Enum.VerticalAlignment.Center
 
-local barHeight=isMobile and 10 or 14
-local barBaseWidth=isMobile and 16 or 20
 local bars={}
-
-for i=1,(isMobile and 10 or 16) do
+for i=1,16 do
 local bar=Instance.new("Frame")
 bar.Parent=holder
-bar.Size=UDim2.new(0,barBaseWidth,0,barHeight)
+bar.Size=UDim2.new(0,20,0,12)
 bar.BackgroundColor3=Color3.fromRGB(255,70,70)
 bar.AnchorPoint=Vector2.new(1,0.5)
 bar.Position=UDim2.new(1,0,0.5,0)
@@ -562,9 +553,8 @@ getgenv().VisualizerConn=RunService.RenderStepped:Connect(function()
 local sound=getgenv().Sound
 if not sound or not sound.IsPlaying then return end
 local level=math.clamp(sound.PlaybackLoudness/400,0,1)
-local maxWidth=viewport.X*(isMobile and 0.18 or 0.25)
 for _,bar in ipairs(bars) do
-bar.Size=UDim2.new(0,barBaseWidth+level*math.random(maxWidth*0.3,maxWidth),0,barHeight)
+bar.Size=UDim2.new(0,20+level*math.random(100,240),0,12)
 end
 end)
 end
