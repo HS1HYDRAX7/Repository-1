@@ -538,6 +538,7 @@ layout.Padding=UDim.new(0,6)
 layout.VerticalAlignment=Enum.VerticalAlignment.Center
 
 local bars={}
+local targets={}
 for i=1,16 do
 local bar=Instance.new("Frame")
 bar.Parent=holder
@@ -546,21 +547,46 @@ bar.BackgroundColor3=Color3.fromRGB(180,57,63)
 bar.AnchorPoint=Vector2.new(0,0.5)
 bar.Position=UDim2.new(0,0,0.5,0)
 Instance.new("UICorner",bar).CornerRadius=UDim.new(1,0)
-table.insert(bars,bar)
+bars[i]=bar
+targets[i]=20
 end
-
-local smooth=0
 
 getgenv().VisualizerConn=RunService.RenderStepped:Connect(function(dt)
 local sound=getgenv().Sound
 if not sound or not sound.IsPlaying then return end
-local target=math.clamp(sound.PlaybackLoudness/500,0,1)
-smooth=smooth+(target-smooth)*dt*6
-local width=20+smooth*220
-for _,bar in ipairs(bars) do
-bar.Size=UDim2.new(0,width,0,12)
+local level=math.clamp(sound.PlaybackLoudness/400,0,1)
+for i,bar in ipairs(bars) do
+local goal=20+level*math.random(120,240)
+targets[i]=targets[i]+(goal-targets[i])*math.clamp(dt*8,0,1)
+bar.Size=UDim2.new(0,targets[i],0,12)
 end
 end)
+end
+})
+
+OthersTab:Toggle({
+Title="Reverb",
+Value=false,
+Callback=function(v)
+local sound=getgenv().Sound
+if not sound then return end
+if v then
+if not getgenv().Reverb then
+local reverb=Instance.new("ReverbSoundEffect")
+reverb.DecayTime=2
+reverb.Density=0.8
+reverb.Diffusion=0.9
+reverb.WetLevel=0.4
+reverb.DryLevel=1
+reverb.Parent=sound
+getgenv().Reverb=reverb
+end
+else
+if getgenv().Reverb then
+getgenv().Reverb:Destroy()
+getgenv().Reverb=nil
+end
+end
 end
 })
 
