@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
+local Workspace = game:GetService("Workspace")
 
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
@@ -106,6 +107,17 @@ end)
 local FakePlayers = {}
 local IdleAnimId = "rbxassetid://507766666"
 
+local function getGroundPosition(origin)
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Blacklist
+	params.FilterDescendantsInstances = {Character}
+	local result = Workspace:Raycast(origin + Vector3.new(0, 5, 0), Vector3.new(0, -500, 0), params)
+	if result then
+		return result.Position
+	end
+	return origin
+end
+
 local function createFakePlayer(username)
 	local userId
 	local success = pcall(function()
@@ -115,13 +127,15 @@ local function createFakePlayer(username)
 
 	local rig = Players:CreateHumanoidModelFromUserId(userId)
 	rig.Name = "FakePlayer"
-	rig.Parent = workspace
-	rig:MoveTo(Root.Position + Vector3.new(math.random(-6,6),0,math.random(-6,6)))
+	rig.Parent = Workspace
 
 	local hum = rig:FindFirstChildOfClass("Humanoid")
 	local hrp = rig:FindFirstChild("HumanoidRootPart")
 
 	if hum then
+		local desc = hum:GetAppliedDescription()
+		desc.RigType = Enum.HumanoidRigType.R15
+		hum:ApplyDescription(desc)
 		hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
 		hum.WalkSpeed = 0
 		hum.JumpPower = 0
@@ -132,7 +146,10 @@ local function createFakePlayer(username)
 		track:Play()
 	end
 
-	if hrp then
+	if hrp and hum then
+		local basePos = Root.Position + Vector3.new(math.random(-6,6), 0, math.random(-6,6))
+		local ground = getGroundPosition(basePos)
+		hrp.CFrame = CFrame.new(ground + Vector3.new(0, hum.HipHeight + 1, 0))
 		hrp.Anchored = true
 	end
 
