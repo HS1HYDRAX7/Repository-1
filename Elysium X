@@ -525,6 +525,17 @@ end
 end
 })
 
+OthersTab:Slider({
+	Title="Volume",
+	Step=1,
+	Value={Min=0,Max=10,Default=5},
+	Callback=function(v)
+		if getgenv().MusicSound then
+			getgenv().MusicSound.Volume = v / 10
+		end
+	end
+})
+
 OthersTab:Button({
 Title = "Play",
 Callback = function()
