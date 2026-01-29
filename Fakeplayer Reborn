@@ -1,7 +1,5 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local Workspace = game:GetService("Workspace")
 
@@ -13,161 +11,159 @@ local Root = Character:WaitForChild("HumanoidRootPart")
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "FakePlayersUI"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = CoreGui
 
 local Main = Instance.new("Frame")
-Main.Size = UDim2.fromOffset(340, 190)
+Main.Size = UDim2.fromScale(0, 0)
 Main.Position = UDim2.fromScale(0.5, 0.5)
 Main.AnchorPoint = Vector2.new(0.5, 0.5)
-Main.BackgroundColor3 = Color3.fromRGB(18,18,18)
+Main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 Main.Parent = ScreenGui
 
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0,18)
-
-local TitleBar = Instance.new("Frame")
-TitleBar.Size = UDim2.new(1,0,0,44)
-TitleBar.BackgroundTransparency = 1
-TitleBar.Parent = Main
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 18)
+Corner.Parent = Main
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1,-60,1,0)
-Title.Position = UDim2.fromOffset(14,0)
+Title.Size = UDim2.new(1, -60, 0, 40)
+Title.Position = UDim2.fromOffset(10, 10)
 Title.BackgroundTransparency = 1
-Title.Text = "Fake Players Controller"
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 18
+Title.Text = "Fake Players"
 Title.TextColor3 = Color3.new(1,1,1)
-Title.TextXAlignment = Left
-Title.Parent = TitleBar
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 20
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = Main
 
-local Close = Instance.new("TextButton")
-Close.Size = UDim2.fromOffset(30,30)
-Close.Position = UDim2.fromOffset(300,7)
-Close.Text = "✕"
-Close.Font = Enum.Font.GothamBold
-Close.TextSize = 16
-Close.TextColor3 = Color3.new(1,1,1)
-Close.BackgroundColor3 = Color3.fromRGB(40,40,40)
-Close.Parent = Main
-Instance.new("UICorner", Close).CornerRadius = UDim.new(0,10)
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.fromOffset(32, 32)
+CloseButton.Position = UDim2.fromOffset(278, 14)
+CloseButton.Text = "X"
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.TextSize = 16
+CloseButton.TextColor3 = Color3.new(1,1,1)
+CloseButton.BackgroundColor3 = Color3.fromRGB(40,40,40)
+CloseButton.Parent = Main
 
-local Box = Instance.new("TextBox")
-Box.Size = UDim2.new(1,-24,0,42)
-Box.Position = UDim2.fromOffset(12,56)
-Box.PlaceholderText = "Username"
-Box.Font = Enum.Font.Gotham
-Box.TextSize = 14
-Box.TextColor3 = Color3.new(1,1,1)
-Box.BackgroundColor3 = Color3.fromRGB(28,28,28)
-Box.Parent = Main
-Instance.new("UICorner", Box).CornerRadius = UDim.new(0,12)
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 10)
+CloseCorner.Parent = CloseButton
 
-local Add = Instance.new("TextButton")
-Add.Size = UDim2.new(0.5,-18,0,42)
-Add.Position = UDim2.fromOffset(12,112)
-Add.Text = "Adicionar"
-Add.Font = Enum.Font.GothamBold
-Add.TextSize = 14
-Add.TextColor3 = Color3.new(1,1,1)
-Add.BackgroundColor3 = Color3.fromRGB(70,130,255)
-Add.Parent = Main
-Instance.new("UICorner", Add).CornerRadius = UDim.new(0,12)
+local TextBox = Instance.new("TextBox")
+TextBox.Size = UDim2.new(1, -20, 0, 40)
+TextBox.Position = UDim2.fromOffset(10, 60)
+TextBox.PlaceholderText = "Nome do Player"
+TextBox.Text = ""
+TextBox.Font = Enum.Font.Gotham
+TextBox.TextSize = 14
+TextBox.TextColor3 = Color3.new(1,1,1)
+TextBox.BackgroundColor3 = Color3.fromRGB(30,30,30)
+TextBox.Parent = Main
 
-local Del = Instance.new("TextButton")
-Del.Size = UDim2.new(0.5,-18,0,42)
-Del.Position = UDim2.fromOffset(170,112)
-Del.Text = "Deletar (Proximidade)"
-Del.Font = Enum.Font.GothamBold
-Del.TextSize = 13
-Del.TextColor3 = Color3.new(1,1,1)
-Del.BackgroundColor3 = Color3.fromRGB(200,70,70)
-Del.Parent = Main
-Instance.new("UICorner", Del).CornerRadius = UDim.new(0,12)
+local TBCorner = Instance.new("UICorner")
+TBCorner.CornerRadius = UDim.new(0,12)
+TBCorner.Parent = TextBox
 
-local dragging, dragStart, startPos
-TitleBar.InputBegan:Connect(function(i)
-	if i.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-		dragStart = i.Position
-		startPos = Main.Position
-	end
-end)
-TitleBar.InputEnded:Connect(function(i)
-	if i.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = false
-	end
-end)
-UserInputService.InputChanged:Connect(function(i)
-	if dragging and i.UserInputType == Enum.UserInputType.MouseMovement then
-		local delta = i.Position - dragStart
-		Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-	end
-end)
+local AddButton = Instance.new("TextButton")
+AddButton.Size = UDim2.new(0.5, -15, 0, 40)
+AddButton.Position = UDim2.fromOffset(10, 110)
+AddButton.Text = "Adicionar"
+AddButton.Font = Enum.Font.GothamBold
+AddButton.TextSize = 14
+AddButton.TextColor3 = Color3.new(1,1,1)
+AddButton.BackgroundColor3 = Color3.fromRGB(60,120,255)
+AddButton.Parent = Main
 
-Close.MouseButton1Click:Connect(function()
+local AddCorner = Instance.new("UICorner")
+AddCorner.CornerRadius = UDim.new(0,12)
+AddCorner.Parent = AddButton
+
+local DelButton = Instance.new("TextButton")
+DelButton.Size = UDim2.new(0.5, -15, 0, 40)
+DelButton.Position = UDim2.fromOffset(165, 110)
+DelButton.Text = "Deletar"
+DelButton.Font = Enum.Font.GothamBold
+DelButton.TextSize = 14
+DelButton.TextColor3 = Color3.new(1,1,1)
+DelButton.BackgroundColor3 = Color3.fromRGB(200,60,60)
+DelButton.Parent = Main
+
+local DelCorner = Instance.new("UICorner")
+DelCorner.CornerRadius = UDim.new(0,12)
+DelCorner.Parent = DelButton
+
+TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+	Size = UDim2.fromOffset(320, 170)
+}):Play()
+
+CloseButton.MouseButton1Click:Connect(function()
 	TweenService:Create(Main, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
-		Size = UDim2.fromScale(0,0)
+		Size = UDim2.fromScale(0, 0)
 	}):Play()
 	task.wait(0.25)
 	ScreenGui:Destroy()
 end)
 
 local FakePlayers = {}
-local IdleAnim = "rbxassetid://507766666"
+local IdleAnimId = "rbxassetid://507766666"
 
-local function groundCFrame(cf)
+local function getGroundPosition(origin)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Blacklist
 	params.FilterDescendantsInstances = {Character}
-	local result = Workspace:Raycast(cf.Position + Vector3.new(0,5,0), Vector3.new(0,-500,0), params)
+	local result = Workspace:Raycast(origin + Vector3.new(0, 5, 0), Vector3.new(0, -500, 0), params)
 	if result then
-		return CFrame.new(result.Position) * CFrame.Angles(0, cf:ToEulerAnglesYXZ())
+		return result.Position
 	end
-	return cf
+	return origin
 end
 
-local function createFake(username)
+local function createFakePlayer(username)
 	local userId
-	if not pcall(function() userId = Players:GetUserIdFromNameAsync(username) end) then return end
+	local success = pcall(function()
+		userId = Players:GetUserIdFromNameAsync(username)
+	end)
+	if not success or not userId then return end
 
-	local desc
-	if not pcall(function() desc = Players:GetHumanoidDescriptionFromUserId(userId) end) then return end
-
-	desc.RigType = Enum.HumanoidRigType.R15
-
-	local rig = Players:CreateHumanoidModelFromDescription(desc, Enum.HumanoidRigType.R15)
+	local rig = Players:CreateHumanoidModelFromUserId(userId)
 	rig.Name = "FakePlayer"
 	rig.Parent = Workspace
 
-	local hum = rig:WaitForChild("Humanoid")
-	local hrp = rig:WaitForChild("HumanoidRootPart")
+	local hum = rig:FindFirstChildOfClass("Humanoid")
+	local hrp = rig:FindFirstChild("HumanoidRootPart")
 
-	hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-	hum.WalkSpeed = 0
-	hum.JumpPower = 0
+	if hum then
+		local desc = hum:GetAppliedDescription()
+		desc.RigType = Enum.HumanoidRigType.R15
+		hum:ApplyDescription(desc)
+		hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+		hum.WalkSpeed = 0
+		hum.JumpPower = 0
+		local idle = Instance.new("Animation")
+		idle.AnimationId = IdleAnimId
+		local track = hum:LoadAnimation(idle)
+		track.Looped = true
+		track:Play()
+	end
 
-	local idle = Instance.new("Animation")
-	idle.AnimationId = IdleAnim
-	local track = hum:LoadAnimation(idle)
-	track.Looped = true
-	track:Play()
-
-	local cf = groundCFrame(Root.CFrame)
-	hrp.CFrame = cf + Vector3.new(0, hum.HipHeight + 0.5, 0)
-	hrp.Anchored = true
+	if hrp and hum then
+		local basePos = Root.Position + Vector3.new(math.random(-6,6), 0, math.random(-6,6))
+		local ground = getGroundPosition(basePos)
+		hrp.CFrame = CFrame.new(ground + Vector3.new(0, hum.HipHeight + 1, 0))
+		hrp.Anchored = true
+	end
 
 	FakePlayers[rig] = {Humanoid = hum}
 end
 
-Add.MouseButton1Click:Connect(function()
-	if Box.Text ~= "" then
-		createFake(Box.Text)
+AddButton.MouseButton1Click:Connect(function()
+	if TextBox.Text ~= "" then
+		createFakePlayer(TextBox.Text)
 	end
 end)
 
-Del.MouseButton1Click:Connect(function()
-	for rig in pairs(FakePlayers) do
+DelButton.MouseButton1Click:Connect(function()
+	for rig,_ in pairs(FakePlayers) do
 		local hrp = rig:FindFirstChild("HumanoidRootPart")
 		if hrp and (hrp.Position - Root.Position).Magnitude <= 4 then
 			FakePlayers[rig] = nil
@@ -177,10 +173,10 @@ Del.MouseButton1Click:Connect(function()
 	end
 end)
 
-Humanoid.EmoteTriggered:Connect(function(name)
-	for _,data in pairs(FakePlayers) do
+Humanoid.EmoteTriggered:Connect(function(emoteName)
+	for rig,data in pairs(FakePlayers) do
 		if data.Humanoid then
-			data.Humanoid:PlayEmote(name)
+			data.Humanoid:PlayEmote(emoteName)
 		end
 	end
 end)
