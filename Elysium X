@@ -530,8 +530,8 @@ local holder=Instance.new("Frame")
 holder.Parent=gui
 holder.BackgroundTransparency=1
 holder.Size=UDim2.new(0,300,0,260)
-holder.AnchorPoint = Vector2.new(1, 0.5)
-holder.Position = UDim2.new(0, 300, 0.5, 0)
+holder.AnchorPoint=Vector2.new(1,0.5)
+holder.Position=UDim2.new(0,300,0.5,0)
 
 local layout=Instance.new("UIListLayout",holder)
 layout.Padding=UDim.new(0,6)
@@ -543,18 +543,22 @@ local bar=Instance.new("Frame")
 bar.Parent=holder
 bar.Size=UDim2.new(0,20,0,12)
 bar.BackgroundColor3=Color3.fromRGB(180,57,63)
-bar.AnchorPoint = Vector2.new(0, 0.5)
-bar.Position = UDim2.new(0, 0, 0.5, 0)
+bar.AnchorPoint=Vector2.new(0,0.5)
+bar.Position=UDim2.new(0,0,0.5,0)
 Instance.new("UICorner",bar).CornerRadius=UDim.new(1,0)
 table.insert(bars,bar)
 end
 
-getgenv().VisualizerConn=RunService.RenderStepped:Connect(function()
+local smooth=0
+
+getgenv().VisualizerConn=RunService.RenderStepped:Connect(function(dt)
 local sound=getgenv().Sound
 if not sound or not sound.IsPlaying then return end
-local level=math.clamp(sound.PlaybackLoudness/400,0,1)
+local target=math.clamp(sound.PlaybackLoudness/500,0,1)
+smooth=smooth+(target-smooth)*dt*6
+local width=20+smooth*220
 for _,bar in ipairs(bars) do
-bar.Size=UDim2.new(0,20+level*math.random(100,240),0,12)
+bar.Size=UDim2.new(0,width,0,12)
 end
 end)
 end
