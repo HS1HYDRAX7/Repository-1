@@ -40,10 +40,11 @@ local EternityTab = Window:Tab({ Title = "Eternity", Icon = "infinity" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "link" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
-local playerEnabled=false
 local noclipEnabled=false
 local infJump=false
 local cframeSpeed=1
+local walkSpeed=16
+local jumpPower=50
 local gravity=196.2
 local noclipConn
 local originalCollisions={}
@@ -81,16 +82,34 @@ LocalPlayer.CharacterAdded:Connect(function(c)
 	end
 end)
 
-PlayerTab:Toggle({ Title="Enable", Value=false, Callback=function(v)
-	playerEnabled=v
-	if not v then workspace.Gravity=DEFAULT_GRAVITY end
-end })
+PlayerTab:Toggle({
+	Title="Enable",
+	Value=false,
+	Callback=function(v)
+		playerEnabled=v
+		if not v then workspace.Gravity=DEFAULT_GRAVITY end
+	end
+})
 
 PlayerTab:Slider({
 	Title="CFrame Speed",
 	Step=1,
 	Value={Min=1,Max=100,Default=1},
 	Callback=function(v) cframeSpeed=v end
+})
+
+PlayerTab:Slider({
+	Title="WalkSpeed",
+	Step=1,
+	Value={Min=1,Max=200,Default=16},
+	Callback=function(v) walkSpeed=v end
+})
+
+PlayerTab:Slider({
+	Title="JumpPower",
+	Step=1,
+	Value={Min=1,Max=200,Default=50},
+	Callback=function(v) jumpPower=v end
 })
 
 PlayerTab:Slider({
@@ -129,6 +148,8 @@ RunService.Heartbeat:Connect(function()
 	local hum=char and char:FindFirstChildOfClass("Humanoid")
 	if not hrp or not hum then return end
 	workspace.Gravity=gravity
+	hum.WalkSpeed=walkSpeed
+	hum.JumpPower=jumpPower
 	local dir=hum.MoveDirection
 	if dir.Magnitude>0 then
 		hrp.CFrame=hrp.CFrame+(dir*(cframeSpeed*0.08))
