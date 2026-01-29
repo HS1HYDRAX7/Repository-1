@@ -107,16 +107,16 @@ end)
 local FakePlayers = {}
 local IdleAnimId = "rbxassetid://507766666"
 
-local function getGroundPosition(origin)
+local function getGroundCFrame(origin, hipHeight)
 	local params = RaycastParams.new()
 	params.FilterDescendantsInstances = {Character}
 	params.FilterType = Enum.RaycastFilterType.Blacklist
 
-	local result = Workspace:Raycast(origin + Vector3.new(0, 10, 0), Vector3.new(0, -100, 0), params)
+	local result = Workspace:Raycast(origin + Vector3.new(0, 20, 0), Vector3.new(0, -200, 0), params)
 	if result then
-		return result.Position
+		return CFrame.new(result.Position + Vector3.new(0, hipHeight + 0.2, 0))
 	end
-	return origin
+	return CFrame.new(origin)
 end
 
 local function playIdle(humanoid)
@@ -139,23 +139,20 @@ local function createFakePlayer(username)
 	rig.Name = "FakePlayer"
 	rig.Parent = workspace
 
-	local offset = Vector3.new(math.random(-6,6), 0, math.random(-6,6))
-	local groundPos = getGroundPosition(Root.Position + offset)
-	rig:PivotTo(CFrame.new(groundPos))
-
 	local hum = rig:FindFirstChildOfClass("Humanoid")
 	local hrp = rig:FindFirstChild("HumanoidRootPart")
+	if not hum or not hrp then rig:Destroy() return end
 
-	if hum then
-		hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-		hum.WalkSpeed = 0
-		hum.JumpPower = 0
-		playIdle(hum)
-	end
+	local offset = Vector3.new(math.random(-6,6), 0, math.random(-6,6))
+	local cf = getGroundCFrame(Root.Position + offset, hum.HipHeight)
+	rig:PivotTo(cf)
 
-	if hrp then
-		hrp.Anchored = true
-	end
+	hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+	hum.WalkSpeed = 0
+	hum.JumpPower = 0
+	playIdle(hum)
+
+	hrp.Anchored = true
 
 	FakePlayers[rig] = {Humanoid = hum}
 end
