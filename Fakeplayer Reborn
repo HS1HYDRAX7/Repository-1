@@ -1,0 +1,165 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local Root = Character:WaitForChild("HumanoidRootPart")
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "FakePlayersUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
+
+local Main = Instance.new("Frame")
+Main.Size = UDim2.fromScale(0, 0)
+Main.Position = UDim2.fromScale(0.5, 0.5)
+Main.AnchorPoint = Vector2.new(0.5, 0.5)
+Main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Main.Parent = ScreenGui
+
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 18)
+Corner.Parent = Main
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -60, 0, 40)
+Title.Position = UDim2.fromOffset(10, 10)
+Title.BackgroundTransparency = 1
+Title.Text = "Fake Players"
+Title.TextColor3 = Color3.new(1,1,1)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 20
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = Main
+
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.fromOffset(32, 32)
+CloseButton.Position = UDim2.fromOffset(278, 14)
+CloseButton.Text = "X"
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.TextSize = 16
+CloseButton.TextColor3 = Color3.new(1,1,1)
+CloseButton.BackgroundColor3 = Color3.fromRGB(40,40,40)
+CloseButton.Parent = Main
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 10)
+CloseCorner.Parent = CloseButton
+
+local TextBox = Instance.new("TextBox")
+TextBox.Size = UDim2.new(1, -20, 0, 40)
+TextBox.Position = UDim2.fromOffset(10, 60)
+TextBox.PlaceholderText = "Nome do Player"
+TextBox.Text = ""
+TextBox.Font = Enum.Font.Gotham
+TextBox.TextSize = 14
+TextBox.TextColor3 = Color3.new(1,1,1)
+TextBox.BackgroundColor3 = Color3.fromRGB(30,30,30)
+TextBox.Parent = Main
+
+local TBCorner = Instance.new("UICorner")
+TBCorner.CornerRadius = UDim.new(0,12)
+TBCorner.Parent = TextBox
+
+local AddButton = Instance.new("TextButton")
+AddButton.Size = UDim2.new(0.5, -15, 0, 40)
+AddButton.Position = UDim2.fromOffset(10, 110)
+AddButton.Text = "Adicionar"
+AddButton.Font = Enum.Font.GothamBold
+AddButton.TextSize = 14
+AddButton.TextColor3 = Color3.new(1,1,1)
+AddButton.BackgroundColor3 = Color3.fromRGB(60,120,255)
+AddButton.Parent = Main
+
+local AddCorner = Instance.new("UICorner")
+AddCorner.CornerRadius = UDim.new(0,12)
+AddCorner.Parent = AddButton
+
+local DelButton = Instance.new("TextButton")
+DelButton.Size = UDim2.new(0.5, -15, 0, 40)
+DelButton.Position = UDim2.fromOffset(165, 110)
+DelButton.Text = "Deletar"
+DelButton.Font = Enum.Font.GothamBold
+DelButton.TextSize = 14
+DelButton.TextColor3 = Color3.new(1,1,1)
+DelButton.BackgroundColor3 = Color3.fromRGB(200,60,60)
+DelButton.Parent = Main
+
+local DelCorner = Instance.new("UICorner")
+DelCorner.CornerRadius = UDim.new(0,12)
+DelCorner.Parent = DelButton
+
+TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+	Size = UDim2.fromOffset(320, 170)
+}):Play()
+
+CloseButton.MouseButton1Click:Connect(function()
+	TweenService:Create(Main, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+		Size = UDim2.fromScale(0, 0)
+	}):Play()
+	task.wait(0.25)
+	ScreenGui:Destroy()
+end)
+
+local FakePlayers = {}
+local IdleAnimId = "rbxassetid://507766666"
+
+local function createFakePlayer(username)
+	local userId
+	local success = pcall(function()
+		userId = Players:GetUserIdFromNameAsync(username)
+	end)
+	if not success or not userId then return end
+
+	local rig = Players:CreateHumanoidModelFromUserId(userId)
+	rig.Name = "FakePlayer"
+	rig.Parent = workspace
+	rig:MoveTo(Root.Position + Vector3.new(math.random(-6,6),0,math.random(-6,6)))
+
+	local hum = rig:FindFirstChildOfClass("Humanoid")
+	local hrp = rig:FindFirstChild("HumanoidRootPart")
+
+	if hum then
+		hum.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+		hum.WalkSpeed = 0
+		hum.JumpPower = 0
+		local idle = Instance.new("Animation")
+		idle.AnimationId = IdleAnimId
+		local track = hum:LoadAnimation(idle)
+		track.Looped = true
+		track:Play()
+	end
+
+	if hrp then
+		hrp.Anchored = true
+	end
+
+	FakePlayers[rig] = {Humanoid = hum}
+end
+
+AddButton.MouseButton1Click:Connect(function()
+	if TextBox.Text ~= "" then
+		createFakePlayer(TextBox.Text)
+	end
+end)
+
+DelButton.MouseButton1Click:Connect(function()
+	for rig,_ in pairs(FakePlayers) do
+		local hrp = rig:FindFirstChild("HumanoidRootPart")
+		if hrp and (hrp.Position - Root.Position).Magnitude <= 4 then
+			FakePlayers[rig] = nil
+			rig:Destroy()
+			break
+		end
+	end
+end)
+
+Humanoid.EmoteTriggered:Connect(function(emoteName)
+	for rig,data in pairs(FakePlayers) do
+		if data.Humanoid then
+			data.Humanoid:PlayEmote(emoteName)
+		end
+	end
+end)
