@@ -424,13 +424,6 @@ EternityTab:Toggle({
 })
 
 OthersTab:Button({
-	Title="Smart IY",
-	Callback=function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/BokX1/InfiniteYieldWithAI/refs/heads/main/InfiniteYieldWithAI.Lua"))()
-	end
-})
-
-OthersTab:Button({
 	Title="Infinite Yield",
 	Callback=function()
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
