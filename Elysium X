@@ -446,39 +446,6 @@ PressureTab:Toggle({
     end
 })
 
-PressureTab:Button({
-    Title = "Give Permanent NormalKey",
-    Callback = function()
-        game.Players.LocalPlayer.PlayerFolder.Inventory.NormalKeyCard:Destroy()
-        local d = Instance.new("NumberValue")
-        d.Name = "NormalKeyCard"
-        d.Parent = game.Players.LocalPlayer.PlayerFolder.Inventory
-    end
-})
-
-PressureTab:Button({
-    Title = "Give Permanent InnerKeyCard",
-    Callback = function()
-        game.Players.LocalPlayer.PlayerFolder.Inventory.InnerKeyCard:Destroy()
-        local d = Instance.new("NumberValue")
-        d.Name = "InnerKeyCard"
-        d.Parent = game.Players.LocalPlayer.PlayerFolder.Inventory
-    end
-})
-
-PressureTab:Toggle({
-    Title = "No ProximityPrompt Duration",
-    Value = false,
-    Callback = function(v)
-        workspace.DescendantAdded:Connect(function(inst)
-            if inst:IsA("ProximityPrompt") and v then
-                task.wait(0.1)
-                inst.HoldDuration = 0
-            end
-        end)
-    end
-})
-
 PressureTab:Toggle({
     Title = "Auto Hide",
     Value = false,
@@ -541,11 +508,26 @@ PressureTab:Toggle({
 })
 
 PressureTab:Toggle({
-    Title = "Key ESP",
+    Title = "Door ESP",
     Value = false,
     Callback = function(v)
-        for _, cham in pairs(key) do
-            cham.Enabled = v
+        for _, door in pairs(Workspace.GamePlayFolder:GetChildren()) do
+            if door.Name == "NormalDoor" then
+                local highlight = door:FindFirstChildOfClass("Highlight")
+                if v then
+                    if not highlight then
+                        highlight = Instance.new("Highlight")
+                        highlight.Parent = door
+                        highlight.FillTransparency = 0.5
+                        highlight.OutlineColor = Color3.fromRGB(0, 255, 0)
+                    end
+                    highlight.Enabled = true
+                else
+                    if highlight then
+                        highlight.Enabled = false
+                    end
+                end
+            end
         end
     end
 })
@@ -554,12 +536,26 @@ PressureTab:Toggle({
     Title = "Monster ESP",
     Value = false,
     Callback = function(v)
-        for _, cham in pairs(monster) do
-            cham.Enabled = v
+        for _, monster in pairs(Workspace.GamePlayFolder.Monsters:GetChildren()) do
+            if monster:IsA("BasePart") or monster:IsA("Model") then
+                local highlight = monster:FindFirstChildOfClass("Highlight")
+                if v then
+                    if not highlight then
+                        highlight = Instance.new("Highlight")
+                        highlight.Parent = monster
+                        highlight.FillTransparency = 0.5
+                        highlight.OutlineColor = Color3.fromRGB(255, 0, 0)
+                    end
+                    highlight.Enabled = true
+                else
+                    if highlight then
+                        highlight.Enabled = false
+                    end
+                end
+            end
         end
     end
 })
-
 PressureTab:Toggle({
     Title = "Monster Notify",
     Value = false,
