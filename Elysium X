@@ -13,7 +13,7 @@ local DEFAULT_GRAVITY = workspace.Gravity
 
 Window = WindUI:CreateWindow({
 	Title = "Elysium X",
-	Author = "By Hydra",
+	Author = "By Fusion",
 	Folder = "Elysium",
 	Transparent = true,
 	Theme = "Crimson",
@@ -588,7 +588,7 @@ end)
 
 InfoTab:Paragraph({
     Title = "Creators",
-    Desc = "Hydra (Owner)",
+    Desc = "Fusion (Owner)",
     Thumbnail = "rbxassetid://101052171885580",
     ThumbnailSize = 140,  
     Locked = true,         
