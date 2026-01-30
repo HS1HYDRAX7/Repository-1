@@ -511,41 +511,39 @@ PressureTab:Toggle({
     Title = "Monster ESP",
     Value = false,
     Callback = function(v)
-        local MonsterColor = Color3.fromRGB(255, 0, 0)
-        PressureTab:Colorpicker({
-            Title = "Monster ESP Color",
-            Default = MonsterColor,
-            Callback = function(color)
-                MonsterColor = color
-            end
-        })
         for _, monster in pairs(Workspace.GamePlayFolder.Monsters:GetChildren()) do
-            if monster:IsA("Model") or monster:IsA("BasePart") or monster:IsA("ImageLabel") then
-                local gui = monster:FindFirstChild("ESP_Billboard")
-                if v then
-                    if not gui then
-                        gui = Instance.new("BillboardGui")
-                        gui.Name = "ESP_Billboard"
-                        gui.Size = UDim2.new(2, 0, 2, 0)
-                        gui.AlwaysOnTop = true
-                        gui.Parent = monster
+            local color = Workspace:GetAttribute("MonsterESPColor") or Color3.fromRGB(255, 0, 0)
+            local gui = monster:FindFirstChild("ESP_Billboard")
+            if v then
+                if not gui then
+                    gui = Instance.new("BillboardGui")
+                    gui.Name = "ESP_Billboard"
+                    gui.Size = UDim2.new(2, 0, 2, 0)
+                    gui.AlwaysOnTop = true
+                    gui.Parent = monster
 
-                        local frame = Instance.new("Frame")
-                        frame.Size = UDim2.new(1, 0, 1, 0)
-                        frame.BackgroundTransparency = 0.5
-                        frame.BackgroundColor3 = MonsterColor
-                        frame.BorderSizePixel = 0
-                        frame.Parent = gui
-                    end
-                    gui.Frame.BackgroundColor3 = MonsterColor
-                    gui.Enabled = true
-                else
-                    if gui then
-                        gui.Enabled = false
-                    end
+                    local frame = Instance.new("Frame")
+                    frame.Size = UDim2.new(1, 0, 1, 0)
+                    frame.BackgroundTransparency = 0.5
+                    frame.BorderSizePixel = 0
+                    frame.Parent = gui
+                end
+                gui.Frame.BackgroundColor3 = color
+                gui.Enabled = true
+            else
+                if gui then
+                    gui.Enabled = false
                 end
             end
         end
+    end
+})
+
+PressureTab:Colorpicker({
+    Title = "Monster ESP Color",
+    Default = Color3.fromRGB(255, 0, 0),
+    Callback = function(color)
+        Workspace:SetAttribute("MonsterESPColor", color)
     end
 })
 
@@ -553,24 +551,17 @@ PressureTab:Toggle({
     Title = "Door ESP",
     Value = false,
     Callback = function(v)
-        local DoorColor = Color3.fromRGB(255, 255, 0)
-        PressureTab:Colorpicker({
-            Title = "Door ESP Color",
-            Default = DoorColor,
-            Callback = function(color)
-                DoorColor = color
-            end
-        })
         for _, door in pairs(Workspace.Rooms.Entrances:GetChildren()) do
             if door.Name == "NormalDoor" then
+                local color = Workspace:GetAttribute("DoorESPColor") or Color3.fromRGB(255, 255, 0)
                 local highlight = door:FindFirstChildOfClass("Highlight")
                 if v then
                     if not highlight then
                         highlight = Instance.new("Highlight")
                         highlight.Parent = door
                         highlight.FillTransparency = 0.5
-                        highlight.OutlineColor = DoorColor
                     end
+                    highlight.OutlineColor = color
                     highlight.Enabled = true
                 else
                     if highlight then
@@ -579,6 +570,14 @@ PressureTab:Toggle({
                 end
             end
         end
+    end
+})
+
+PressureTab:Colorpicker({
+    Title = "Door ESP Color",
+    Default = Color3.fromRGB(255, 255, 0),
+    Callback = function(color)
+        Workspace:SetAttribute("DoorESPColor", color)
     end
 })
 
