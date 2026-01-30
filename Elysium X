@@ -37,7 +37,7 @@ Window:Tag({
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
 local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
 local EternityTab = Window:Tab({ Title = "Eternity", Icon = "infinity" })
-local PressureTab = Window:Tab({ Title = "Pressure", Icon = "code-circle-outline" })
+local PressureTab = Window:Tab({ Title = "Pressure", Icon = "cpu" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "link" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -480,27 +480,6 @@ PressureTab:Toggle({
 })
 
 PressureTab:Toggle({
-    Title = "Monster Notify",
-    Value = false,
-    Callback = function(v)
-        workspace.ChildAdded:Connect(function(inst)
-            local monsterNames = {}
-            for _, descendant in ipairs(game.ReplicatedStorage.DeathFolder:GetDescendants()) do
-                table.insert(monsterNames, descendant.Name)
-            end
-            if table.find(monsterNames, inst.Name) and v then
-                WindUI:Notify({
-                    Title = "Monster Alert",
-                    Content = inst.Name.." Spawned ⚠️",
-                    Duration = 5,
-                    Icon = "skull"
-                })
-            end
-        end)
-    end
-})
-
-PressureTab:Toggle({
     Title = "Auto Hide",
     Value = false,
     Callback = function(v)
@@ -582,20 +561,24 @@ PressureTab:Toggle({
 })
 
 PressureTab:Toggle({
-    Title = "TricksterRoom ESP",
+    Title = "Monster Notify",
     Value = false,
     Callback = function(v)
-        for _, cham in pairs(trickster) do
-            cham.Enabled = v
-        end
+        workspace.ChildAdded:Connect(function(inst)
+            local monsterNames = {}
+            for _, descendant in ipairs(game.ReplicatedStorage.DeathFolder:GetDescendants()) do
+                table.insert(monsterNames, descendant.Name)
+            end
+            if table.find(monsterNames, inst.Name) and v then
+                WindUI:Notify({
+                    Title = "Monster Alert",
+                    Content = inst.Name.." Spawned ⚠️",
+                    Duration = 5,
+                    Icon = "skull"
+                })
+            end
+        end)
     end
-})
-
-OthersTab:Button({
-	Title="Smart IY",
-	Callback=function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/BokX1/InfiniteYieldWithAI/refs/heads/main/InfiniteYieldWithAI.Lua"))()
-	end
 })
 
 OthersTab:Button({
