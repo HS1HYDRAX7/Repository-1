@@ -447,28 +447,6 @@ PressureTab:Toggle({
 })
 
 PressureTab:Toggle({
-    Title = "Auto Hide",
-    Value = false,
-    Callback = function(v)
-        workspace.ChildAdded:Connect(function(inst)
-            local monsterNames = {}
-            for _, descendant in ipairs(game.ReplicatedStorage.DeathFolder:GetDescendants()) do
-                table.insert(monsterNames, descendant.Name)
-            end
-            if table.find(monsterNames, inst.Name) and v then
-                local oldpos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
-                local tp = game:GetService("RunService").Heartbeat:Connect(function()
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(p.Position)
-                end)
-                inst.Destroying:Wait()
-                tp:Disconnect()
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(oldpos)
-            end
-        end)
-    end
-})
-
-PressureTab:Toggle({
     Title = "No Eyefestation",
     Value = false,
     Callback = function(v)
@@ -511,7 +489,7 @@ PressureTab:Toggle({
     Title = "Monster ESP",
     Value = false,
     Callback = function(v)
-        for _, monster in pairs(Workspace.GamePlayFolder.Monsters:GetChildren()) do
+        local function apply(monster)
             local color = Workspace:GetAttribute("MonsterESPColor") or Color3.fromRGB(255, 0, 0)
             local gui = monster:FindFirstChild("ESP_Billboard")
             if v then
@@ -536,6 +514,25 @@ PressureTab:Toggle({
                 end
             end
         end
+
+        for _, m in pairs(Workspace.GamePlayFolder.Monsters:GetChildren()) do
+            apply(m)
+        end
+
+        if v then
+            if not Workspace:GetAttribute("MonsterESPConn") then
+                local conn = Workspace.GamePlayFolder.Monsters.ChildAdded:Connect(function(m)
+                    apply(m)
+                end)
+                Workspace:SetAttribute("MonsterESPConn", conn)
+            end
+        else
+            local conn = Workspace:GetAttribute("MonsterESPConn")
+            if conn then
+                conn:Disconnect()
+                Workspace:SetAttribute("MonsterESPConn", nil)
+            end
+        end
     end
 })
 
@@ -551,21 +548,42 @@ PressureTab:Toggle({
     Title = "Door ESP",
     Value = false,
     Callback = function(v)
-        for _, door in pairs(Workspace.Rooms.Entrances:GetChildren()) do
-            if door.Name == "NormalDoor" then
-                local color = Workspace:GetAttribute("DoorESPColor") or Color3.fromRGB(255, 255, 0)
-                local highlight = door:FindFirstChildOfClass("Highlight")
+        local function apply(item)
+            local color = Workspace:GetAttribute("DoorESPColor") or Color3.fromRGB(255, 255, 0)
+            local h = item:FindFirstChildOfClass("Highlight")
+            if v then
+                if not h then
+                    h = Instance.new("Highlight")
+                    h.Parent = item
+                    h.FillTransparency = 0.5
+                end
+                h.OutlineColor = color
+                h.Enabled = true
+            else
+                if h then
+                    h.Enabled = false
+                end
+            end
+        end
+
+        for _, room in pairs(Workspace.Rooms:GetChildren()) do
+            local exit = room:FindFirstChild("Exit")
+            if exit then
+                for _, it in pairs(exit:GetChildren()) do
+                    apply(it)
+                end
                 if v then
-                    if not highlight then
-                        highlight = Instance.new("Highlight")
-                        highlight.Parent = door
-                        highlight.FillTransparency = 0.5
+                    if not exit:GetAttribute("ExitESPConn") then
+                        local conn = exit.ChildAdded:Connect(function(it)
+                            apply(it)
+                        end)
+                        exit:SetAttribute("ExitESPConn", conn)
                     end
-                    highlight.OutlineColor = color
-                    highlight.Enabled = true
                 else
-                    if highlight then
-                        highlight.Enabled = false
+                    local conn = exit:GetAttribute("ExitESPConn")
+                    if conn then
+                        conn:Disconnect()
+                        exit:SetAttribute("ExitESPConn", nil)
                     end
                 end
             end
@@ -578,6 +596,58 @@ PressureTab:Colorpicker({
     Default = Color3.fromRGB(255, 255, 0),
     Callback = function(color)
         Workspace:SetAttribute("DoorESPColor", color)
+    end
+})
+
+PressureTab:Toggle({
+    Title = "Key ESP",
+    Value = false,
+    Callback = function(v)
+        local function apply(item)
+            if item.Name ~= "NormalKeyCard" then return end
+            local color = Workspace:GetAttribute("KeyESPColor") or Color3.fromRGB(0, 0, 139)
+            local h = item:FindFirstChildOfClass("Highlight")
+            if v then
+                if not h then
+                    h = Instance.new("Highlight")
+                    h.Parent = item
+                    h.FillTransparency = 0.5
+                end
+                h.OutlineColor = color
+                h.Enabled = true
+            else
+                if h then
+                    h.Enabled = false
+                end
+            end
+        end
+
+        for _, it in pairs(Workspace:GetDescendants()) do
+            apply(it)
+        end
+
+        if v then
+            if not Workspace:GetAttribute("KeyESPConn") then
+                local conn = Workspace.DescendantAdded:Connect(function(it)
+                    apply(it)
+                end)
+                Workspace:SetAttribute("KeyESPConn", conn)
+            end
+        else
+            local conn = Workspace:GetAttribute("KeyESPConn")
+            if conn then
+                conn:Disconnect()
+                Workspace:SetAttribute("KeyESPConn", nil)
+            end
+        end
+    end
+})
+
+PressureTab:Colorpicker({
+    Title = "Key ESP Color",
+    Default = Color3.fromRGB(0, 0, 139),
+    Callback = function(color)
+        Workspace:SetAttribute("KeyESPColor", color)
     end
 })
 
