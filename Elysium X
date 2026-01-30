@@ -37,6 +37,7 @@ Window:Tag({
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
 local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
 local EternityTab = Window:Tab({ Title = "Eternity", Icon = "infinity" })
+local PressureTab = Window:Tab({ Title = "Pressure", Icon = "code-circle-outline" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "link" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -421,6 +422,173 @@ EternityTab:Toggle({
 			end
 		end)
 	end
+})
+
+PressureTab:Toggle({
+    Title = "Fullbright",
+    Value = false,
+    Callback = function(v)
+        if v then
+            local lighting = game.Lighting
+            lighting.Brightness = 2
+            lighting.ClockTime = 14
+            lighting.FogEnd = 100000
+            lighting.GlobalShadows = false
+            lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+        else
+            local lighting = game.Lighting
+            lighting.Brightness = 1
+            lighting.ClockTime = 12
+            lighting.FogEnd = 100000
+            lighting.GlobalShadows = true
+            lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+        end
+    end
+})
+
+PressureTab:Button({
+    Title = "Give Permanent NormalKey",
+    Callback = function()
+        game.Players.LocalPlayer.PlayerFolder.Inventory.NormalKeyCard:Destroy()
+        local d = Instance.new("NumberValue")
+        d.Name = "NormalKeyCard"
+        d.Parent = game.Players.LocalPlayer.PlayerFolder.Inventory
+    end
+})
+
+PressureTab:Button({
+    Title = "Give Permanent InnerKeyCard",
+    Callback = function()
+        game.Players.LocalPlayer.PlayerFolder.Inventory.InnerKeyCard:Destroy()
+        local d = Instance.new("NumberValue")
+        d.Name = "InnerKeyCard"
+        d.Parent = game.Players.LocalPlayer.PlayerFolder.Inventory
+    end
+})
+
+PressureTab:Toggle({
+    Title = "No ProximityPrompt Duration",
+    Value = false,
+    Callback = function(v)
+        workspace.DescendantAdded:Connect(function(inst)
+            if inst:IsA("ProximityPrompt") and v then
+                task.wait(0.1)
+                inst.HoldDuration = 0
+            end
+        end)
+    end
+})
+
+PressureTab:Toggle({
+    Title = "Monster Notify",
+    Value = false,
+    Callback = function(v)
+        workspace.ChildAdded:Connect(function(inst)
+            local monsterNames = {}
+            for _, descendant in ipairs(game.ReplicatedStorage.DeathFolder:GetDescendants()) do
+                table.insert(monsterNames, descendant.Name)
+            end
+            if table.find(monsterNames, inst.Name) and v then
+                WindUI:Notify({
+                    Title = "Monster Alert",
+                    Content = inst.Name.." Spawned ⚠️",
+                    Duration = 5,
+                    Icon = "skull"
+                })
+            end
+        end)
+    end
+})
+
+PressureTab:Toggle({
+    Title = "Auto Hide",
+    Value = false,
+    Callback = function(v)
+        workspace.ChildAdded:Connect(function(inst)
+            local monsterNames = {}
+            for _, descendant in ipairs(game.ReplicatedStorage.DeathFolder:GetDescendants()) do
+                table.insert(monsterNames, descendant.Name)
+            end
+            if table.find(monsterNames, inst.Name) and v then
+                local oldpos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+                local tp = game:GetService("RunService").Heartbeat:Connect(function()
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(p.Position)
+                end)
+                inst.Destroying:Wait()
+                tp:Disconnect()
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(oldpos)
+            end
+        end)
+    end
+})
+
+PressureTab:Toggle({
+    Title = "No Eyefestation",
+    Value = false,
+    Callback = function(v)
+        workspace.DescendantAdded:Connect(function(inst)
+            if inst.Name == "Eyefestation" and v then
+                task.wait(0.1)
+                inst:Destroy()
+            end
+        end)
+    end
+})
+
+PressureTab:Toggle({
+    Title = "No Searchlights",
+    Value = false,
+    Callback = function(v)
+        workspace.DescendantAdded:Connect(function(inst)
+            if inst.Name == "SearchlightsEncounter" and v then
+                task.wait(0.1)
+                inst:Destroy()
+            end
+        end)
+    end
+})
+
+PressureTab:Toggle({
+    Title = "No Steams",
+    Value = false,
+    Callback = function(v)
+        workspace.DescendantAdded:Connect(function(inst)
+            if inst.Name == "Steams" and v then
+                task.wait(0.1)
+                inst:Destroy()
+            end
+        end)
+    end
+})
+
+PressureTab:Toggle({
+    Title = "Key ESP",
+    Value = false,
+    Callback = function(v)
+        for _, cham in pairs(key) do
+            cham.Enabled = v
+        end
+    end
+})
+
+PressureTab:Toggle({
+    Title = "Monster ESP",
+    Value = false,
+    Callback = function(v)
+        for _, cham in pairs(monster) do
+            cham.Enabled = v
+        end
+    end
+})
+
+PressureTab:Toggle({
+    Title = "TricksterRoom ESP",
+    Value = false,
+    Callback = function(v)
+        for _, cham in pairs(trickster) do
+            cham.Enabled = v
+        end
+    end
 })
 
 OthersTab:Button({
