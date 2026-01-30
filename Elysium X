@@ -691,7 +691,7 @@ end)
 
 InfoTab:Paragraph({
     Title = "Creators",
-    Desc = "Fusion (Owner)",
+    Desc = "Fusion (Owner) {Status:Extremely debilitated}",
     Thumbnail = "rbxassetid://101052171885580",
     ThumbnailSize = 140,  
     Locked = true,         
