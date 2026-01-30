@@ -438,6 +438,21 @@ OthersTab:Button({
 })
 
 OthersTab:Button({
+	Title="Dex Explorer",
+	Callback=function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
+    end
+})
+
+
+OthersTab:Button({
+	Title="FE Gazer Animation Editor",
+	Callback=function()
+		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Gazer-FE-Animation-Editor-14508"))()
+    end
+})
+
+OthersTab:Button({
 	Title="Web Browser",
 	Callback=function()
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/HS1HYDRAX7/Repository-1/refs/heads/main/T.E.S.T"))()
