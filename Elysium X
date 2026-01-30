@@ -489,50 +489,31 @@ PressureTab:Toggle({
     Title = "Monster ESP",
     Value = false,
     Callback = function(v)
-        local function apply(monster)
-            local color = Workspace:GetAttribute("MonsterESPColor") or Color3.fromRGB(255, 0, 0)
-            local gui = monster:FindFirstChild("ESP_Billboard")
-            if v then
+        workspace.ChildAdded:Connect(function(inst)
+            if not v then return end
+            local monsterNames = {}
+            for _, d in ipairs(game.ReplicatedStorage.DeathFolder:GetDescendants()) do
+                table.insert(monsterNames, d.Name)
+            end
+            if table.find(monsterNames, inst.Name) then
+                local gui = inst:FindFirstChild("ESP_Billboard")
                 if not gui then
                     gui = Instance.new("BillboardGui")
                     gui.Name = "ESP_Billboard"
                     gui.Size = UDim2.new(2, 0, 2, 0)
                     gui.AlwaysOnTop = true
-                    gui.Parent = monster
+                    gui.Parent = inst
 
                     local frame = Instance.new("Frame")
                     frame.Size = UDim2.new(1, 0, 1, 0)
-                    frame.BackgroundTransparency = 0.5
                     frame.BorderSizePixel = 0
+                    frame.BackgroundTransparency = 0
                     frame.Parent = gui
                 end
-                gui.Frame.BackgroundColor3 = color
+                gui.Frame.BackgroundColor3 = Workspace:GetAttribute("MonsterESPColor") or Color3.fromRGB(255, 0, 0)
                 gui.Enabled = true
-            else
-                if gui then
-                    gui.Enabled = false
-                end
             end
-        end
-
-        for _, m in pairs(Workspace.GamePlayFolder.Monsters:GetChildren()) do
-            apply(m)
-        end
-
-        if v then
-            if not Workspace:GetAttribute("MonsterESPConn") then
-                local conn = Workspace.GamePlayFolder.Monsters.ChildAdded:Connect(function(m)
-                    apply(m)
-                end)
-                Workspace:SetAttribute("MonsterESPConn", conn)
-            end
-        else
-            local conn = Workspace:GetAttribute("MonsterESPConn")
-            if conn then
-                conn:Disconnect()
-                Workspace:SetAttribute("MonsterESPConn", nil)
-            end
-        end
+        end)
     end
 })
 
@@ -549,42 +530,27 @@ PressureTab:Toggle({
     Value = false,
     Callback = function(v)
         local function apply(item)
-            local color = Workspace:GetAttribute("DoorESPColor") or Color3.fromRGB(255, 255, 0)
+            if not v then return end
             local h = item:FindFirstChildOfClass("Highlight")
-            if v then
-                if not h then
-                    h = Instance.new("Highlight")
-                    h.Parent = item
-                    h.FillTransparency = 0.5
-                end
-                h.OutlineColor = color
-                h.Enabled = true
-            else
-                if h then
-                    h.Enabled = false
-                end
+            if not h then
+                h = Instance.new("Highlight")
+                h.Parent = item
+                h.FillTransparency = 0
             end
+            h.FillColor = Workspace:GetAttribute("DoorESPColor") or Color3.fromRGB(255, 255, 0)
+            h.Enabled = true
         end
 
         for _, room in pairs(Workspace.Rooms:GetChildren()) do
-            local exit = room:FindFirstChild("Exit")
-            if exit then
-                for _, it in pairs(exit:GetChildren()) do
-                    apply(it)
-                end
-                if v then
-                    if not exit:GetAttribute("ExitESPConn") then
-                        local conn = exit.ChildAdded:Connect(function(it)
-                            apply(it)
-                        end)
-                        exit:SetAttribute("ExitESPConn", conn)
+            for _, name in ipairs({"Exit", "Exits"}) do
+                local folder = room:FindFirstChild(name)
+                if folder then
+                    for _, it in pairs(folder:GetChildren()) do
+                        apply(it)
                     end
-                else
-                    local conn = exit:GetAttribute("ExitESPConn")
-                    if conn then
-                        conn:Disconnect()
-                        exit:SetAttribute("ExitESPConn", nil)
-                    end
+                    folder.ChildAdded:Connect(function(it)
+                        apply(it)
+                    end)
                 end
             end
         end
@@ -603,43 +569,26 @@ PressureTab:Toggle({
     Title = "Key ESP",
     Value = false,
     Callback = function(v)
-        local function apply(item)
-            if item.Name ~= "NormalKeyCard" then return end
-            local color = Workspace:GetAttribute("KeyESPColor") or Color3.fromRGB(0, 0, 139)
-            local h = item:FindFirstChildOfClass("Highlight")
-            if v then
-                if not h then
-                    h = Instance.new("Highlight")
-                    h.Parent = item
-                    h.FillTransparency = 0.5
-                end
-                h.OutlineColor = color
-                h.Enabled = true
-            else
-                if h then
-                    h.Enabled = false
-                end
+        local function apply(inst)
+            if not v then return end
+            if inst.Name ~= "NormalKeyCard" then return end
+            local h = inst:FindFirstChildOfClass("Highlight")
+            if not h then
+                h = Instance.new("Highlight")
+                h.Parent = inst
+                h.FillTransparency = 0
             end
+            h.FillColor = Workspace:GetAttribute("KeyESPColor") or Color3.fromRGB(0, 0, 139)
+            h.Enabled = true
         end
 
-        for _, it in pairs(Workspace:GetDescendants()) do
-            apply(it)
+        for _, d in pairs(Workspace:GetDescendants()) do
+            apply(d)
         end
 
-        if v then
-            if not Workspace:GetAttribute("KeyESPConn") then
-                local conn = Workspace.DescendantAdded:Connect(function(it)
-                    apply(it)
-                end)
-                Workspace:SetAttribute("KeyESPConn", conn)
-            end
-        else
-            local conn = Workspace:GetAttribute("KeyESPConn")
-            if conn then
-                conn:Disconnect()
-                Workspace:SetAttribute("KeyESPConn", nil)
-            end
-        end
+        Workspace.DescendantAdded:Connect(function(d)
+            apply(d)
+        end)
     end
 })
 
