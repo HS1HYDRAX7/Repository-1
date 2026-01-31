@@ -697,32 +697,44 @@ local paragraph = InfoTab:Paragraph({
     Locked = true,
 })
 
+local charset = {}
+for i = 32, 126 do
+    table.insert(charset, string.char(i))
+end
+
 local words = { "Alive", "Dead" }
-local current = 1
 local base = "Fusion (Owner) ("
 local closing = ")"
 
 local function scrambleTo(target)
     local chars = {}
     for i = 1, #target do
-        chars[i] = string.char(math.random(65, 90))
+        chars[i] = charset[math.random(#charset)]
+    end
+
+    for step = 1, 20 do
+        for i = 1, #target do
+            if math.random() < 0.5 then
+                chars[i] = charset[math.random(#charset)]
+            end
+        end
+        paragraph:SetDesc(base .. table.concat(chars) .. closing)
+        task.wait(0.1)
     end
 
     for i = 1, #target do
         chars[i] = target:sub(i, i)
         paragraph:SetDesc(base .. table.concat(chars) .. closing)
-        task.wait(0.05)
+        task.wait(0.15)
     end
 end
 
 task.spawn(function()
+    local index = 1
     while true do
-        scrambleTo(words[current])
-        task.wait(2)
-        current = current % #words + 1
-        scrambleTo(words[current])
-        task.wait(2)
-        current = current % #words + 1
+        scrambleTo(words[index])
+        task.wait(3)
+        index = index % #words + 1
     end
 end)
 
