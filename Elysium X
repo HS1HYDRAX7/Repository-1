@@ -467,31 +467,44 @@ FPESTab:Toggle({
 	Title="ESP Teachers",
 	Value=false,
 	Callback=function(v)
-		local esp={}
+		local highlights={}
+		local conns={}
 		local function clear()
-			for _,e in ipairs(esp) do
-				if e then e:Destroy() end
+			for _,h in ipairs(highlights) do
+				if h then h:Destroy() end
 			end
-			table.clear(esp)
+			table.clear(highlights)
+			for _,c in ipairs(conns) do
+				if c then c:Disconnect() end
+			end
+			table.clear(conns)
+		end
+		local function apply()
+			local folder=workspace:FindFirstChild("Teachers")
+			if not folder then return end
+			for _,m in ipairs(folder:GetChildren()) do
+				if m:IsA("Model") then
+					local h=Instance.new("Highlight")
+					h.Adornee=m
+					h.FillColor=Color3.fromRGB(255,0,0)
+					h.OutlineColor=Color3.fromRGB(255,0,0)
+					h.FillTransparency=0.5
+					h.Parent=m
+					table.insert(highlights,h)
+				end
+			end
 		end
 		if not v then
 			clear()
 			return
 		end
+		apply()
 		local folder=workspace:FindFirstChild("Teachers")
-		if not folder then return end
-		for _,obj in ipairs(folder:GetDescendants()) do
-			if obj:IsA("BasePart") then
-				local b=Instance.new("BoxHandleAdornment")
-				b.Adornee=obj
-				b.Size=obj.Size
-				b.AlwaysOnTop=true
-				b.ZIndex=10
-				b.Transparency=0.5
-				b.Color3=Color3.fromRGB(255,0,0)
-				b.Parent=obj
-				table.insert(esp,b)
-			end
+		if folder then
+			table.insert(conns,folder.ChildAdded:Connect(function()
+				clear()
+				apply()
+			end))
 		end
 	end
 })
@@ -500,31 +513,44 @@ FPESTab:Toggle({
 	Title="ESP Students",
 	Value=false,
 	Callback=function(v)
-		local esp={}
+		local highlights={}
+		local conns={}
 		local function clear()
-			for _,e in ipairs(esp) do
-				if e then e:Destroy() end
+			for _,h in ipairs(highlights) do
+				if h then h:Destroy() end
 			end
-			table.clear(esp)
+			table.clear(highlights)
+			for _,c in ipairs(conns) do
+				if c then c:Disconnect() end
+			end
+			table.clear(conns)
+		end
+		local function apply()
+			local folder=workspace:FindFirstChild("Students")
+			if not folder then return end
+			for _,m in ipairs(folder:GetChildren()) do
+				if m:IsA("Model") then
+					local h=Instance.new("Highlight")
+					h.Adornee=m
+					h.FillColor=Color3.fromRGB(0,255,0)
+					h.OutlineColor=Color3.fromRGB(0,255,0)
+					h.FillTransparency=0.5
+					h.Parent=m
+					table.insert(highlights,h)
+				end
+			end
 		end
 		if not v then
 			clear()
 			return
 		end
+		apply()
 		local folder=workspace:FindFirstChild("Students")
-		if not folder then return end
-		for _,obj in ipairs(folder:GetDescendants()) do
-			if obj:IsA("BasePart") then
-				local b=Instance.new("BoxHandleAdornment")
-				b.Adornee=obj
-				b.Size=obj.Size
-				b.AlwaysOnTop=true
-				b.ZIndex=10
-				b.Transparency=0.5
-				b.Color3=Color3.fromRGB(0,255,0)
-				b.Parent=obj
-				table.insert(esp,b)
-			end
+		if folder then
+			table.insert(conns,folder.ChildAdded:Connect(function()
+				clear()
+				apply()
+			end))
 		end
 	end
 })
@@ -548,14 +574,15 @@ FPESTab:Toggle({
 			if not hrp then return end
 			local folder=workspace:FindFirstChild("Teachers")
 			if not folder then return end
-			for _,obj in ipairs(folder:GetDescendants()) do
-				if obj:IsA("BasePart") then
-					if (obj.Position-hrp.Position).Magnitude<=15 then
+			for _,m in ipairs(folder:GetChildren()) do
+				if m:IsA("Model") then
+					local root=m:FindFirstChild("HumanoidRootPart")
+					if root and (root.Position-hrp.Position).Magnitude<=15 then
 						if os.clock()-last>=3 then
 							last=os.clock()
 							WindUI:Notify({
 								Title="Proximity Alert",
-								Content=obj.Name.." is too close!",
+								Content=m.Name.." is too close!",
 								Duration=3,
 								Icon="skull",
 							})
