@@ -475,12 +475,8 @@ FPESTab:Toggle({
 		end
 		local state = _G.__ESP_TEACHERS
 
-		for _,h in ipairs(state.highlights) do
-			if h then h:Destroy() end
-		end
-		for _,c in ipairs(state.conns) do
-			if c then c:Disconnect() end
-		end
+		for _,h in ipairs(state.highlights) do if h then h:Destroy() end end
+		for _,c in ipairs(state.conns) do if c then c:Disconnect() end end
 		state.highlights = {}
 		state.conns = {}
 
@@ -502,18 +498,56 @@ FPESTab:Toggle({
 			table.insert(state.highlights, h)
 		end
 
-		for _,m in ipairs(folder:GetChildren()) do
-			apply(m)
-		end
-
+		for _,m in ipairs(folder:GetChildren()) do apply(m) end
 		table.insert(state.conns, folder.ChildAdded:Connect(apply))
 		table.insert(state.conns, folder.ChildRemoved:Connect(function(m)
 			for i,h in ipairs(state.highlights) do
-				if h.Adornee == m then
-					h:Destroy()
-					table.remove(state.highlights, i)
-					break
-				end
+				if h.Adornee == m then h:Destroy() table.remove(state.highlights,i) break end
+			end
+		end))
+	end
+})
+
+FPESTab:Toggle({
+	Title="ESP Alices",
+	Value=false,
+	Callback=function(v)
+		local Players = game:GetService("Players")
+		local LocalPlayer = Players.LocalPlayer
+
+		if not _G.__ESP_ALICES then
+			_G.__ESP_ALICES = {highlights = {}, conns = {}}
+		end
+		local state = _G.__ESP_ALICES
+
+		for _,h in ipairs(state.highlights) do if h then h:Destroy() end end
+		for _,c in ipairs(state.conns) do if c then c:Disconnect() end end
+		state.highlights = {}
+		state.conns = {}
+
+		if not v then return end
+
+		local folder = workspace:FindFirstChild("Alices")
+		if not folder then return end
+
+		local function apply(model)
+			if not model:IsA("Model") then return end
+			if LocalPlayer.Character and model == LocalPlayer.Character then return end
+			local h = Instance.new("Highlight")
+			h.Adornee = model
+			h.FillColor = Color3.fromRGB(255,255,255)
+			h.OutlineColor = Color3.fromRGB(255,255,255)
+			h.FillTransparency = 0.5
+			h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+			h.Parent = model
+			table.insert(state.highlights, h)
+		end
+
+		for _,m in ipairs(folder:GetChildren()) do apply(m) end
+		table.insert(state.conns, folder.ChildAdded:Connect(apply))
+		table.insert(state.conns, folder.ChildRemoved:Connect(function(m)
+			for i,h in ipairs(state.highlights) do
+				if h.Adornee == m then h:Destroy() table.remove(state.highlights,i) break end
 			end
 		end))
 	end
@@ -531,12 +565,8 @@ FPESTab:Toggle({
 		end
 		local state = _G.__ESP_STUDENTS
 
-		for _,h in ipairs(state.highlights) do
-			if h then h:Destroy() end
-		end
-		for _,c in ipairs(state.conns) do
-			if c then c:Disconnect() end
-		end
+		for _,h in ipairs(state.highlights) do if h then h:Destroy() end end
+		for _,c in ipairs(state.conns) do if c then c:Disconnect() end end
 		state.highlights = {}
 		state.conns = {}
 
@@ -558,18 +588,11 @@ FPESTab:Toggle({
 			table.insert(state.highlights, h)
 		end
 
-		for _,m in ipairs(folder:GetChildren()) do
-			apply(m)
-		end
-
+		for _,m in ipairs(folder:GetChildren()) do apply(m) end
 		table.insert(state.conns, folder.ChildAdded:Connect(apply))
 		table.insert(state.conns, folder.ChildRemoved:Connect(function(m)
 			for i,h in ipairs(state.highlights) do
-				if h.Adornee == m then
-					h:Destroy()
-					table.remove(state.highlights, i)
-					break
-				end
+				if h.Adornee == m then h:Destroy() table.remove(state.highlights,i) break end
 			end
 		end))
 	end
@@ -579,33 +602,37 @@ FPESTab:Toggle({
 	Title="Proximity Alert",
 	Value=false,
 	Callback=function(v)
-		if not CallbackState then CallbackState={} end
-		local state=CallbackState
-		if state.conn then state.conn:Disconnect() state.conn=nil end
+		if not CallbackState then CallbackState = {} end
+		local state = CallbackState
+		if state.conn then state.conn:Disconnect() state.conn = nil end
 		if not v then return end
 
-		local Players=game:GetService("Players")
-		local RunService=game:GetService("RunService")
-		local lp=Players.LocalPlayer
-		local last=0
+		local Players = game:GetService("Players")
+		local RunService = game:GetService("RunService")
+		local lp = Players.LocalPlayer
+		local last = 0
 
-		state.conn=RunService.Heartbeat:Connect(function()
-			local char=lp.Character
-			local hrp=char and char:FindFirstChild("HumanoidRootPart")
+		state.conn = RunService.Heartbeat:Connect(function()
+			local char = lp.Character
+			local hrp = char and char:FindFirstChild("HumanoidRootPart")
 			if not hrp then return end
-			local folder=workspace:FindFirstChild("Teachers")
+
+			local folder = workspace:FindFirstChild("Teachers")
 			if not folder then return end
+
+			if char.Parent == folder then return end
+
 			for _,m in ipairs(folder:GetChildren()) do
 				if m:IsA("Model") then
-					local root=m:FindFirstChild("HumanoidRootPart")
-					if root and (root.Position-hrp.Position).Magnitude<=15 then
-						if os.clock()-last>=3 then
-							last=os.clock()
+					local root = m:FindFirstChild("HumanoidRootPart")
+					if root and (root.Position - hrp.Position).Magnitude <= 15 then
+						if os.clock() - last >= 3 then
+							last = os.clock()
 							WindUI:Notify({
 								Title="Proximity Alert",
-								Content=m.Name.." is too close!",
-								Duration=3,
-								Icon="skull",
+								Content = m.Name .. " is too close!",
+								Duration = 3,
+								Icon = "skull",
 							})
 						end
 						break
