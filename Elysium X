@@ -627,34 +627,12 @@ OthersTab:Toggle({
 Title="Third Person",
 Value=false,
 Callback=function(v)
+	local player = game:GetService("Players").LocalPlayer
 	if v then
-		if getgenv().ThirdPersonEnabled then return end
-		getgenv().ThirdPersonEnabled = true
-
-		local Players = game:GetService("Players")
-		local RunService = game:GetService("RunService")
-
-		local player = Players.LocalPlayer
-		local camera = workspace.CurrentCamera
-		local character = player.Character or player.CharacterAdded:Wait()
-		local hrp = character:WaitForChild("HumanoidRootPart")
-
+		player.CameraMaxZoomDistance = 120
 		player.CameraMode = Enum.CameraMode.Classic
-		camera.CameraType = Enum.CameraType.Custom
-
-		getgenv().ThirdPersonConn = RunService.RenderStepped:Connect(function()
-			if not getgenv().ThirdPersonEnabled then return end
-			camera.CFrame = CFrame.new(
-				hrp.Position - hrp.CFrame.LookVector * 6 + Vector3.new(0, 2, 0),
-				hrp.Position
-			)
-		end)
 	else
-		getgenv().ThirdPersonEnabled = false
-		if getgenv().ThirdPersonConn then
-			pcall(function() getgenv().ThirdPersonConn:Disconnect() end)
-			getgenv().ThirdPersonConn = nil
-		end
+		player.CameraMaxZoomDistance = 10
 	end
 end
 })
@@ -663,63 +641,123 @@ OthersTab:Toggle({
 Title="Shiftlock",
 Value=false,
 Callback=function(v)
-	if getgenv().ShiftlockEnabled == nil then
-		getgenv().ShiftlockEnabled = false
-	end
-
-	local Players = game:GetService("Players")
-	local RunService = game:GetService("RunService")
-	local UserInputService = game:GetService("UserInputService")
-
-	local player = Players.LocalPlayer
-	local camera = workspace.CurrentCamera
-	local character = player.Character or player.CharacterAdded:Wait()
-	local humanoid = character:WaitForChild("Humanoid")
-	local hrp = character:WaitForChild("HumanoidRootPart")
-
-	if not getgenv().ShiftlockGui then
-		local gui = Instance.new("ScreenGui")
-		gui.ResetOnSpawn = false
-		gui.Parent = player:WaitForChild("PlayerGui")
-
-		local img = Instance.new("ImageButton")
-		img.Size = UDim2.fromOffset(48,48)
-		img.Position = UDim2.new(0,10,0.5,-24)
-		img.BackgroundTransparency = 1
-		img.Image = "rbxassetid://80450981243325"
-		img.Parent = gui
-
-		getgenv().ShiftlockGui = gui
-		getgenv().ShiftlockButton = img
-
-		img.MouseButton1Click:Connect(function()
-			getgenv().ShiftlockEnabled = not getgenv().ShiftlockEnabled
-			img.Image = getgenv().ShiftlockEnabled
-				and "rbxassetid://101910992099753"
-				or "rbxassetid://80450981243325"
-		end)
-	end
-
 	if v then
-		if getgenv().ShiftlockConn then return end
+		if getgenv().MobileShiftlockLoaded then return end
+		getgenv().MobileShiftlockLoaded = true
 
-		getgenv().ShiftlockConn = RunService.RenderStepped:Connect(function()
-			if not getgenv().ShiftlockEnabled then return end
-			humanoid.AutoRotate = false
-			hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + camera.CFrame.LookVector)
+		local Players = game:GetService("Players")
+		local RunService = game:GetService("RunService")
+		local UserInputService = game:GetService("UserInputService")
+
+		local Player = Players.LocalPlayer
+		local Camera = workspace.CurrentCamera
+
+		local ScreenGui = Instance.new("ScreenGui")
+		ScreenGui.Name = "MobileShiftlockGUI"
+		ScreenGui.ResetOnSpawn = false
+		ScreenGui.Parent = Player:WaitForChild("PlayerGui")
+
+		local ToggleButton = Instance.new("ImageButton")
+		ToggleButton.Name = "ShiftlockButton"
+		ToggleButton.Parent = ScreenGui
+		ToggleButton.BackgroundTransparency = 1
+		ToggleButton.Size = UDim2.new(0,60,0,60)
+		ToggleButton.Position = UDim2.new(0.85,-30,0.5,-30)
+		ToggleButton.Image = "rbxassetid://80450981243325"
+
+		local dragging
+		local dragInput
+		local dragStart
+		local startPos
+
+		local function update(input)
+			local delta = input.Position - dragStart
+			ToggleButton.Position = UDim2.new(
+				startPos.X.Scale,
+				startPos.X.Offset + delta.X,
+				startPos.Y.Scale,
+				startPos.Y.Offset + delta.Y
+			)
+		end
+
+		ToggleButton.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+				dragging = true
+				dragStart = input.Position
+				startPos = ToggleButton.Position
+				input.Changed:Connect(function()
+					if input.UserInputState == Enum.UserInputState.End then
+						dragging = false
+					end
+				end)
+			end
+		end)
+
+		ToggleButton.InputChanged:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+				dragInput = input
+			end
+		end)
+
+		UserInputService.InputChanged:Connect(function(input)
+			if input == dragInput and dragging then
+				update(input)
+			end
+		end)
+
+		local Crosshair = Instance.new("ImageLabel")
+		Crosshair.Name = "ShiftlockCursor"
+		Crosshair.Parent = ScreenGui
+		Crosshair.BackgroundTransparency = 1
+		Crosshair.Position = UDim2.new(0.5,0,0.5,0)
+		Crosshair.AnchorPoint = Vector2.new(0.5,0.5)
+		Crosshair.Size = UDim2.new(0,32,0,32)
+		Crosshair.Image = "rbxasset://textures/MouseLockedCursor.png"
+		Crosshair.Visible = false
+
+		local shiftLockEnabled = false
+		local CameraOffset = Vector3.new(1.7,0.5,0)
+
+		ToggleButton.Activated:Connect(function()
+			shiftLockEnabled = not shiftLockEnabled
+			if shiftLockEnabled then
+				ToggleButton.Image = "rbxassetid://101910992099753"
+				Crosshair.Visible = true
+				if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+					Player.Character.Humanoid.AutoRotate = false
+				end
+			else
+				ToggleButton.Image = "rbxassetid://80450981243325"
+				Crosshair.Visible = false
+				if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+					Player.Character.Humanoid.AutoRotate = true
+					Player.Character.Humanoid.CameraOffset = Vector3.zero
+				end
+			end
+		end)
+
+		getgenv().ShiftlockRender = RunService.RenderStepped:Connect(function()
+			if shiftLockEnabled then
+				local char = Player.Character
+				if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") then
+					char.Humanoid.CameraOffset = CameraOffset
+					local root = char.HumanoidRootPart
+					local look = Camera.CFrame.LookVector
+					root.CFrame = CFrame.new(
+						root.Position,
+						root.Position + Vector3.new(look.X,0,look.Z)
+					)
+				end
+			end
 		end)
 	else
-		getgenv().ShiftlockEnabled = false
-		if getgenv().ShiftlockConn then
-			pcall(function() getgenv().ShiftlockConn:Disconnect() end)
-			getgenv().ShiftlockConn = nil
+		getgenv().MobileShiftlockLoaded = false
+		if getgenv().ShiftlockRender then
+			pcall(function() getgenv().ShiftlockRender:Disconnect() end)
+			getgenv().ShiftlockRender = nil
 		end
-		if humanoid then
-			humanoid.AutoRotate = true
-		end
-		if getgenv().ShiftlockButton then
-			getgenv().ShiftlockButton.Image = "rbxassetid://80450981243325"
-		end
+		local gui = game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("MobileShiftlockGUI")
+		if gui then gui:Destroy() end
 	end
 end
 })
