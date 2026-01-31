@@ -691,7 +691,7 @@ end)
 
 local paragraph = InfoTab:Paragraph({
     Title = "Creators",
-    Desc = "Fusion (Owner) (Alive)",
+    Desc = "I'm a fan of Tenna (Deltarune)",
     Thumbnail = "rbxassetid://101052171885580",
     ThumbnailSize = 140,
     Locked = true,
@@ -702,9 +702,11 @@ for i = 32, 126 do
     table.insert(charset, string.char(i))
 end
 
-local words = { "Alive", "Dead" }
-local base = "Fusion (Owner) ("
-local closing = ")"
+local texts = {
+    "I'm a fan of Tenna (Deltarune)",
+    "I'm a fan of Sebastian Solace (Pressure)",
+    "I'm a fan of Rambley the Raccoon (Indigo Park)",
+}
 
 local function scrambleTo(target)
     local chars = {}
@@ -712,29 +714,29 @@ local function scrambleTo(target)
         chars[i] = charset[math.random(#charset)]
     end
 
-    for step = 1, 20 do
+    for step = 1, 30 do
         for i = 1, #target do
-            if math.random() < 0.5 then
+            if math.random() < 0.6 then
                 chars[i] = charset[math.random(#charset)]
             end
         end
-        paragraph:SetDesc(base .. table.concat(chars) .. closing)
-        task.wait(0.1)
+        paragraph:SetDesc(table.concat(chars))
+        task.wait(0.12)
     end
 
     for i = 1, #target do
         chars[i] = target:sub(i, i)
-        paragraph:SetDesc(base .. table.concat(chars) .. closing)
-        task.wait(0.15)
+        paragraph:SetDesc(table.concat(chars))
+        task.wait(0.18)
     end
 end
 
 task.spawn(function()
     local index = 1
     while true do
-        scrambleTo(words[index])
+        scrambleTo(texts[index])
         task.wait(3)
-        index = index % #words + 1
+        index = index % #texts + 1
     end
 end)
 
