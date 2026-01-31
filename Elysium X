@@ -37,7 +37,6 @@ Window:Tag({
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
 local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
 local EternityTab = Window:Tab({ Title = "Eternity", Icon = "infinity" })
-local PressureTab = Window:Tab({ Title = "Pressure", Icon = "cpu" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "link" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -299,34 +298,6 @@ task.spawn(function()
 	end
 end)
 
-PressureTab:Toggle({
-	Title = "Monster Notifications",
-	Value = false,
-	Callback = function(enabled)
-		if not enabled then return end
-
-		local conn
-		conn = workspace.ChildAdded:Connect(function(inst)
-			if not enabled then
-				conn:Disconnect()
-				return
-			end
-
-			for _, d in ipairs(game.ReplicatedStorage.DeathFolder:GetDescendants()) do
-				if d.Name == inst.Name then
-					WindUI:Notify({
-						Title = "Elysium Notification",
-						Content = inst.Name .. " Spawned ⚠️",
-						Duration = 3,
-						Icon = "skull",
-					})
-					break
-				end
-			end
-		end)
-	end
-})
-
 EternityTab:Toggle({
 	Title = "Infinite Stamina",
 	Value = false,
@@ -479,34 +450,6 @@ OthersTab:Button({
 	Callback=function()
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/HS1HYDRAX7/Repository-1/refs/heads/main/T.E.S.T"))()
     end
-})
-
-OthersTab:Toggle({
-	Title = "Fullbright",
-	Value = false,
-	Callback = function(enabled)
-		local Lighting = game:GetService("Lighting")
-
-		if enabled then
-			Lighting:SetAttribute("OLD_Brightness", Lighting.Brightness)
-			Lighting:SetAttribute("OLD_ClockTime", Lighting.ClockTime)
-			Lighting:SetAttribute("OLD_FogEnd", Lighting.FogEnd)
-			Lighting:SetAttribute("OLD_GlobalShadows", Lighting.GlobalShadows)
-			Lighting:SetAttribute("OLD_OutdoorAmbient", Lighting.OutdoorAmbient)
-
-			Lighting.Brightness = 2
-			Lighting.ClockTime = 14
-			Lighting.FogEnd = 100000
-			Lighting.GlobalShadows = false
-			Lighting.OutdoorAmbient = Color3.fromRGB(128,128,128)
-		else
-			Lighting.Brightness = Lighting:GetAttribute("OLD_Brightness")
-			Lighting.ClockTime = Lighting:GetAttribute("OLD_ClockTime")
-			Lighting.FogEnd = Lighting:GetAttribute("OLD_FogEnd")
-			Lighting.GlobalShadows = Lighting:GetAttribute("OLD_GlobalShadows")
-			Lighting.OutdoorAmbient = Lighting:GetAttribute("OLD_OutdoorAmbient")
-		end
-	end
 })
 
 OthersTab:Toggle({
