@@ -37,7 +37,7 @@ Window:Tag({
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
 local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
 local EternityTab = Window:Tab({ Title = "Eternity", Icon = "infinity" })
-local FPESTab = Window:Tab({ Title = "FPE:S", Icon = "cpu" })
+local FPESTab = Window:Tab({ Title = "FPE Survival", Icon = "cpu" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "link" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
