@@ -37,7 +37,7 @@ Window:Tag({
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
 local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
 local EternityTab = Window:Tab({ Title = "Eternity", Icon = "infinity" })
-local FPE:STab = Window:Tab({ Title = "FPE:S", Icon = "book" })
+local FPESTab = Window:Tab({ Title = "FPE:S", Icon = "cpu" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "link" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -424,7 +424,7 @@ EternityTab:Toggle({
 	end
 })
 
-FPE:STab:Toggle({
+FPESTab:Toggle({
 	Title = "Infinite Stamina",
 	Value = false,
 	Callback = function(v)
@@ -463,7 +463,7 @@ FPE:STab:Toggle({
 	end
 })
 
-FPE:STab:Toggle({
+FPESTab:Toggle({
 	Title="ESP Teachers",
 	Value=false,
 	Callback=function(v)
@@ -496,7 +496,7 @@ FPE:STab:Toggle({
 	end
 })
 
-FPE:STab:Toggle({
+FPESTab:Toggle({
 	Title="ESP Students",
 	Value=false,
 	Callback=function(v)
@@ -529,7 +529,7 @@ FPE:STab:Toggle({
 	end
 })
 
-FPE:STab:Toggle({
+FPESTab:Toggle({
 	Title="Proximity Alert",
 	Value=false,
 	Callback=function(v)
