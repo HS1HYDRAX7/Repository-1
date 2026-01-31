@@ -665,14 +665,6 @@ Callback=function(v)
 		ToggleButton.Position = UDim2.new(0.85,-30,0.5,-30)
 		ToggleButton.Image = "rbxassetid://80450981243325"
 
-		local Crosshair = Instance.new("Frame")
-		Crosshair.Parent = ScreenGui
-		Crosshair.Size = UDim2.new(0,6,0,6)
-		Crosshair.Position = UDim2.new(0.5,-3,0.5,-3)
-		Crosshair.BackgroundColor3 = Color3.new(1,1,1)
-		Crosshair.BorderSizePixel = 0
-		Crosshair.Visible = false
-
 		local dragging = false
 		local dragInput
 		local dragStart
@@ -720,13 +712,11 @@ Callback=function(v)
 			shiftLockEnabled = not shiftLockEnabled
 			if shiftLockEnabled then
 				ToggleButton.Image = "rbxassetid://101910992099753"
-				Crosshair.Visible = true
 				if Player.Character and Player.Character:FindFirstChild("Humanoid") then
 					Player.Character.Humanoid.AutoRotate = false
 				end
 			else
 				ToggleButton.Image = "rbxassetid://80450981243325"
-				Crosshair.Visible = false
 				if Player.Character and Player.Character:FindFirstChild("Humanoid") then
 					Player.Character.Humanoid.AutoRotate = true
 					Player.Character.Humanoid.CameraOffset = Vector3.zero
