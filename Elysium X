@@ -629,7 +629,7 @@ Value=false,
 Callback=function(v)
 	local player = game:GetService("Players").LocalPlayer
 	if v then
-		player.CameraMaxZoomDistance = 120
+		player.CameraMaxZoomDistance = 25
 		player.CameraMode = Enum.CameraMode.Classic
 	else
 		player.CameraMaxZoomDistance = 10
@@ -665,7 +665,15 @@ Callback=function(v)
 		ToggleButton.Position = UDim2.new(0.85,-30,0.5,-30)
 		ToggleButton.Image = "rbxassetid://80450981243325"
 
-		local dragging
+		local Crosshair = Instance.new("Frame")
+		Crosshair.Parent = ScreenGui
+		Crosshair.Size = UDim2.new(0,6,0,6)
+		Crosshair.Position = UDim2.new(0.5,-3,0.5,-3)
+		Crosshair.BackgroundColor3 = Color3.new(1,1,1)
+		Crosshair.BorderSizePixel = 0
+		Crosshair.Visible = false
+
+		local dragging = false
 		local dragInput
 		local dragStart
 		local startPos
@@ -727,17 +735,16 @@ Callback=function(v)
 		end)
 
 		getgenv().ShiftlockRender = RunService.RenderStepped:Connect(function()
-			if shiftLockEnabled then
-				local char = Player.Character
-				if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") then
-					char.Humanoid.CameraOffset = CameraOffset
-					local root = char.HumanoidRootPart
-					local look = Camera.CFrame.LookVector
-					root.CFrame = CFrame.new(
-						root.Position,
-						root.Position + Vector3.new(look.X,0,look.Z)
-					)
-				end
+			if not shiftLockEnabled then return end
+			local char = Player.Character
+			if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") then
+				char.Humanoid.CameraOffset = CameraOffset
+				local root = char.HumanoidRootPart
+				local look = Camera.CFrame.LookVector
+				root.CFrame = CFrame.new(
+					root.Position,
+					root.Position + Vector3.new(look.X,0,look.Z)
+				)
 			end
 		end)
 	else
