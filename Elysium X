@@ -689,12 +689,41 @@ task.spawn(function()
 	end
 end)
 
-InfoTab:Paragraph({
+local paragraph = InfoTab:Paragraph({
     Title = "Creators",
-    Desc = "Fusion (Owner)",
+    Desc = "Fusion (Owner) (Alive)",
     Thumbnail = "rbxassetid://101052171885580",
-    ThumbnailSize = 140,  
-    Locked = true,         
+    ThumbnailSize = 140,
+    Locked = true,
 })
+
+local words = { "Alive", "Dead" }
+local current = 1
+local base = "Fusion (Owner) ("
+local closing = ")"
+
+local function scrambleTo(target)
+    local chars = {}
+    for i = 1, #target do
+        chars[i] = string.char(math.random(65, 90))
+    end
+
+    for i = 1, #target do
+        chars[i] = target:sub(i, i)
+        paragraph:SetDesc(base .. table.concat(chars) .. closing)
+        task.wait(0.05)
+    end
+end
+
+task.spawn(function()
+    while true do
+        scrambleTo(words[current])
+        task.wait(2)
+        current = current % #words + 1
+        scrambleTo(words[current])
+        task.wait(2)
+        current = current % #words + 1
+    end
+end)
 
 Window:Init()
