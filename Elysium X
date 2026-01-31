@@ -690,7 +690,7 @@ task.spawn(function()
 end)
 
 local paragraph = InfoTab:Paragraph({
-    Title = "Creators",
+    Title = "About Fusion",
     Desc = "I'm a fan of Tenna (Deltarune)",
     Thumbnail = "rbxassetid://101052171885580",
     ThumbnailSize = 140,
