@@ -37,6 +37,7 @@ Window:Tag({
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
 local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
 local EternityTab = Window:Tab({ Title = "Eternity", Icon = "infinity" })
+local FPE:STab = Window:Tab({ Title = "FPE:S", Icon = "book" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "link" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -416,6 +417,150 @@ EternityTab:Toggle({
 						hl.FillColor = Color3.fromRGB(0,255,0)
 						hl.OutlineColor = Color3.fromRGB(0,255,0)
 						hl.Parent = char
+					end
+				end
+			end
+		end)
+	end
+})
+
+FPE:STab:Toggle({
+	Title = "Infinite Stamina",
+	Value = false,
+	Callback = function(v)
+		infStamina = v
+		if staminaConn then
+			staminaConn:Disconnect()
+			staminaConn = nil
+		end
+
+		local function applyInfStamina()
+			local Character_upvr = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+			local max = Character_upvr:GetAttribute("MaxStamina") or 100
+			Character_upvr:SetAttribute("Stamina", max)
+
+			staminaConn = RunService.Heartbeat:Connect(function()
+				if not infStamina then return end
+				if Character_upvr and Character_upvr.Parent then
+					Character_upvr:SetAttribute("Stamina", max)
+				end
+			end)
+		end
+
+		if v then
+			applyInfStamina()
+			Players.LocalPlayer.CharacterAdded:Connect(function()
+				if infStamina then
+					applyInfStamina()
+				end
+			end)
+		else
+			if staminaConn then
+				staminaConn:Disconnect()
+				staminaConn = nil
+			end
+		end
+	end
+})
+
+FPE:STab:Toggle({
+	Title="ESP Teachers",
+	Value=false,
+	Callback=function(v)
+		local esp={}
+		local function clear()
+			for _,e in ipairs(esp) do
+				if e then e:Destroy() end
+			end
+			table.clear(esp)
+		end
+		if not v then
+			clear()
+			return
+		end
+		local folder=workspace:FindFirstChild("Teachers")
+		if not folder then return end
+		for _,obj in ipairs(folder:GetDescendants()) do
+			if obj:IsA("BasePart") then
+				local b=Instance.new("BoxHandleAdornment")
+				b.Adornee=obj
+				b.Size=obj.Size
+				b.AlwaysOnTop=true
+				b.ZIndex=10
+				b.Transparency=0.5
+				b.Color3=Color3.fromRGB(255,0,0)
+				b.Parent=obj
+				table.insert(esp,b)
+			end
+		end
+	end
+})
+
+FPE:STab:Toggle({
+	Title="ESP Students",
+	Value=false,
+	Callback=function(v)
+		local esp={}
+		local function clear()
+			for _,e in ipairs(esp) do
+				if e then e:Destroy() end
+			end
+			table.clear(esp)
+		end
+		if not v then
+			clear()
+			return
+		end
+		local folder=workspace:FindFirstChild("Students")
+		if not folder then return end
+		for _,obj in ipairs(folder:GetDescendants()) do
+			if obj:IsA("BasePart") then
+				local b=Instance.new("BoxHandleAdornment")
+				b.Adornee=obj
+				b.Size=obj.Size
+				b.AlwaysOnTop=true
+				b.ZIndex=10
+				b.Transparency=0.5
+				b.Color3=Color3.fromRGB(0,255,0)
+				b.Parent=obj
+				table.insert(esp,b)
+			end
+		end
+	end
+})
+
+FPE:STab:Toggle({
+	Title="Proximity Alert",
+	Value=false,
+	Callback=function(v)
+		local Players=game:GetService("Players")
+		local RunService=game:GetService("RunService")
+		local lp=Players.LocalPlayer
+		local conn
+		if not v then
+			if conn then conn:Disconnect() end
+			return
+		end
+		local last=0
+		conn=RunService.Heartbeat:Connect(function()
+			local char=lp.Character
+			local hrp=char and char:FindFirstChild("HumanoidRootPart")
+			if not hrp then return end
+			local folder=workspace:FindFirstChild("Teachers")
+			if not folder then return end
+			for _,obj in ipairs(folder:GetDescendants()) do
+				if obj:IsA("BasePart") then
+					if (obj.Position-hrp.Position).Magnitude<=15 then
+						if os.clock()-last>=3 then
+							last=os.clock()
+							WindUI:Notify({
+								Title="Proximity Alert",
+								Content=obj.Name.." is too close!",
+								Duration=3,
+								Icon="skull",
+							})
+						end
+						break
 					end
 				end
 			end
