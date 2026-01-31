@@ -624,111 +624,102 @@ OthersTab:Button({
 })
 
 OthersTab:Toggle({
-Title="Better Camera",
+Title="Third Person",
 Value=false,
 Callback=function(v)
 	if v then
-		if getgenv().HeadCamEnabled then return end
-		getgenv().HeadCamEnabled = true
+		if getgenv().ThirdPersonEnabled then return end
+		getgenv().ThirdPersonEnabled = true
 
 		local Players = game:GetService("Players")
 		local RunService = game:GetService("RunService")
 
 		local player = Players.LocalPlayer
 		local camera = workspace.CurrentCamera
-
 		local character = player.Character or player.CharacterAdded:Wait()
-		local humanoid = character:WaitForChild("Humanoid")
-		local head = character:WaitForChild("Head")
 		local hrp = character:WaitForChild("HumanoidRootPart")
 
-		local shakePower = 0
-		local targetFOV = 70
-		local fovSpeed = 10
-
-		local baseOffsetY = -1.5
-		local baseOffsetZ = -1
-		local bobAmount = 0.2
-		local bobSpeed = 2
-
-		local headAttachments = {"HatAttachment","HairAttachment","FaceFrontAttachment","FaceCenterAttachment"}
-
 		player.CameraMode = Enum.CameraMode.Classic
+		camera.CameraType = Enum.CameraType.Custom
 
-		getgenv().HeadCamConns = {}
-
-		getgenv().HeadCamConns.render1 = RunService.RenderStepped:Connect(function()
-			if not getgenv().HeadCamEnabled then return end
-			local isFirstPerson = (head.Position - camera.CFrame.Position).Magnitude < 2
-			for _, part in ipairs(character:GetDescendants()) do
-				if part:IsA("BasePart") then
-					if part.Name == "Head" then
-						part.LocalTransparencyModifier = isFirstPerson and 1 or 0
-					elseif part.Name == "Handle" then
-						local attachment = part:FindFirstChildOfClass("Attachment")
-						if attachment and table.find(headAttachments, attachment.Name) then
-							part.LocalTransparencyModifier = isFirstPerson and 1 or 0
-						else
-							part.LocalTransparencyModifier = 0
-						end
-					elseif part.Name ~= "HumanoidRootPart" then
-						part.LocalTransparencyModifier = 0
-					end
-				end
-			end
-		end)
-
-		getgenv().HeadCamConns.health = humanoid.HealthChanged:Connect(function(h)
-			if h < humanoid.MaxHealth then
-				shakePower += 0.6
-			end
-		end)
-
-		getgenv().HeadCamConns.state = humanoid.StateChanged:Connect(function(_, state)
-			if state == Enum.HumanoidStateType.Landed then
-				shakePower += 0.8
-			end
-		end)
-
-		getgenv().HeadCamConns.explosion = workspace.ChildAdded:Connect(function(child)
-			if child:IsA("Explosion") and (child.Position - camera.CFrame.Position).Magnitude < 40 then
-				shakePower += 1.2
-			end
-		end)
-
-		getgenv().HeadCamConns.render2 = RunService.RenderStepped:Connect(function(dt)
-			if not getgenv().HeadCamEnabled then return end
-			local t = tick()
-			local bob = Vector3.new(
-				math.sin(t * bobSpeed) * bobAmount,
-				math.abs(math.cos(t * bobSpeed)) * bobAmount * 0.6,
-				0
+		getgenv().ThirdPersonConn = RunService.RenderStepped:Connect(function()
+			if not getgenv().ThirdPersonEnabled then return end
+			camera.CFrame = CFrame.new(
+				hrp.Position - hrp.CFrame.LookVector * 6 + Vector3.new(0, 2, 0),
+				hrp.Position
 			)
-			local shake = Vector3.new(
-				math.random(-100,100)/100 * shakePower,
-				math.random(-100,100)/100 * shakePower,
-				math.random(-100,100)/100 * shakePower
-			)
-			shakePower = math.max(shakePower - 5 * dt, 0)
-			local headRelativePos = hrp.CFrame:ToObjectSpace(head.CFrame).Position
-			humanoid.CameraOffset = headRelativePos + Vector3.new(0, baseOffsetY, baseOffsetZ) + bob + shake
-			camera.FieldOfView += (targetFOV - camera.FieldOfView) * fovSpeed * dt
 		end)
 	else
-		getgenv().HeadCamEnabled = false
-		if getgenv().HeadCamConns then
-			for _, c in pairs(getgenv().HeadCamConns) do
-				pcall(function() c:Disconnect() end)
-			end
-			getgenv().HeadCamConns = nil
+		getgenv().ThirdPersonEnabled = false
+		if getgenv().ThirdPersonConn then
+			pcall(function() getgenv().ThirdPersonConn:Disconnect() end)
+			getgenv().ThirdPersonConn = nil
 		end
-		if game:GetService("Players").LocalPlayer.Character then
-			local hum = game:GetService("Players").LocalPlayer.Character:FindFirstChild("Humanoid")
-			if hum then
-				hum.CameraOffset = Vector3.zero
-			end
+	end
+end
+})
+
+OthersTab:Toggle({
+Title="Shiftlock",
+Value=false,
+Callback=function(v)
+	if getgenv().ShiftlockEnabled == nil then
+		getgenv().ShiftlockEnabled = false
+	end
+
+	local Players = game:GetService("Players")
+	local RunService = game:GetService("RunService")
+	local UserInputService = game:GetService("UserInputService")
+
+	local player = Players.LocalPlayer
+	local camera = workspace.CurrentCamera
+	local character = player.Character or player.CharacterAdded:Wait()
+	local humanoid = character:WaitForChild("Humanoid")
+	local hrp = character:WaitForChild("HumanoidRootPart")
+
+	if not getgenv().ShiftlockGui then
+		local gui = Instance.new("ScreenGui")
+		gui.ResetOnSpawn = false
+		gui.Parent = player:WaitForChild("PlayerGui")
+
+		local img = Instance.new("ImageButton")
+		img.Size = UDim2.fromOffset(48,48)
+		img.Position = UDim2.new(0,10,0.5,-24)
+		img.BackgroundTransparency = 1
+		img.Image = "rbxassetid://80450981243325"
+		img.Parent = gui
+
+		getgenv().ShiftlockGui = gui
+		getgenv().ShiftlockButton = img
+
+		img.MouseButton1Click:Connect(function()
+			getgenv().ShiftlockEnabled = not getgenv().ShiftlockEnabled
+			img.Image = getgenv().ShiftlockEnabled
+				and "rbxassetid://101910992099753"
+				or "rbxassetid://80450981243325"
+		end)
+	end
+
+	if v then
+		if getgenv().ShiftlockConn then return end
+
+		getgenv().ShiftlockConn = RunService.RenderStepped:Connect(function()
+			if not getgenv().ShiftlockEnabled then return end
+			humanoid.AutoRotate = false
+			hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + camera.CFrame.LookVector)
+		end)
+	else
+		getgenv().ShiftlockEnabled = false
+		if getgenv().ShiftlockConn then
+			pcall(function() getgenv().ShiftlockConn:Disconnect() end)
+			getgenv().ShiftlockConn = nil
 		end
-		workspace.CurrentCamera.FieldOfView = 70
+		if humanoid then
+			humanoid.AutoRotate = true
+		end
+		if getgenv().ShiftlockButton then
+			getgenv().ShiftlockButton.Image = "rbxassetid://80450981243325"
+		end
 	end
 end
 })
@@ -862,7 +853,7 @@ end)
 
 local paragraph = InfoTab:Paragraph({
     Title = "About Fusion",
-    Desc = "I'm a fan of Tenna (Deltarune)",
+    Desc = "I'm a fan of Sebastian Solace (Pressure)",
     Thumbnail = "rbxassetid://101052171885580",
     ThumbnailSize = 140,
     Locked = true,
@@ -874,7 +865,6 @@ for i = 32, 126 do
 end
 
 local texts = {
-    "I'm a fan of Tenna (Deltarune)",
     "I'm a fan of Sebastian Solace (Pressure)",
     "I'm a fan of Rambley the Raccoon (Indigo Park)",
 }
