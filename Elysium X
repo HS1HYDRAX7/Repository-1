@@ -473,21 +473,18 @@ FPESTab:Toggle({
 			nvgConn:Disconnect()
 			nvgConn = nil
 		end
-
 		if noiseConn then
 			noiseConn:Disconnect()
 			noiseConn = nil
 		end
+		if camLight then
+			camLight:Destroy()
+			camLight = nil
+		end
 
-		if not nvgCC then
-			nvgCC = Instance.new("ColorCorrectionEffect")
-		end
-		if not nvgBloom then
-			nvgBloom = Instance.new("BloomEffect")
-		end
-		if not nvgDOF then
-			nvgDOF = Instance.new("DepthOfFieldEffect")
-		end
+		if not nvgCC then nvgCC = Instance.new("ColorCorrectionEffect") end
+		if not nvgBloom then nvgBloom = Instance.new("BloomEffect") end
+		if not nvgDOF then nvgDOF = Instance.new("DepthOfFieldEffect") end
 
 		if not noiseGui then
 			noiseGui = Instance.new("ScreenGui")
@@ -496,7 +493,6 @@ FPESTab:Toggle({
 
 			noiseImage = Instance.new("ImageLabel")
 			noiseImage.Size = UDim2.fromScale(1, 1)
-			noiseImage.Position = UDim2.fromScale(0, 0)
 			noiseImage.BackgroundTransparency = 1
 			noiseImage.Image = "rbxassetid://13911895447"
 			noiseImage.ImageTransparency = 0.85
@@ -504,28 +500,40 @@ FPESTab:Toggle({
 		end
 
 		if v then
-			nvgCC.Brightness = 0.15
-			nvgCC.Contrast = 1.6
+			Lighting.Brightness = 4
+			Lighting.ExposureCompensation = 2.5
+			Lighting.GlobalShadows = false
+			Lighting.EnvironmentDiffuseScale = 1
+			Lighting.EnvironmentSpecularScale = 1
+
+			nvgCC.Brightness = 0.25
+			nvgCC.Contrast = 2
 			nvgCC.Saturation = -1
 			nvgCC.TintColor = Color3.fromRGB(235, 255, 235)
 			nvgCC.Parent = Lighting
 
-			nvgBloom.Intensity = 1.2
-			nvgBloom.Size = 24
-			nvgBloom.Threshold = 0.2
+			nvgBloom.Intensity = 1.5
+			nvgBloom.Size = 32
+			nvgBloom.Threshold = 0
 			nvgBloom.Parent = Lighting
 
-			nvgDOF.FarIntensity = 0.1
+			nvgDOF.FarIntensity = 0.15
 			nvgDOF.NearIntensity = 0
-			nvgDOF.FocusDistance = 5
+			nvgDOF.FocusDistance = 8
 			nvgDOF.Parent = Lighting
 
 			noiseGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
+			camLight = Instance.new("PointLight")
+			camLight.Range = 60
+			camLight.Brightness = 4
+			camLight.Color = Color3.fromRGB(235, 255, 235)
+			camLight.Parent = workspace.CurrentCamera
+
 			nvgConn = RunService.Heartbeat:Connect(function()
 				if not nvgEnabled then return end
-				Lighting.Ambient = Color3.fromRGB(180, 180, 180)
-				Lighting.OutdoorAmbient = Color3.fromRGB(180, 180, 180)
+				Lighting.Ambient = Color3.fromRGB(200, 200, 200)
+				Lighting.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
 			end)
 
 			noiseConn = RunService.RenderStepped:Connect(function()
@@ -538,6 +546,11 @@ FPESTab:Toggle({
 			if nvgBloom then nvgBloom.Parent = nil end
 			if nvgDOF then nvgDOF.Parent = nil end
 			if noiseGui then noiseGui.Parent = nil end
+			if camLight then camLight:Destroy() camLight = nil end
+
+			Lighting.Brightness = 1
+			Lighting.ExposureCompensation = 0
+			Lighting.GlobalShadows = true
 			Lighting.Ambient = Color3.fromRGB(0, 0, 0)
 			Lighting.OutdoorAmbient = Color3.fromRGB(0, 0, 0)
 		end
