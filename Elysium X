@@ -464,11 +464,11 @@ FPESTab:Toggle({
 })
 
 FPESTab:Toggle({
-	Title="Auto Play Refined",
+	Title="Auto Play Teachers & Students",
 	Value=false,
 	Callback=function(v)
 		if not _G.__AUTO_PLAY then
-			_G.__AUTO_PLAY = {conn=nil}
+			_G.__AUTO_PLAY = {conn=nil, lastUpdate=0}
 		end
 
 		if _G.__AUTO_PLAY.conn then
@@ -488,7 +488,17 @@ FPESTab:Toggle({
 		local teachersFolder = workspace:WaitForChild("Teachers")
 		local alicesFolder = workspace:WaitForChild("Alices")
 		local studentsFolder = workspace:WaitForChild("Students")
-		local doors = {"SingleDoor","DoubleDoor"}
+		local doorNames = {"SingleDoor","DoubleDoor"}
+
+		-- Pré-carrega portas
+		local doors = {}
+		for _,doorName in ipairs(doorNames) do
+			for _,door in ipairs(workspace:GetDescendants()) do
+				if door.Name == doorName and door:IsA("Model") then
+					table.insert(doors, door)
+				end
+			end
+		end
 
 		local function getRoot(model)
 			return model and model:FindFirstChild("HumanoidRootPart")
@@ -496,6 +506,30 @@ FPESTab:Toggle({
 
 		local function getHumanoid(model)
 			return model and model:FindFirstChildOfClass("Humanoid")
+		end
+
+		local function interact()
+			VirtualInputManager:SendKeyEvent(true,Enum.KeyCode.E,false,game)
+			task.wait(0.05)
+			VirtualInputManager:SendKeyEvent(false,Enum.KeyCode.E,false,game)
+		end
+
+		local function attack()
+			VirtualInputManager:SendMouseButtonEvent(0,0,0,true,game,0)
+			task.wait(0.05)
+			VirtualInputManager:SendMouseButtonEvent(0,0,0,false,game,0)
+		end
+
+		local function checkAndUseDoors(charRoot, isTeacher)
+			for _,door in ipairs(doors) do
+				local dRoot = door:FindFirstChild("PrimaryPart") or door:FindFirstChild("Handle")
+				if dRoot and (dRoot.Position - charRoot.Position).Magnitude < 6 then
+					interact()
+					if isTeacher then
+						attack() -- professores atacam portas para destruir
+					end
+				end
+			end
 		end
 
 		local function getClosestTarget(fromModel, folder)
@@ -518,78 +552,35 @@ FPESTab:Toggle({
 			return closest, dist
 		end
 
-		local function interact()
-			VirtualInputManager:SendKeyEvent(true,Enum.KeyCode.E,false,game)
-			task.wait(0.05)
-			VirtualInputManager:SendKeyEvent(false,Enum.KeyCode.E,false,game)
-		end
-
-		local function checkAndOpenDoors(charRoot)
-			for _,doorName in ipairs(doors) do
-				for _,door in ipairs(workspace:GetDescendants()) do
-					if door.Name == doorName and door:IsA("Model") then
-						local dRoot = door:FindFirstChild("PrimaryPart") or door:FindFirstChild("Handle")
-						if dRoot and (dRoot.Position - charRoot.Position).Magnitude < 6 then
-							interact()
-						end
-					end
-				end
-			end
-		end
-
-		local function getEscapeDirection(charRoot)
-			local t1,d1 = getClosestTarget(LocalPlayer.Character, teachersFolder)
-			local t2,d2 = getClosestTarget(LocalPlayer.Character, alicesFolder)
-			local danger, dist = nil, math.huge
-			if t1 and t2 then
-				if (getRoot(t1).Position - charRoot.Position).Magnitude < (getRoot(t2).Position - charRoot.Position).Magnitude then
-					danger = t1
-					dist = d1
-				else
-					danger = t2
-					dist = d2
-				end
-			else
-				danger = t1 or t2
-				dist = danger and (getRoot(danger).Position - charRoot.Position).Magnitude or math.huge
-			end
+		local function computeEscapePosition(char)
+			local root = getRoot(char)
+			local t1,_ = getClosestTarget(char, teachersFolder)
+			local t2,_ = getClosestTarget(char, alicesFolder)
+			local danger = t1 or t2
 			if danger then
 				local dRoot = getRoot(danger)
-				local dir = (charRoot.Position - dRoot.Position).Unit
-				return dir, dist
+				if dRoot then
+					local dir = (root.Position - dRoot.Position).Unit
+					return root.Position + dir * 40
+				end
 			end
-			return Vector3.new(0,0,0), math.huge
+			return nil
 		end
 
-		local function moveToWithAvoid(char, destination)
+		local function moveAlongPath(char, path)
 			local humanoid = getHumanoid(char)
 			local root = getRoot(char)
 			if not humanoid or not root then return end
-
-			local path = PathfindingService:CreatePath({
-				AgentRadius = 2,
-				AgentHeight = 5,
-				AgentCanJump = true,
-				AgentJumpHeight = 7,
-				AgentMaxSlope = 45,
-				CostMultiplier = 1
-			})
-			path:ComputeAsync(root.Position, destination)
-			if path.Status ~= Enum.PathStatus.Success then return end
-
 			for _,wp in ipairs(path:GetWaypoints()) do
-				-- Ajusta direção do olhar
-				local lookPos = wp.Position + Vector3.new(0,2,0)
-				root.CFrame = CFrame.new(root.Position, lookPos)
+				if wp.Action == Enum.PathWaypointAction.Jump then
+					humanoid.Jump = true
+				end
+				-- olhar para próximo waypoint
+				root.CFrame = CFrame.new(root.Position, wp.Position)
 				humanoid:MoveTo(wp.Position)
-				humanoid.MoveToFinished:Wait()
+				local ok = humanoid.MoveToFinished:Wait()
+				if not ok then break end
 			end
-		end
-
-		local function attack()
-			VirtualInputManager:SendMouseButtonEvent(0,0,0,true,game,0)
-			task.wait(0.05)
-			VirtualInputManager:SendMouseButtonEvent(0,0,0,false,game,0)
 		end
 
 		_G.__AUTO_PLAY.conn = RunService.Heartbeat:Connect(function()
@@ -598,23 +589,49 @@ FPESTab:Toggle({
 			local root = getRoot(char)
 			if not root then return end
 
-			checkAndOpenDoors(root)
+			local now = tick()
+			if now - _G.__AUTO_PLAY.lastUpdate < 0.5 then return end
+			_G.__AUTO_PLAY.lastUpdate = now
 
 			local inTeachers = teachersFolder:FindFirstChild(char.Name)
 			local inAlices = alicesFolder:FindFirstChild(char.Name)
 			local inStudents = studentsFolder:FindFirstChild(char.Name)
 
 			if inTeachers or inAlices then
-				local target = getClosestTarget(char, studentsFolder)
+				local target,_ = getClosestTarget(char, studentsFolder)
 				if target then
-					moveToWithAvoid(char, getRoot(target).Position)
-					attack()
+					local tRoot = getRoot(target)
+					if tRoot then
+						checkAndUseDoors(root, true)
+						local path = PathfindingService:CreatePath({
+							AgentRadius = 2,
+							AgentHeight = 5,
+							AgentCanJump = true,
+							AgentJumpHeight = 7,
+							AgentMaxSlope = 45
+						})
+						path:ComputeAsync(root.Position, tRoot.Position)
+						if path.Status == Enum.PathStatus.Success then
+							moveAlongPath(char, path)
+							attack()
+						end
+					end
 				end
 			elseif inStudents then
-				local dir, dist = getEscapeDirection(root)
-				if dist < 40 then
-					local safePos = root.Position + dir * 40
-					moveToWithAvoid(char, safePos)
+				local escapePos = computeEscapePosition(char)
+				if escapePos then
+					checkAndUseDoors(root, false)
+					local path = PathfindingService:CreatePath({
+						AgentRadius = 2,
+						AgentHeight = 5,
+						AgentCanJump = true,
+						AgentJumpHeight = 7,
+						AgentMaxSlope = 45
+					})
+					path:ComputeAsync(root.Position, escapePos)
+					if path.Status == Enum.PathStatus.Success then
+						moveAlongPath(char, path)
+					end
 				end
 			end
 		end)
