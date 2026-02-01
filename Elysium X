@@ -326,7 +326,7 @@ FPESTab:Toggle({
 		state.redOverlay = screenGui
 
 		local redOverlay = Instance.new("Frame")
-		redOverlay.Size = UDim2.new(1,0,1,0)
+		redOverlay.Size = UDim2.new(1,100,1,100)
 		redOverlay.BackgroundColor3 = Color3.fromRGB(255,0,0)
 		redOverlay.BackgroundTransparency = 0.5
 		redOverlay.Parent = screenGui
