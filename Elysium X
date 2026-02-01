@@ -312,16 +312,11 @@ FPESTab:Toggle({
 		local state = CallbackState
 
 		local Players = game:GetService("Players")
-		local RunService = game:GetService("RunService")
 		local lp = Players.LocalPlayer
 
 		if state.vfx then state.vfx:Destroy() state.vfx = nil end
 		if state.sound1 then state.sound1:Stop() state.sound1:Destroy() state.sound1 = nil end
 		if state.sound2 then state.sound2:Stop() state.sound2:Destroy() state.sound2 = nil end
-		if state.stepA then state.stepA:Stop() state.stepA:Destroy() state.stepA = nil end
-		if state.stepB then state.stepB:Stop() state.stepB:Destroy() state.stepB = nil end
-		if state.conn then state.conn:Disconnect() state.conn = nil end
-		state.playing = false
 
 		if not v then return end
 
@@ -346,51 +341,6 @@ FPESTab:Toggle({
 		task.delay(2, function()
 			if state.sound2 then
 				state.sound2:Play()
-			end
-		end)
-
-		local char = lp.Character or lp.CharacterAdded:Wait()
-		local hum = char:WaitForChild("Humanoid")
-
-		local stepA = Instance.new("Sound")
-		stepA.SoundId = "rbxassetid://9116487746"
-		stepA.Volume = 2
-		stepA.Parent = char
-		state.stepA = stepA
-
-		local stepB = Instance.new("Sound")
-		stepB.SoundId = "rbxassetid://9116488438"
-		stepB.Volume = 2
-		stepB.Parent = char
-		state.stepB = stepB
-
-		state.conn = RunService.Heartbeat:Connect(function()
-			local speed = hum.MoveDirection.Magnitude * hum.WalkSpeed
-
-			if speed > 0 then
-				if not state.playing then
-					state.playing = true
-					task.spawn(function()
-						local toggle = false
-						while state.playing and hum.MoveDirection.Magnitude > 0 do
-							local interval = math.clamp(0.35 - (speed / 80), 0.06, 0.35)
-
-							toggle = not toggle
-							if toggle then
-								stepA:Play()
-							else
-								stepB:Play()
-							end
-
-							task.wait(interval)
-						end
-						state.playing = false
-					end)
-				end
-			else
-				state.playing = false
-				stepA:Stop()
-				stepB:Stop()
 			end
 		end)
 
