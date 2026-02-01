@@ -347,7 +347,7 @@ FPESTab:Toggle({
 		WindUI:Notify({
 			Title="Miss Circle",
 			Content="You failed",
-			Duration=3,
+			Duration=2,
 			Icon="rbxassetid://17224686449"
 		})
 	end
