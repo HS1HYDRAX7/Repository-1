@@ -469,11 +469,9 @@ FPESTab:Toggle({
 	Callback = function(v)
 		local Lighting = game:GetService("Lighting")
 		local RunService = game:GetService("RunService")
-		local Players = game:GetService("Players")
 
 		if not _NVG then
 			_NVG = {
-				enabled = false,
 				conn = nil,
 				restore = {
 					Brightness = Lighting.Brightness,
@@ -489,32 +487,27 @@ FPESTab:Toggle({
 				light = Instance.new("SpotLight")
 			}
 
-			_NVG.cc.Brightness = 0.3
-			_NVG.cc.Contrast = 2
+			_NVG.cc.Brightness = 0.05
+			_NVG.cc.Contrast = 1.8
 			_NVG.cc.Saturation = -1
-			_NVG.cc.TintColor = Color3.fromRGB(235,235,235)
+			_NVG.cc.TintColor = Color3.fromRGB(220, 235, 220)
 
-			_NVG.bloom.Intensity = 1.5
-			_NVG.bloom.Size = 30
-			_NVG.bloom.Threshold = 0
+			_NVG.bloom.Intensity = 0.4
+			_NVG.bloom.Size = 18
+			_NVG.bloom.Threshold = 0.6
 
-			_NVG.light.Angle = 90
-			_NVG.light.Range = 80
-			_NVG.light.Brightness = 6
-			_NVG.light.Color = Color3.fromRGB(235,235,235)
+			_NVG.light.Angle = 70
+			_NVG.light.Range = 45
+			_NVG.light.Brightness = 1.2
+			_NVG.light.Color = Color3.fromRGB(220, 235, 220)
 			_NVG.light.Shadows = false
 		end
 
-		_NVG.enabled = v
-
 		if v then
-			Lighting.Brightness = 1
-			Lighting.ClockTime = 12
-			Lighting.FogEnd = 786543
+			Lighting.ExposureCompensation = 0.6
 			Lighting.GlobalShadows = false
-			Lighting.Ambient = Color3.fromRGB(178,178,178)
-			Lighting.OutdoorAmbient = Color3.fromRGB(178,178,178)
-			Lighting.ExposureCompensation = 2
+			Lighting.Ambient = Color3.fromRGB(40, 40, 40)
+			Lighting.OutdoorAmbient = Color3.fromRGB(40, 40, 40)
 
 			_NVG.cc.Parent = Lighting
 			_NVG.bloom.Parent = Lighting
@@ -529,8 +522,8 @@ FPESTab:Toggle({
 			_NVG.bloom.Parent = nil
 			_NVG.light.Parent = nil
 
-			for k,v0 in pairs(_NVG.restore) do
-				Lighting[k] = v0
+			for k, val in pairs(_NVG.restore) do
+				Lighting[k] = val
 			end
 		end
 	end
