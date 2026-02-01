@@ -305,6 +305,96 @@ FPESTab:Toggle({
 })
 
 FPESTab:Toggle({
+	Title="Fake Miss Circle Rage Mode",
+	Value=false,
+	Callback=function(v)
+		if not CallbackState then CallbackState = {} end
+		local state = CallbackState
+
+		local Players = game:GetService("Players")
+		local RunService = game:GetService("RunService")
+		local lp = Players.LocalPlayer
+		local last = 0
+
+		if state.conn then state.conn:Disconnect() state.conn = nil end
+		if state.redOverlay then state.redOverlay:Destroy() state.redOverlay = nil end
+		if state.sound1 then state.sound1:Stop() state.sound1:Destroy() state.sound1 = nil end
+		if state.sound2 then state.sound2:Stop() state.sound2:Destroy() state.sound2 = nil end
+		if state.vhsEffect then state.vhsEffect:Destroy() state.vhsEffect = nil end
+		if not v then return end
+
+		local screenGui = Instance.new("ScreenGui")
+		screenGui.Name = "RageOverlay"
+		screenGui.Parent = lp:WaitForChild("PlayerGui")
+		state.redOverlay = screenGui
+
+		local redOverlay = Instance.new("Frame")
+		redOverlay.Size = UDim2.new(1,0,1,0)
+		redOverlay.BackgroundColor3 = Color3.fromRGB(255,0,0)
+		redOverlay.BackgroundTransparency = 0.5
+		redOverlay.Parent = screenGui
+
+		local vhsEffect = Instance.new("ColorCorrectionEffect")
+		vhsEffect.TintColor = Color3.fromRGB(255,50,50)
+		vhsEffect.Contrast = 0.2
+		vhsEffect.Saturation = -0.5
+		vhsEffect.Parent = workspace.CurrentCamera
+		state.vhsEffect = vhsEffect
+
+		local sound1 = Instance.new("Sound", workspace)
+		sound1.SoundId = "rbxassetid://17548871120"
+		sound1.Volume = 1
+		sound1:Play()
+		state.sound1 = sound1
+
+		sound1.Ended:Connect(function()
+			if state.sound2 then return end
+			local sound2 = Instance.new("Sound", workspace)
+			sound2.SoundId = "rbxassetid://17548873081"
+			sound2.Volume = 1
+			sound2:Play()
+			state.sound2 = sound2
+		end)
+
+		WindUI:Notify({
+			Title="Miss Circle",
+			Content="You failed",
+			Duration=3,
+			Icon="rbxassetid://17224686449"
+		})
+
+		state.conn = RunService.Heartbeat:Connect(function()
+			local char = lp.Character
+			local hrp = char and char:FindFirstChild("HumanoidRootPart")
+			if not hrp then return end
+
+			local folder = workspace:FindFirstChild("Teachers")
+			if not folder then return end
+
+			if char.Parent == folder then return end
+
+			for _,m in ipairs(folder:GetChildren()) do
+				if m:IsA("Model") then
+					local root = m:FindFirstChild("HumanoidRootPart")
+					if root and (root.Position - hrp.Position).Magnitude <= 15 then
+						if os.clock() - last >= 3 then
+							last = os.clock()
+							WindUI:Notify({
+								Title="Miss Circle",
+								Content = m.Name .. " is too close!",
+								Duration = 3,
+								Icon = "rbxassetid://17224686449",
+							})
+						end
+						break
+					end
+				end
+			end
+		end)
+	end
+})
+
+FPESTab:Toggle({
 	Title="Proximity Alert",
 	Value=false,
 	Callback=function(v)
