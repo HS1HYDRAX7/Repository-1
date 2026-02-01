@@ -313,10 +313,12 @@ FPESTab:Toggle({
 
 		local Players = game:GetService("Players")
 		local lp = Players.LocalPlayer
+		local RunService = game:GetService("RunService")
 
 		if state.vfx then state.vfx:Destroy() state.vfx = nil end
 		if state.sound1 then state.sound1:Stop() state.sound1:Destroy() state.sound1 = nil end
 		if state.sound2 then state.sound2:Stop() state.sound2:Destroy() state.sound2 = nil end
+		if state.conn then state.conn:Disconnect() state.conn = nil end
 
 		if not v then return end
 
@@ -339,11 +341,9 @@ FPESTab:Toggle({
 		state.sound2 = sound2
 
 		sound1.Ended:Connect(function()
-			task.delay(0.7, function()
-				if state.sound2 then
-					state.sound2:Play()
-				end
-			end)
+			if state.sound2 then
+				state.sound2:Play()
+			end
 		end)
 
 		WindUI:Notify({
@@ -352,6 +352,14 @@ FPESTab:Toggle({
 			Duration=3,
 			Icon="rbxassetid://17224686449"
 		})
+
+		state.conn = RunService.RenderStepped:Connect(function()
+			local char = lp.Character
+			local hrp = char and char:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				hrp.CFrame = hrp.CFrame + hrp.CFrame.LookVector * 2 * RunService.RenderStepped:Wait()
+			end
+		end)
 	end
 })
 
