@@ -312,8 +312,8 @@ FPESTab:Toggle({
 		local state = CallbackState
 
 		local Players = game:GetService("Players")
-		local lp = Players.LocalPlayer
 		local RunService = game:GetService("RunService")
+		local lp = Players.LocalPlayer
 
 		if state.vfx then state.vfx:Destroy() state.vfx = nil end
 		if state.sound1 then state.sound1:Stop() state.sound1:Destroy() state.sound1 = nil end
@@ -353,11 +353,14 @@ FPESTab:Toggle({
 			Icon="rbxassetid://17224686449"
 		})
 
-		state.conn = RunService.RenderStepped:Connect(function()
+		state.conn = RunService.Heartbeat:Connect(function()
 			local char = lp.Character
 			local hrp = char and char:FindFirstChild("HumanoidRootPart")
-			if hrp then
-				hrp.CFrame = hrp.CFrame + hrp.CFrame.LookVector * 2 * RunService.RenderStepped:Wait()
+			local hum = char and char:FindFirstChildOfClass("Humanoid")
+			if not hrp or not hum then return end
+			local dir = hum.MoveDirection
+			if dir.Magnitude > 0 then
+				hrp.CFrame = hrp.CFrame + dir * 2 * RunService.Heartbeat:Wait()
 			end
 		end)
 	end
