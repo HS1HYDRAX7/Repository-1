@@ -314,22 +314,18 @@ FPESTab:Toggle({
 		local Players = game:GetService("Players")
 		local lp = Players.LocalPlayer
 
-		if state.redOverlay then state.redOverlay:Destroy() state.redOverlay = nil end
+		if state.vfx then state.vfx:Destroy() state.vfx = nil end
 		if state.sound1 then state.sound1:Stop() state.sound1:Destroy() state.sound1 = nil end
 		if state.sound2 then state.sound2:Stop() state.sound2:Destroy() state.sound2 = nil end
-		if state.conn then state.conn:Disconnect() state.conn = nil end
+
 		if not v then return end
 
-		local screenGui = Instance.new("ScreenGui")
-		screenGui.Name = "RageOverlay"
-		screenGui.Parent = lp:WaitForChild("PlayerGui")
-		state.redOverlay = screenGui
-
-		local redOverlay = Instance.new("Frame")
-		redOverlay.Size = UDim2.new(1,100,1,100)
-		redOverlay.BackgroundColor3 = Color3.fromRGB(255,0,0)
-		redOverlay.BackgroundTransparency = 0.5
-		redOverlay.Parent = screenGui
+		local vfx = Instance.new("ColorCorrectionEffect")
+		vfx.TintColor = Color3.fromRGB(255,50,50)
+		vfx.Contrast = 0.2
+		vfx.Saturation = -0.5
+		vfx.Parent = workspace.CurrentCamera
+		state.vfx = vfx
 
 		local sound1 = Instance.new("Sound", workspace)
 		sound1.SoundId = "rbxassetid://17548871120"
@@ -343,9 +339,11 @@ FPESTab:Toggle({
 		state.sound2 = sound2
 
 		sound1.Ended:Connect(function()
-			if state.sound2 then
-				state.sound2:Play()
-			end
+			task.delay(0.7, function()
+				if state.sound2 then
+					state.sound2:Play()
+				end
+			end)
 		end)
 
 		WindUI:Notify({
