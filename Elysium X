@@ -761,18 +761,23 @@ local ConfigNameInput = Section:Input({
     end
 })
 
-local Drawer = Section:Drawer({
+local ConfigsSection = Section:Section({
     Title = "Select Config",
-    Icon = "settings"
+    Box = false,
+    FontWeight = "SemiBold",
+    TextTransparency = 0.05,
+    TextXAlignment = "Left",
+    TextSize = 15,
+    Opened = true,
 })
 
-local function updateDrawer()
-    Drawer:Clear()
+local function updateConfigsSection()
+    ConfigsSection:Clear()
     local ConfigManager = Window.ConfigManager
     if not ConfigManager then return end
     local configs = ConfigManager:GetConfigs()
     for _, config in ipairs(configs) do
-        Drawer:Button({
+        ConfigsSection:Button({
             Title = config.Name,
             Icon = "file",
             Callback = function()
@@ -783,51 +788,47 @@ local function updateDrawer()
     end
 end
 
-updateDrawer()
+updateConfigsSection()
 
-Drawer:Button({
+ConfigsSection:Button({
     Title = "Refresh Configs",
     Icon = "refresh",
     Variant = "Secondary",
     Callback = function()
-        updateDrawer()
-        print("Drawer refreshed")
+        updateConfigsSection()
+        print("Configs refreshed")
     end
 })
 
-Drawer:Button({
+ConfigsSection:Button({
     Title = "Create Config",
     Icon = "plus",
     Variant = "Primary",
     Callback = function()
         if not ConfigName or ConfigName == "" then
-            warn("Please enter a valid name!")
             return
         end
         local ConfigManager = Window.ConfigManager
         if not ConfigManager then return end
         local newConfig = ConfigManager:CreateConfig(ConfigName)
         newConfig:Save()
-        print("Config created:", ConfigName)
-        updateDrawer()
+        updateConfigsSection()
     end
 })
 
-Drawer:Button({
+ConfigsSection:Button({
     Title = "Delete Config",
     Icon = "trash",
     Variant = "Danger",
     Callback = function()
         if not ConfigName or ConfigName == "" then
-            warn("Please enter a name to delete!")
             return
         end
         local ConfigManager = Window.ConfigManager
         if not ConfigManager then return end
         local toDelete = ConfigManager:CreateConfig(ConfigName)
         toDelete:Delete()
-        print("Config deleted:", ConfigName)
-        updateDrawer()
+        updateConfigsSection()
     end
 })
 
