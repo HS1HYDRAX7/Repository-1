@@ -395,9 +395,6 @@ FPESTab:Toggle({
 			Icon="rbxassetid://17224686449"
 		})
 	end
-})"
-		})
-	end
 })
 
 FPESTab:Toggle({
