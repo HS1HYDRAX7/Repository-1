@@ -402,6 +402,39 @@ FPESTab:Toggle({
 })
 
 FPESTab:Toggle({
+	Title="Music",
+	Value=true,
+	Callback=function(v)
+		if not CallbackState then CallbackState = {} end
+		local state = CallbackState
+		state.music = v
+
+		if state.sound1 then
+			if v then state.sound1:Play() else state.sound1:Stop() end
+		end
+		if state.sound2 then
+			if v then state.sound2:Play() else state.sound2:Stop() end
+		end
+	end
+})
+
+FPESTab:Toggle({
+	Title="Footsteps",
+	Value=true,
+	Callback=function(v)
+		if not CallbackState then CallbackState = {} end
+		local state = CallbackState
+		state.footsteps = v
+
+		if not v then
+			if state.stepA then state.stepA:Stop() end
+			if state.stepB then state.stepB:Stop() end
+			state.playing = false
+		end
+	end
+})
+
+FPESTab:Toggle({
 	Title="Proximity Alert",
 	Value=false,
 	Callback=function(v)
