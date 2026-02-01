@@ -3,12 +3,8 @@ local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/rel
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TextChatService = game:GetService("TextChatService")
-local StarterGui = game:GetService("StarterGui")
 
 local LocalPlayer = Players.LocalPlayer
-local FONT = Font.new("rbxassetid://12187360881")
 local DEFAULT_GRAVITY = workspace.Gravity
 
 Window = WindUI:CreateWindow({
@@ -35,7 +31,6 @@ Window:Tag({
 })
 
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
-local ForsakenTab = Window:Tab({ Title = "Forsaken", Icon = "skull" })
 local EternityTab = Window:Tab({ Title = "Eternity", Icon = "infinity" })
 local FPESTab = Window:Tab({ Title = "FPE Survival", Icon = "book" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "link" })
