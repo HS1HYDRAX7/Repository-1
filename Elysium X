@@ -464,69 +464,6 @@ FPESTab:Toggle({
 })
 
 FPESTab:Toggle({
-	Title = "Night Vision",
-	Value = false,
-	Callback = function(v)
-		local Lighting = game:GetService("Lighting")
-		local RunService = game:GetService("RunService")
-
-		if not _NVG then
-			_NVG = {
-				conn = nil,
-				restore = {
-					ExposureCompensation = Lighting.ExposureCompensation,
-					GlobalShadows = Lighting.GlobalShadows,
-					Ambient = Lighting.Ambient,
-					OutdoorAmbient = Lighting.OutdoorAmbient
-				},
-				cc = Instance.new("ColorCorrectionEffect"),
-				bloom = Instance.new("BloomEffect"),
-				light = Instance.new("SpotLight")
-			}
-
-			_NVG.cc.Brightness = 0.1
-			_NVG.cc.Contrast = 2.3
-			_NVG.cc.Saturation = -0.4
-			_NVG.cc.TintColor = Color3.fromRGB(120, 255, 120)
-
-			_NVG.bloom.Intensity = 0.5
-			_NVG.bloom.Size = 20
-			_NVG.bloom.Threshold = 0.6
-
-			_NVG.light.Angle = 70
-			_NVG.light.Range = 55
-			_NVG.light.Brightness = 2.2
-			_NVG.light.Color = Color3.fromRGB(120, 255, 120)
-			_NVG.light.Shadows = false
-		end
-
-		if v then
-			Lighting.ExposureCompensation = 1.3
-			Lighting.GlobalShadows = false
-			Lighting.Ambient = Color3.fromRGB(60, 60, 60)
-			Lighting.OutdoorAmbient = Color3.fromRGB(60, 60, 60)
-
-			_NVG.cc.Parent = Lighting
-			_NVG.bloom.Parent = Lighting
-			_NVG.light.Parent = workspace.CurrentCamera
-
-			_NVG.conn = RunService.RenderStepped:Connect(function()
-				_NVG.light.CFrame = workspace.CurrentCamera.CFrame
-			end)
-		else
-			if _NVG.conn then _NVG.conn:Disconnect() _NVG.conn = nil end
-			_NVG.cc.Parent = nil
-			_NVG.bloom.Parent = nil
-			_NVG.light.Parent = nil
-
-			for k, v0 in pairs(_NVG.restore) do
-				Lighting[k] = v0
-			end
-		end
-	end
-})
-
-FPESTab:Toggle({
 	Title="ESP Teachers",
 	Value=false,
 	Callback=function(v)
