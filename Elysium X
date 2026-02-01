@@ -474,40 +474,37 @@ FPESTab:Toggle({
 			_NVG = {
 				conn = nil,
 				restore = {
-					Brightness = Lighting.Brightness,
-					ClockTime = Lighting.ClockTime,
-					FogEnd = Lighting.FogEnd,
+					ExposureCompensation = Lighting.ExposureCompensation,
 					GlobalShadows = Lighting.GlobalShadows,
 					Ambient = Lighting.Ambient,
-					OutdoorAmbient = Lighting.OutdoorAmbient,
-					ExposureCompensation = Lighting.ExposureCompensation
+					OutdoorAmbient = Lighting.OutdoorAmbient
 				},
 				cc = Instance.new("ColorCorrectionEffect"),
 				bloom = Instance.new("BloomEffect"),
 				light = Instance.new("SpotLight")
 			}
 
-			_NVG.cc.Brightness = 0.05
-			_NVG.cc.Contrast = 1.8
-			_NVG.cc.Saturation = -1
-			_NVG.cc.TintColor = Color3.fromRGB(220, 235, 220)
+			_NVG.cc.Brightness = 0.1
+			_NVG.cc.Contrast = 2.3
+			_NVG.cc.Saturation = -0.4
+			_NVG.cc.TintColor = Color3.fromRGB(120, 255, 120)
 
-			_NVG.bloom.Intensity = 0.4
-			_NVG.bloom.Size = 18
+			_NVG.bloom.Intensity = 0.5
+			_NVG.bloom.Size = 20
 			_NVG.bloom.Threshold = 0.6
 
 			_NVG.light.Angle = 70
-			_NVG.light.Range = 45
-			_NVG.light.Brightness = 1.2
-			_NVG.light.Color = Color3.fromRGB(220, 235, 220)
+			_NVG.light.Range = 55
+			_NVG.light.Brightness = 2.2
+			_NVG.light.Color = Color3.fromRGB(120, 255, 120)
 			_NVG.light.Shadows = false
 		end
 
 		if v then
-			Lighting.ExposureCompensation = 0.6
+			Lighting.ExposureCompensation = 1.3
 			Lighting.GlobalShadows = false
-			Lighting.Ambient = Color3.fromRGB(40, 40, 40)
-			Lighting.OutdoorAmbient = Color3.fromRGB(40, 40, 40)
+			Lighting.Ambient = Color3.fromRGB(60, 60, 60)
+			Lighting.OutdoorAmbient = Color3.fromRGB(60, 60, 60)
 
 			_NVG.cc.Parent = Lighting
 			_NVG.bloom.Parent = Lighting
@@ -522,8 +519,8 @@ FPESTab:Toggle({
 			_NVG.bloom.Parent = nil
 			_NVG.light.Parent = nil
 
-			for k, val in pairs(_NVG.restore) do
-				Lighting[k] = val
+			for k, v0 in pairs(_NVG.restore) do
+				Lighting[k] = v0
 			end
 		end
 	end
