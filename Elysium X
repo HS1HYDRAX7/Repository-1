@@ -467,74 +467,71 @@ FPESTab:Toggle({
 	Title = "Night Vision",
 	Value = false,
 	Callback = function(v)
-		nvgEnabled = v
+		local Lighting = game:GetService("Lighting")
+		local RunService = game:GetService("RunService")
+		local Players = game:GetService("Players")
 
-		if nvgConn then nvgConn:Disconnect() nvgConn = nil end
-		if noiseConn then noiseConn:Disconnect() noiseConn = nil end
-		if camLight then camLight:Destroy() camLight = nil end
+		if not _NVG then
+			_NVG = {
+				enabled = false,
+				conn = nil,
+				restore = {
+					Brightness = Lighting.Brightness,
+					ClockTime = Lighting.ClockTime,
+					FogEnd = Lighting.FogEnd,
+					GlobalShadows = Lighting.GlobalShadows,
+					Ambient = Lighting.Ambient,
+					OutdoorAmbient = Lighting.OutdoorAmbient,
+					ExposureCompensation = Lighting.ExposureCompensation
+				},
+				cc = Instance.new("ColorCorrectionEffect"),
+				bloom = Instance.new("BloomEffect"),
+				light = Instance.new("SpotLight")
+			}
 
-		if not nvgCC then nvgCC = Instance.new("ColorCorrectionEffect") end
-		if not nvgBloom then nvgBloom = Instance.new("BloomEffect") end
+			_NVG.cc.Brightness = 0.3
+			_NVG.cc.Contrast = 2
+			_NVG.cc.Saturation = -1
+			_NVG.cc.TintColor = Color3.fromRGB(235,235,235)
 
-		if not noiseGui then
-			noiseGui = Instance.new("ScreenGui")
-			noiseGui.IgnoreGuiInset = true
-			noiseGui.ResetOnSpawn = false
+			_NVG.bloom.Intensity = 1.5
+			_NVG.bloom.Size = 30
+			_NVG.bloom.Threshold = 0
 
-			noiseImage = Instance.new("ImageLabel")
-			noiseImage.Size = UDim2.fromScale(1, 1)
-			noiseImage.BackgroundTransparency = 1
-			noiseImage.Image = "rbxassetid://13911895447"
-			noiseImage.ImageTransparency = 0.85
-			noiseImage.Parent = noiseGui
+			_NVG.light.Angle = 90
+			_NVG.light.Range = 80
+			_NVG.light.Brightness = 6
+			_NVG.light.Color = Color3.fromRGB(235,235,235)
+			_NVG.light.Shadows = false
 		end
 
+		_NVG.enabled = v
+
 		if v then
-			nvgCC.Brightness = 0.3
-			nvgCC.Contrast = 2.2
-			nvgCC.Saturation = -1
-			nvgCC.TintColor = Color3.fromRGB(235, 255, 235)
-			nvgCC.Parent = Lighting
-
-			nvgBloom.Intensity = 1.6
-			nvgBloom.Size = 36
-			nvgBloom.Threshold = 0
-			nvgBloom.Parent = Lighting
-
-			Lighting.ExposureCompensation = 2
+			Lighting.Brightness = 1
+			Lighting.ClockTime = 12
+			Lighting.FogEnd = 786543
 			Lighting.GlobalShadows = false
-			Lighting.Ambient = Color3.fromRGB(120, 120, 120)
-			Lighting.OutdoorAmbient = Color3.fromRGB(120, 120, 120)
+			Lighting.Ambient = Color3.fromRGB(178,178,178)
+			Lighting.OutdoorAmbient = Color3.fromRGB(178,178,178)
+			Lighting.ExposureCompensation = 2
 
-			camLight = Instance.new("SpotLight")
-			camLight.Angle = 90
-			camLight.Range = 80
-			camLight.Brightness = 6
-			camLight.Color = Color3.fromRGB(235, 255, 235)
-			camLight.Shadows = false
-			camLight.Parent = workspace.CurrentCamera
+			_NVG.cc.Parent = Lighting
+			_NVG.bloom.Parent = Lighting
+			_NVG.light.Parent = workspace.CurrentCamera
 
-			noiseGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-
-			nvgConn = RunService.RenderStepped:Connect(function()
-				if not nvgEnabled then return end
-				camLight.CFrame = workspace.CurrentCamera.CFrame
-			end)
-
-			noiseConn = RunService.RenderStepped:Connect(function()
-				if not nvgEnabled then return end
-				noiseImage.Position = UDim2.fromScale(math.random(), math.random())
+			_NVG.conn = RunService.RenderStepped:Connect(function()
+				_NVG.light.CFrame = workspace.CurrentCamera.CFrame
 			end)
 		else
-			if nvgCC then nvgCC.Parent = nil end
-			if nvgBloom then nvgBloom.Parent = nil end
-			if noiseGui then noiseGui.Parent = nil end
-			if camLight then camLight:Destroy() camLight = nil end
+			if _NVG.conn then _NVG.conn:Disconnect() _NVG.conn = nil end
+			_NVG.cc.Parent = nil
+			_NVG.bloom.Parent = nil
+			_NVG.light.Parent = nil
 
-			Lighting.ExposureCompensation = 0
-			Lighting.GlobalShadows = true
-			Lighting.Ambient = Color3.fromRGB(0, 0, 0)
-			Lighting.OutdoorAmbient = Color3.fromRGB(0, 0, 0)
+			for k,v0 in pairs(_NVG.restore) do
+				Lighting[k] = v0
+			end
 		end
 	end
 })
