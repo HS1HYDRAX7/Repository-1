@@ -464,11 +464,11 @@ FPESTab:Toggle({
 })
 
 FPESTab:Toggle({
-	Title="Auto Play Teachers & Students",
+	Title="Auto Play Stable",
 	Value=false,
 	Callback=function(v)
 		if not _G.__AUTO_PLAY then
-			_G.__AUTO_PLAY = {conn=nil, lastUpdate=0}
+			_G.__AUTO_PLAY = {conn=nil, lastPath=nil, lastTarget=nil, lastUpdate=0}
 		end
 
 		if _G.__AUTO_PLAY.conn then
@@ -484,13 +484,11 @@ FPESTab:Toggle({
 		local RunService = game:GetService("RunService")
 
 		local LocalPlayer = Players.LocalPlayer
-
 		local teachersFolder = workspace:WaitForChild("Teachers")
 		local alicesFolder = workspace:WaitForChild("Alices")
 		local studentsFolder = workspace:WaitForChild("Students")
 		local doorNames = {"SingleDoor","DoubleDoor"}
 
-		-- Pré-carrega portas
 		local doors = {}
 		for _,doorName in ipairs(doorNames) do
 			for _,door in ipairs(workspace:GetDescendants()) do
@@ -526,7 +524,7 @@ FPESTab:Toggle({
 				if dRoot and (dRoot.Position - charRoot.Position).Magnitude < 6 then
 					interact()
 					if isTeacher then
-						attack() -- professores atacam portas para destruir
+						attack()
 					end
 				end
 			end
@@ -575,9 +573,8 @@ FPESTab:Toggle({
 				if wp.Action == Enum.PathWaypointAction.Jump then
 					humanoid.Jump = true
 				end
-				-- olhar para próximo waypoint
-				root.CFrame = CFrame.new(root.Position, wp.Position)
 				humanoid:MoveTo(wp.Position)
+				root.CFrame = CFrame.new(root.Position, wp.Position)
 				local ok = humanoid.MoveToFinished:Wait()
 				if not ok then break end
 			end
@@ -599,27 +596,26 @@ FPESTab:Toggle({
 
 			if inTeachers or inAlices then
 				local target,_ = getClosestTarget(char, studentsFolder)
-				if target then
-					local tRoot = getRoot(target)
-					if tRoot then
-						checkAndUseDoors(root, true)
-						local path = PathfindingService:CreatePath({
-							AgentRadius = 2,
-							AgentHeight = 5,
-							AgentCanJump = true,
-							AgentJumpHeight = 7,
-							AgentMaxSlope = 45
-						})
-						path:ComputeAsync(root.Position, tRoot.Position)
-						if path.Status == Enum.PathStatus.Success then
-							moveAlongPath(char, path)
-							attack()
-						end
+				if target and target ~= _G.__AUTO_PLAY.lastTarget then
+					_G.__AUTO_PLAY.lastTarget = target
+					checkAndUseDoors(root, true)
+					local path = PathfindingService:CreatePath({
+						AgentRadius = 2,
+						AgentHeight = 5,
+						AgentCanJump = true,
+						AgentJumpHeight = 7,
+						AgentMaxSlope = 45
+					})
+					path:ComputeAsync(root.Position, getRoot(target).Position)
+					if path.Status == Enum.PathStatus.Success then
+						moveAlongPath(char, path)
+						attack()
 					end
 				end
 			elseif inStudents then
 				local escapePos = computeEscapePosition(char)
-				if escapePos then
+				if escapePos and escapePos ~= _G.__AUTO_PLAY.lastTarget then
+					_G.__AUTO_PLAY.lastTarget = escapePos
 					checkAndUseDoors(root, false)
 					local path = PathfindingService:CreatePath({
 						AgentRadius = 2,
@@ -636,7 +632,7 @@ FPESTab:Toggle({
 			end
 		end)
 	end
-})
+})	
 
 FPESTab:Toggle({
 	Title="ESP Teachers",
