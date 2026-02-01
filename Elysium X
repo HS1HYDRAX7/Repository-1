@@ -425,6 +425,117 @@ EternityTab:Toggle({
 })
 
 FPESTab:Toggle({
+	Title = "Auto Farm",
+	Value = false,
+	Callback = function(v)
+		local Players = game:GetService("Players")
+		local RunService = game:GetService("RunService")
+		local TweenService = game:GetService("TweenService")
+		local LocalPlayer = Players.LocalPlayer
+		local Camera = workspace.CurrentCamera
+
+		local autoFarm = v
+		local blockedPosition = Vector3.new(-229.41, 133.66, 213.57)
+		local originalPosition = nil
+		local gui = nil
+
+		if not autoFarm then
+			if gui then gui:Destroy() gui = nil end
+			if originalPosition and LocalPlayer.Character and LocalPlayer.Character.PrimaryPart then
+				LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(originalPosition))
+				originalPosition = nil
+			end
+			return
+		end
+
+		local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+		Character:WaitForChild("HumanoidRootPart")
+		originalPosition = Character.PrimaryPart.Position
+
+		local function blockPosition()
+			if (Character.PrimaryPart.Position - blockedPosition).magnitude < 5 then
+				Character:SetPrimaryPartCFrame(CFrame.new(originalPosition + Vector3.new(0,5,0)))
+			end
+		end
+
+		gui = Instance.new("ScreenGui")
+		gui.Name = "AutoFarmGui"
+		gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+		local nameFrame = Instance.new("Frame")
+		nameFrame.Size = UDim2.new(0, 250, 0, 40)
+		nameFrame.Position = UDim2.new(0.5, -125, 0, 50)
+		nameFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+		nameFrame.BackgroundTransparency = 0.05
+		nameFrame.BorderSizePixel = 0
+		nameFrame.AnchorPoint = Vector2.new(0.5,0)
+		nameFrame.Parent = gui
+		local nameCorner = Instance.new("UICorner", nameFrame)
+		nameCorner.CornerRadius = UDim.new(0,15)
+
+		local nameLabel = Instance.new("TextLabel")
+		nameLabel.Size = UDim2.new(1, -20, 1, 0)
+		nameLabel.Position = UDim2.new(0,10,0,0)
+		nameLabel.BackgroundTransparency = 1
+		nameLabel.Text = ""
+		nameLabel.TextColor3 = Color3.fromRGB(255,255,255)
+		nameLabel.Font = Enum.Font.GothamBold
+		nameLabel.TextSize = 18
+		nameLabel.Parent = nameFrame
+
+		local arrowFrame = Instance.new("Frame")
+		arrowFrame.Size = UDim2.new(0, 100, 0, 50)
+		arrowFrame.Position = UDim2.new(0.5, -50, 0, 100)
+		arrowFrame.BackgroundTransparency = 1
+		arrowFrame.Parent = gui
+
+		local leftArrow = Instance.new("TextLabel")
+		leftArrow.Size = UDim2.new(0, 40, 0, 40)
+		leftArrow.Position = UDim2.new(0,0,0,0)
+		leftArrow.BackgroundColor3 = Color3.fromRGB(70,130,250)
+		leftArrow.BackgroundTransparency = 0.1
+		leftArrow.Text = "<"
+		leftArrow.TextColor3 = Color3.fromRGB(255,255,255)
+		leftArrow.Font = Enum.Font.GothamBold
+		leftArrow.TextSize = 28
+		leftArrow.AnchorPoint = Vector2.new(0.5,0.5)
+		leftArrow.Parent = arrowFrame
+		local leftCorner = Instance.new("UICorner", leftArrow)
+		leftCorner.CornerRadius = UDim.new(0,12)
+
+		local rightArrow = Instance.new("TextLabel")
+		rightArrow.Size = UDim2.new(0, 40, 0, 40)
+		rightArrow.Position = UDim2.new(1,0,0,0)
+		rightArrow.BackgroundColor3 = Color3.fromRGB(70,130,250)
+		rightArrow.BackgroundTransparency = 0.1
+		rightArrow.Text = ">"
+		rightArrow.TextColor3 = Color3.fromRGB(255,255,255)
+		rightArrow.Font = Enum.Font.GothamBold
+		rightArrow.TextSize = 28
+		rightArrow.AnchorPoint = Vector2.new(0.5,0.5)
+		rightArrow.Parent = arrowFrame
+		local rightCorner = Instance.new("UICorner", rightArrow)
+		rightCorner.CornerRadius = UDim.new(0,12)
+
+		RunService.RenderStepped:Connect(function()
+			if autoFarm then
+				blockPosition()
+				for _, player in pairs(Players:GetPlayers()) do
+					if player ~= LocalPlayer and player.Character and player.Character.PrimaryPart then
+						nameLabel.Text = player.Name
+						local screenPos, onScreen = Camera:WorldToViewportPoint(player.Character.PrimaryPart.Position)
+						if onScreen then
+							TweenService:Create(leftArrow,TweenInfo.new(0.1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Position=UDim2.new(0, screenPos.X-60,0, screenPos.Y-20)}):Play()
+							TweenService:Create(rightArrow,TweenInfo.new(0.1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Position=UDim2.new(0, screenPos.X+60,0, screenPos.Y-20)}):Play()
+						end
+					end
+				end
+			end
+		end)
+	end
+})
+
+FPESTab:Toggle({
 	Title = "Infinite Stamina",
 	Value = false,
 	Callback = function(v)
