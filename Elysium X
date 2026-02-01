@@ -435,30 +435,28 @@ FPESTab:Toggle({
 		local Camera = workspace.CurrentCamera
 
 		local autoFarm = v
-		local blockedPosition = Vector3.new(-229.41, 133.66, 213.57)
+		local targetPosition = Vector3.new(-229.41, 133.66, 213.57)
 		local originalPosition = nil
-		local gui, nameLabel, leftArrow, rightArrow = nil, nil, nil, nil
-		local renderConn
+		local gui, nameLabel, leftButton, rightButton = nil, nil, nil, nil
+		local selectedIndex = 1
+		local playerList = {}
+
+		local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+		Character:WaitForChild("HumanoidRootPart")
 
 		if not autoFarm then
 			if gui then gui:Destroy() gui = nil end
-			if renderConn then renderConn:Disconnect() renderConn = nil end
-			if originalPosition and LocalPlayer.Character and LocalPlayer.Character.PrimaryPart then
-				LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(originalPosition))
+			Character.HumanoidRootPart.Anchored = false
+			if originalPosition then
+				Character:SetPrimaryPartCFrame(CFrame.new(originalPosition))
 				originalPosition = nil
 			end
 			return
 		end
 
-		local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-		Character:WaitForChild("HumanoidRootPart")
 		originalPosition = Character.PrimaryPart.Position
-
-		local function blockPosition()
-			if (Character.PrimaryPart.Position - blockedPosition).magnitude < 5 then
-				Character:SetPrimaryPartCFrame(CFrame.new(originalPosition + Vector3.new(0,5,0)))
-			end
-		end
+		Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition)
+		Character.HumanoidRootPart.Anchored = true
 
 		gui = Instance.new("ScreenGui")
 		gui.Name = "AutoFarmGui"
@@ -486,57 +484,78 @@ FPESTab:Toggle({
 		nameLabel.Parent = nameFrame
 
 		local arrowFrame = Instance.new("Frame")
-		arrowFrame.Size = UDim2.new(0, 100, 0, 50)
-		arrowFrame.Position = UDim2.new(0.5, -50, 0, 100)
+		arrowFrame.Size = UDim2.new(0, 100, 0, 40)
+		arrowFrame.Position = UDim2.new(0.5, -50, 0, 110)
 		arrowFrame.BackgroundTransparency = 1
 		arrowFrame.Parent = gui
 
-		leftArrow = Instance.new("TextLabel")
-		leftArrow.Size = UDim2.new(0, 40, 0, 40)
-		leftArrow.Position = UDim2.new(0,0,0,0)
-		leftArrow.BackgroundColor3 = Color3.fromRGB(70,130,250)
-		leftArrow.BackgroundTransparency = 0.1
-		leftArrow.Text = "<"
-		leftArrow.TextColor3 = Color3.fromRGB(255,255,255)
-		leftArrow.Font = Enum.Font.GothamBold
-		leftArrow.TextSize = 28
-		leftArrow.AnchorPoint = Vector2.new(0.5,0.5)
-		leftArrow.Parent = arrowFrame
-		local leftCorner = Instance.new("UICorner", leftArrow)
+		leftButton = Instance.new("TextButton")
+		leftButton.Size = UDim2.new(0, 40, 0, 40)
+		leftButton.Position = UDim2.new(0,0,0,0)
+		leftButton.BackgroundColor3 = Color3.fromRGB(70,130,250)
+		leftButton.Text = "<"
+		leftButton.TextColor3 = Color3.fromRGB(255,255,255)
+		leftButton.Font = Enum.Font.GothamBold
+		leftButton.TextSize = 28
+		leftButton.AnchorPoint = Vector2.new(0.5,0.5)
+		leftButton.Parent = arrowFrame
+		local leftCorner = Instance.new("UICorner", leftButton)
 		leftCorner.CornerRadius = UDim.new(0,12)
 
-		rightArrow = Instance.new("TextLabel")
-		rightArrow.Size = UDim2.new(0, 40, 0, 40)
-		rightArrow.Position = UDim2.new(1,0,0,0)
-		rightArrow.BackgroundColor3 = Color3.fromRGB(70,130,250)
-		rightArrow.BackgroundTransparency = 0.1
-		rightArrow.Text = ">"
-		rightArrow.TextColor3 = Color3.fromRGB(255,255,255)
-		rightArrow.Font = Enum.Font.GothamBold
-		rightArrow.TextSize = 28
-		rightArrow.AnchorPoint = Vector2.new(0.5,0.5)
-		rightArrow.Parent = arrowFrame
-		local rightCorner = Instance.new("UICorner", rightArrow)
+		rightButton = Instance.new("TextButton")
+		rightButton.Size = UDim2.new(0, 40, 0, 40)
+		rightButton.Position = UDim2.new(1,0,0,0)
+		rightButton.BackgroundColor3 = Color3.fromRGB(70,130,250)
+		rightButton.Text = ">"
+		rightButton.TextColor3 = Color3.fromRGB(255,255,255)
+		rightButton.Font = Enum.Font.GothamBold
+		rightButton.TextSize = 28
+		rightButton.AnchorPoint = Vector2.new(0.5,0.5)
+		rightButton.Parent = arrowFrame
+		local rightCorner = Instance.new("UICorner", rightButton)
 		rightCorner.CornerRadius = UDim.new(0,12)
 
-		renderConn = RunService.RenderStepped:Connect(function()
-			if autoFarm and Character and Character.PrimaryPart then
+		local function updatePlayerList()
+			playerList = {}
+			for _, p in pairs(Players:GetPlayers()) do
+				if p ~= LocalPlayer then
+					table.insert(playerList, p)
+				end
+			end
+			if #playerList == 0 then
+				nameLabel.Text = "Nenhum player"
+			else
+				selectedIndex = math.clamp(selectedIndex, 1, #playerList)
+				nameLabel.Text = playerList[selectedIndex].Name
+			end
+		end
+
+		leftButton.MouseButton1Click:Connect(function()
+			if #playerList > 0 then
+				selectedIndex = selectedIndex - 1
+				if selectedIndex < 1 then selectedIndex = #playerList end
+				nameLabel.Text = playerList[selectedIndex].Name
+				TweenService:Create(leftButton,TweenInfo.new(0.1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{BackgroundTransparency=0}):Play()
+				wait(0.05)
+				TweenService:Create(leftButton,TweenInfo.new(0.1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{BackgroundTransparency=0.1}):Play()
+			end
+		end)
+
+		rightButton.MouseButton1Click:Connect(function()
+			if #playerList > 0 then
+				selectedIndex = selectedIndex + 1
+				if selectedIndex > #playerList then selectedIndex = 1 end
+				nameLabel.Text = playerList[selectedIndex].Name
+				TweenService:Create(rightButton,TweenInfo.new(0.1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{BackgroundTransparency=0}):Play()
+				wait(0.05)
+				TweenService:Create(rightButton,TweenInfo.new(0.1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{BackgroundTransparency=0.1}):Play()
+			end
+		end)
+
+		RunService.RenderStepped:Connect(function()
+			if autoFarm then
 				blockPosition()
-				local target
-				for _, player in pairs(Players:GetPlayers()) do
-					if player ~= LocalPlayer and player.Character and player.Character.PrimaryPart then
-						target = player
-						break
-					end
-				end
-				if target then
-					nameLabel.Text = target.Name
-					local screenPos, onScreen = Camera:WorldToViewportPoint(target.Character.PrimaryPart.Position)
-					if onScreen then
-						TweenService:Create(leftArrow,TweenInfo.new(0.1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Position=UDim2.new(0, screenPos.X-60,0, screenPos.Y-20)}):Play()
-						TweenService:Create(rightArrow,TweenInfo.new(0.1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Position=UDim2.new(0, screenPos.X+60,0, screenPos.Y-20)}):Play()
-					end
-				end
+				updatePlayerList()
 			end
 		end)
 	end
