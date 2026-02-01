@@ -305,18 +305,23 @@ FPESTab:Toggle({
 })
 
 FPESTab:Toggle({
-	Title="Fake Miss Circle Rage Mode",
+	Title="Fake Miss Circle Enrage Mode",
 	Value=false,
 	Callback=function(v)
 		if not CallbackState then CallbackState = {} end
 		local state = CallbackState
 
 		local Players = game:GetService("Players")
+		local RunService = game:GetService("RunService")
 		local lp = Players.LocalPlayer
 
 		if state.vfx then state.vfx:Destroy() state.vfx = nil end
 		if state.sound1 then state.sound1:Stop() state.sound1:Destroy() state.sound1 = nil end
 		if state.sound2 then state.sound2:Stop() state.sound2:Destroy() state.sound2 = nil end
+		if state.stepA then state.stepA:Stop() state.stepA:Destroy() state.stepA = nil end
+		if state.stepB then state.stepB:Stop() state.stepB:Destroy() state.stepB = nil end
+		if state.conn then state.conn:Disconnect() state.conn = nil end
+		if state.playing then state.playing = false end
 
 		if not v then return end
 
@@ -341,6 +346,45 @@ FPESTab:Toggle({
 		task.delay(2, function()
 			if state.sound2 then
 				state.sound2:Play()
+			end
+		end)
+
+		local char = lp.Character or lp.CharacterAdded:Wait()
+		local hum = char:WaitForChild("Humanoid")
+
+		local stepA = Instance.new("Sound")
+		stepA.SoundId = "rbxassetid://9116487746"
+		stepA.Volume = 1
+		stepA.Parent = char
+		state.stepA = stepA
+
+		local stepB = Instance.new("Sound")
+		stepB.SoundId = "rbxassetid://9116488438"
+		stepB.Volume = 1
+		stepB.Parent = char
+		state.stepB = stepB
+
+		state.playing = false
+
+		state.conn = RunService.Heartbeat:Connect(function()
+			if hum.MoveDirection.Magnitude > 0 then
+				if not state.playing then
+					state.playing = true
+					task.spawn(function()
+						while state.playing and hum.MoveDirection.Magnitude > 0 do
+							stepA:Play()
+							stepA.Ended:Wait()
+							if not state.playing then break end
+							stepB:Play()
+							stepB.Ended:Wait()
+						end
+						state.playing = false
+					end)
+				end
+			else
+				state.playing = false
+				stepA:Stop()
+				stepB:Stop()
 			end
 		end)
 
