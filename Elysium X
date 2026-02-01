@@ -437,10 +437,12 @@ FPESTab:Toggle({
 		local autoFarm = v
 		local blockedPosition = Vector3.new(-229.41, 133.66, 213.57)
 		local originalPosition = nil
-		local gui = nil
+		local gui, nameLabel, leftArrow, rightArrow = nil, nil, nil, nil
+		local renderConn
 
 		if not autoFarm then
 			if gui then gui:Destroy() gui = nil end
+			if renderConn then renderConn:Disconnect() renderConn = nil end
 			if originalPosition and LocalPlayer.Character and LocalPlayer.Character.PrimaryPart then
 				LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(originalPosition))
 				originalPosition = nil
@@ -473,7 +475,7 @@ FPESTab:Toggle({
 		local nameCorner = Instance.new("UICorner", nameFrame)
 		nameCorner.CornerRadius = UDim.new(0,15)
 
-		local nameLabel = Instance.new("TextLabel")
+		nameLabel = Instance.new("TextLabel")
 		nameLabel.Size = UDim2.new(1, -20, 1, 0)
 		nameLabel.Position = UDim2.new(0,10,0,0)
 		nameLabel.BackgroundTransparency = 1
@@ -489,7 +491,7 @@ FPESTab:Toggle({
 		arrowFrame.BackgroundTransparency = 1
 		arrowFrame.Parent = gui
 
-		local leftArrow = Instance.new("TextLabel")
+		leftArrow = Instance.new("TextLabel")
 		leftArrow.Size = UDim2.new(0, 40, 0, 40)
 		leftArrow.Position = UDim2.new(0,0,0,0)
 		leftArrow.BackgroundColor3 = Color3.fromRGB(70,130,250)
@@ -503,7 +505,7 @@ FPESTab:Toggle({
 		local leftCorner = Instance.new("UICorner", leftArrow)
 		leftCorner.CornerRadius = UDim.new(0,12)
 
-		local rightArrow = Instance.new("TextLabel")
+		rightArrow = Instance.new("TextLabel")
 		rightArrow.Size = UDim2.new(0, 40, 0, 40)
 		rightArrow.Position = UDim2.new(1,0,0,0)
 		rightArrow.BackgroundColor3 = Color3.fromRGB(70,130,250)
@@ -517,17 +519,22 @@ FPESTab:Toggle({
 		local rightCorner = Instance.new("UICorner", rightArrow)
 		rightCorner.CornerRadius = UDim.new(0,12)
 
-		RunService.RenderStepped:Connect(function()
-			if autoFarm then
+		renderConn = RunService.RenderStepped:Connect(function()
+			if autoFarm and Character and Character.PrimaryPart then
 				blockPosition()
+				local target
 				for _, player in pairs(Players:GetPlayers()) do
 					if player ~= LocalPlayer and player.Character and player.Character.PrimaryPart then
-						nameLabel.Text = player.Name
-						local screenPos, onScreen = Camera:WorldToViewportPoint(player.Character.PrimaryPart.Position)
-						if onScreen then
-							TweenService:Create(leftArrow,TweenInfo.new(0.1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Position=UDim2.new(0, screenPos.X-60,0, screenPos.Y-20)}):Play()
-							TweenService:Create(rightArrow,TweenInfo.new(0.1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Position=UDim2.new(0, screenPos.X+60,0, screenPos.Y-20)}):Play()
-						end
+						target = player
+						break
+					end
+				end
+				if target then
+					nameLabel.Text = target.Name
+					local screenPos, onScreen = Camera:WorldToViewportPoint(target.Character.PrimaryPart.Position)
+					if onScreen then
+						TweenService:Create(leftArrow,TweenInfo.new(0.1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Position=UDim2.new(0, screenPos.X-60,0, screenPos.Y-20)}):Play()
+						TweenService:Create(rightArrow,TweenInfo.new(0.1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Position=UDim2.new(0, screenPos.X+60,0, screenPos.Y-20)}):Play()
 					end
 				end
 			end
