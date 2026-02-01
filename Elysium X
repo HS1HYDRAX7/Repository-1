@@ -464,7 +464,7 @@ FPESTab:Toggle({
 })
 
 FPESTab:Toggle({
-	Title = "Night vision",
+	Title = "Night Vision",
 	Value = false,
 	Callback = function(v)
 		nvgEnabled = v
