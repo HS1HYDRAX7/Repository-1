@@ -672,33 +672,115 @@ OthersTab:Button({
     end
 })
 
+
 OthersTab:Toggle({
-	Title = "Third Person",
-	Value = false,
-	Callback = function(v)
+Title="Better Camera",
+Value=false,
+Callback=function(v)
+	if v then
+		if getgenv().HeadCamEnabled then return end
+		getgenv().HeadCamEnabled = true
+
 		local Players = game:GetService("Players")
+		local RunService = game:GetService("RunService")
+
 		local player = Players.LocalPlayer
+		local camera = workspace.CurrentCamera
 
-		_G.__ThirdPersonEnabled = v
+		local character = player.Character or player.CharacterAdded:Wait()
+		local humanoid = character:WaitForChild("Humanoid")
+		local head = character:WaitForChild("Head")
+		local hrp = character:WaitForChild("HumanoidRootPart")
 
-		local function apply()
-			if _G.__ThirdPersonEnabled then
-				player.CameraMaxZoomDistance = 25
-				player.CameraMode = Enum.CameraMode.Classic
-			else
-				player.CameraMaxZoomDistance = 10
+		local shakePower = 0
+		local targetFOV = 70
+		local fovSpeed = 10
+
+		local baseOffsetY = -1.5
+		local baseOffsetZ = -1
+		local bobAmount = 0.2
+		local bobSpeed = 2
+
+		local headAttachments = {"HatAttachment","HairAttachment","FaceFrontAttachment","FaceCenterAttachment"}
+
+		player.CameraMode = Enum.CameraMode.Classic
+
+		getgenv().HeadCamConns = {}
+
+		getgenv().HeadCamConns.render1 = RunService.RenderStepped:Connect(function()
+			if not getgenv().HeadCamEnabled then return end
+			local isFirstPerson = (head.Position - camera.CFrame.Position).Magnitude < 2
+			for _, part in ipairs(character:GetDescendants()) do
+				if part:IsA("BasePart") then
+					if part.Name == "Head" then
+						part.LocalTransparencyModifier = isFirstPerson and 1 or 0
+					elseif part.Name == "Handle" then
+						local attachment = part:FindFirstChildOfClass("Attachment")
+						if attachment and table.find(headAttachments, attachment.Name) then
+							part.LocalTransparencyModifier = isFirstPerson and 1 or 0
+						else
+							part.LocalTransparencyModifier = 0
+						end
+					elseif part.Name ~= "HumanoidRootPart" then
+						part.LocalTransparencyModifier = 0
+					end
+				end
+			end
+		end)
+
+		getgenv().HeadCamConns.health = humanoid.HealthChanged:Connect(function(h)
+			if h < humanoid.MaxHealth then
+				shakePower += 0.6
+			end
+		end)
+
+		getgenv().HeadCamConns.state = humanoid.StateChanged:Connect(function(_, state)
+			if state == Enum.HumanoidStateType.Landed then
+				shakePower += 0.8
+			end
+		end)
+
+		getgenv().HeadCamConns.explosion = workspace.ChildAdded:Connect(function(child)
+			if child:IsA("Explosion") and (child.Position - camera.CFrame.Position).Magnitude < 40 then
+				shakePower += 1.2
+			end
+		end)
+
+		getgenv().HeadCamConns.render2 = RunService.RenderStepped:Connect(function(dt)
+			if not getgenv().HeadCamEnabled then return end
+			local t = tick()
+			local bob = Vector3.new(
+				math.sin(t * bobSpeed) * bobAmount,
+				math.abs(math.cos(t * bobSpeed)) * bobAmount * 0.6,
+				0
+			)
+			local shake = Vector3.new(
+				math.random(-100,100)/100 * shakePower,
+				math.random(-100,100)/100 * shakePower,
+				math.random(-100,100)/100 * shakePower
+			)
+			shakePower = math.max(shakePower - 5 * dt, 0)
+			local headRelativePos = hrp.CFrame:ToObjectSpace(head.CFrame).Position
+			humanoid.CameraOffset = headRelativePos + Vector3.new(0, baseOffsetY, baseOffsetZ) + bob + shake
+			camera.FieldOfView += (targetFOV - camera.FieldOfView) * fovSpeed * dt
+		end)
+	else
+		getgenv().HeadCamEnabled = false
+		if getgenv().HeadCamConns then
+			for _, c in pairs(getgenv().HeadCamConns) do
+				pcall(function() c:Disconnect() end)
+			end
+			getgenv().HeadCamConns = nil
+		end
+		if game:GetService("Players").LocalPlayer.Character then
+			local hum = game:GetService("Players").LocalPlayer.Character:FindFirstChild("Humanoid")
+			if hum then
+				hum.CameraOffset = Vector3.zero
 			end
 		end
-
-		if not _G.__ThirdPersonConn then
-			_G.__ThirdPersonConn = player.CharacterAdded:Connect(function()
-				task.wait()
-				apply()
-			end)
-		end
-
-		apply()
+		workspace.CurrentCamera.FieldOfView = 70
 	end
+end
 })
 
 OthersTab:Toggle({
