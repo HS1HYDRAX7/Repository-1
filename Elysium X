@@ -338,7 +338,7 @@ FPESTab:Toggle({
 		sound2.Volume = 1
 		state.sound2 = sound2
 
-		task.delay(1.4, function()
+		task.delay(2, function()
 			if state.sound2 then
 				state.sound2:Play()
 			end
