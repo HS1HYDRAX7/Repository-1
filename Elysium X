@@ -464,6 +464,137 @@ FPESTab:Toggle({
 })
 
 FPESTab:Toggle({
+	Title="Auto Play",
+	Value=false,
+	Callback=function(v)
+		if not _G.__AUTO_PLAY then
+			_G.__AUTO_PLAY = {conn=nil}
+		end
+
+		if _G.__AUTO_PLAY.conn then
+			_G.__AUTO_PLAY.conn:Disconnect()
+			_G.__AUTO_PLAY.conn = nil
+		end
+
+		if not v then return end
+
+		local Players = game:GetService("Players")
+		local PathfindingService = game:GetService("PathfindingService")
+		local VirtualInputManager = game:GetService("VirtualInputManager")
+		local RunService = game:GetService("RunService")
+
+		local LocalPlayer = Players.LocalPlayer
+
+		local teachersFolder = workspace:WaitForChild("Teachers")
+		local alicesFolder = workspace:WaitForChild("Alices")
+		local studentsFolder = workspace:WaitForChild("Students")
+
+		local function isInFolder(folder, model)
+			for _,m in ipairs(folder:GetChildren()) do
+				if m == model then
+					return true
+				end
+			end
+			return false
+		end
+
+		local function getRoot(model)
+			return model and model:FindFirstChild("HumanoidRootPart")
+		end
+
+		local function getHumanoid(model)
+			return model and model:FindFirstChildOfClass("Humanoid")
+		end
+
+		local function getClosestTarget(fromModel, folder)
+			local root = getRoot(fromModel)
+			if not root then return nil, math.huge end
+			local closest, dist = nil, math.huge
+			for _,m in ipairs(folder:GetChildren()) do
+				if m:IsA("Model") and m ~= fromModel then
+					local r = getRoot(m)
+					local h = getHumanoid(m)
+					if r and h and h.Health > 0 then
+						local d = (r.Position - root.Position).Magnitude
+						if d < dist then
+							dist = d
+							closest = m
+						end
+					end
+				end
+			end
+			return closest, dist
+		end
+
+		local function moveTo(model, position)
+			local humanoid = getHumanoid(model)
+			local root = getRoot(model)
+			if not humanoid or not root then return end
+			local path = PathfindingService:CreatePath()
+			path:ComputeAsync(root.Position, position)
+			if path.Status ~= Enum.PathStatus.Success then return end
+			for _,wp in ipairs(path:GetWaypoints()) do
+				humanoid:MoveTo(wp.Position)
+				humanoid.MoveToFinished:Wait()
+			end
+		end
+
+		local function attack()
+			VirtualInputManager:SendMouseButtonEvent(0,0,0,true,game,0)
+			task.wait(0.05)
+			VirtualInputManager:SendMouseButtonEvent(0,0,0,false,game,0)
+		end
+
+		local function block()
+			VirtualInputManager:SendKeyEvent(true,Enum.KeyCode.Q,false,game)
+			task.wait(0.1)
+			VirtualInputManager:SendKeyEvent(false,Enum.KeyCode.Q,false,game)
+		end
+
+		local function interact()
+			VirtualInputManager:SendKeyEvent(true,Enum.KeyCode.E,false,game)
+			task.wait(0.05)
+			VirtualInputManager:SendKeyEvent(false,Enum.KeyCode.E,false,game)
+		end
+
+		_G.__AUTO_PLAY.conn = RunService.Heartbeat:Connect(function()
+			local char = LocalPlayer.Character
+			if not char then return end
+
+			if isInFolder(teachersFolder,char) or isInFolder(alicesFolder,char) then
+				local target = getClosestTarget(char, studentsFolder)
+				if target then
+					local root = getRoot(target)
+					if root then
+						moveTo(char, root.Position)
+						attack()
+					end
+				end
+			elseif isInFolder(studentsFolder,char) then
+				local t1,d1 = getClosestTarget(char, teachersFolder)
+				local t2,d2 = getClosestTarget(char, alicesFolder)
+				local danger = nil
+				if t1 and t2 then
+					danger = d1 < d2 and t1 or t2
+				else
+					danger = t1 or t2
+				end
+				if danger then
+					local myRoot = getRoot(char)
+					local dRoot = getRoot(danger)
+					if myRoot and dRoot then
+						local dir = (myRoot.Position - dRoot.Position).Unit * 40
+						moveTo(char, myRoot.Position + dir)
+						block()
+						interact()
+					end
+				end
+			end
+		end)
+	end
+})
+
+FPESTab:Toggle({
 	Title="ESP Teachers",
 	Value=false,
 	Callback=function(v)
