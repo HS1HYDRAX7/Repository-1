@@ -340,7 +340,7 @@ FPESTab:Toggle({
 
 		local sound2 = Instance.new("Sound", workspace)
 		sound2.SoundId = "rbxassetid://17548873081"
-		sound2.Volume = 1
+		sound2.Volume = 0.6
 		state.sound2 = sound2
 
 		task.delay(2, function()
@@ -354,13 +354,13 @@ FPESTab:Toggle({
 
 		local stepA = Instance.new("Sound")
 		stepA.SoundId = "rbxassetid://9116487746"
-		stepA.Volume = 1
+		stepA.Volume = 1.5
 		stepA.Parent = char
 		state.stepA = stepA
 
 		local stepB = Instance.new("Sound")
 		stepB.SoundId = "rbxassetid://9116488438"
-		stepB.Volume = 1
+		stepB.Volume = 1.5
 		stepB.Parent = char
 		state.stepB = stepB
 
