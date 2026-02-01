@@ -371,16 +371,18 @@ FPESTab:Toggle({
 				if not state.playing then
 					state.playing = true
 					task.spawn(function()
+						local toggle = false
 						while state.playing and hum.MoveDirection.Magnitude > 0 do
-							local interval = math.clamp(0.6 - (speed / 50), 0.12, 0.6)
+							local interval = math.clamp(0.35 - (speed / 80), 0.06, 0.35)
 
-							stepA:Play()
-							task.wait(stepA.TimeLength > 0 and stepA.TimeLength or interval)
+							toggle = not toggle
+							if toggle then
+								stepA:Play()
+							else
+								stepB:Play()
+							end
 
-							if not state.playing then break end
-
-							stepB:Play()
-							task.wait(stepB.TimeLength > 0 and stepB.TimeLength or interval)
+							task.wait(interval)
 						end
 						state.playing = false
 					end)
@@ -398,39 +400,6 @@ FPESTab:Toggle({
 			Duration=2,
 			Icon="rbxassetid://17224686449"
 		})
-	end
-})
-
-FPESTab:Toggle({
-	Title="Music",
-	Value=true,
-	Callback=function(v)
-		if not CallbackState then CallbackState = {} end
-		local state = CallbackState
-		state.music = v
-
-		if state.sound1 then
-			if v then state.sound1:Play() else state.sound1:Stop() end
-		end
-		if state.sound2 then
-			if v then state.sound2:Play() else state.sound2:Stop() end
-		end
-	end
-})
-
-FPESTab:Toggle({
-	Title="Footsteps",
-	Value=true,
-	Callback=function(v)
-		if not CallbackState then CallbackState = {} end
-		local state = CallbackState
-		state.footsteps = v
-
-		if not v then
-			if state.stepA then state.stepA:Stop() end
-			if state.stepB then state.stepB:Stop() end
-			state.playing = false
-		end
 	end
 })
 
