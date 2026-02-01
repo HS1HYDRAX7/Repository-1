@@ -321,7 +321,7 @@ FPESTab:Toggle({
 		if state.stepA then state.stepA:Stop() state.stepA:Destroy() state.stepA = nil end
 		if state.stepB then state.stepB:Stop() state.stepB:Destroy() state.stepB = nil end
 		if state.conn then state.conn:Disconnect() state.conn = nil end
-		if state.playing then state.playing = false end
+		state.playing = false
 
 		if not v then return end
 
@@ -364,19 +364,23 @@ FPESTab:Toggle({
 		stepB.Parent = char
 		state.stepB = stepB
 
-		state.playing = false
-
 		state.conn = RunService.Heartbeat:Connect(function()
-			if hum.MoveDirection.Magnitude > 0 then
+			local speed = hum.MoveDirection.Magnitude * hum.WalkSpeed
+
+			if speed > 0 then
 				if not state.playing then
 					state.playing = true
 					task.spawn(function()
 						while state.playing and hum.MoveDirection.Magnitude > 0 do
+							local interval = math.clamp(0.6 - (speed / 50), 0.12, 0.6)
+
 							stepA:Play()
-							stepA.Ended:Wait()
+							task.wait(stepA.TimeLength > 0 and stepA.TimeLength or interval)
+
 							if not state.playing then break end
+
 							stepB:Play()
-							stepB.Ended:Wait()
+							task.wait(stepB.TimeLength > 0 and stepB.TimeLength or interval)
 						end
 						state.playing = false
 					end)
