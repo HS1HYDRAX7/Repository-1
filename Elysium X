@@ -464,6 +464,87 @@ FPESTab:Toggle({
 })
 
 FPESTab:Toggle({
+	Title = "Night vision",
+	Value = false,
+	Callback = function(v)
+		nvgEnabled = v
+
+		if nvgConn then
+			nvgConn:Disconnect()
+			nvgConn = nil
+		end
+
+		if noiseConn then
+			noiseConn:Disconnect()
+			noiseConn = nil
+		end
+
+		if not nvgCC then
+			nvgCC = Instance.new("ColorCorrectionEffect")
+		end
+		if not nvgBloom then
+			nvgBloom = Instance.new("BloomEffect")
+		end
+		if not nvgDOF then
+			nvgDOF = Instance.new("DepthOfFieldEffect")
+		end
+
+		if not noiseGui then
+			noiseGui = Instance.new("ScreenGui")
+			noiseGui.IgnoreGuiInset = true
+			noiseGui.ResetOnSpawn = false
+
+			noiseImage = Instance.new("ImageLabel")
+			noiseImage.Size = UDim2.fromScale(1, 1)
+			noiseImage.Position = UDim2.fromScale(0, 0)
+			noiseImage.BackgroundTransparency = 1
+			noiseImage.Image = "rbxassetid://13911895447"
+			noiseImage.ImageTransparency = 0.85
+			noiseImage.Parent = noiseGui
+		end
+
+		if v then
+			nvgCC.Brightness = 0.15
+			nvgCC.Contrast = 1.6
+			nvgCC.Saturation = -1
+			nvgCC.TintColor = Color3.fromRGB(235, 255, 235)
+			nvgCC.Parent = Lighting
+
+			nvgBloom.Intensity = 1.2
+			nvgBloom.Size = 24
+			nvgBloom.Threshold = 0.2
+			nvgBloom.Parent = Lighting
+
+			nvgDOF.FarIntensity = 0.1
+			nvgDOF.NearIntensity = 0
+			nvgDOF.FocusDistance = 5
+			nvgDOF.Parent = Lighting
+
+			noiseGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+
+			nvgConn = RunService.Heartbeat:Connect(function()
+				if not nvgEnabled then return end
+				Lighting.Ambient = Color3.fromRGB(180, 180, 180)
+				Lighting.OutdoorAmbient = Color3.fromRGB(180, 180, 180)
+			end)
+
+			noiseConn = RunService.RenderStepped:Connect(function()
+				if not nvgEnabled then return end
+				noiseImage.Position = UDim2.fromScale(math.random(), math.random())
+				noiseImage.Rotation = math.random(-2, 2)
+			end)
+		else
+			if nvgCC then nvgCC.Parent = nil end
+			if nvgBloom then nvgBloom.Parent = nil end
+			if nvgDOF then nvgDOF.Parent = nil end
+			if noiseGui then noiseGui.Parent = nil end
+			Lighting.Ambient = Color3.fromRGB(0, 0, 0)
+			Lighting.OutdoorAmbient = Color3.fromRGB(0, 0, 0)
+		end
+	end
+})
+
+FPESTab:Toggle({
 	Title="ESP Teachers",
 	Value=false,
 	Callback=function(v)
