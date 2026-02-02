@@ -417,9 +417,7 @@ ExtensionsTab:Button({
 			Icon="rbxassetid://12765596850",
 		})
 		local player = game.Players.LocalPlayer
-		local success, message = pcall(function()
-			game:GetService("MarketplaceService"):PromptGamePassPurchase(player, 1696760402)
-		end)
+		game:GetService("MarketplaceService"):PromptGamePassPurchase(player, 1696760402)
 	end
 })
 
