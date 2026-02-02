@@ -411,32 +411,55 @@ ExtensionsTab:Toggle({
     Title = "Hitbox Desync",
     Value = false,
     Callback = function(v)
+        local plr = game.Players.LocalPlayer
+        local char = plr.Character or plr.CharacterAdded:Wait()
+        local hum = char:WaitForChild("Humanoid", 9)
+        local hrp = char:WaitForChild("HumanoidRootPart", 9)
+        if not hum or not hrp then return end
+        
         if v then
             if getgenv().DesyncConn then return end
             
-            local plr = game.Players.LocalPlayer
-            local char = plr.Character or plr.CharacterAdded:Wait()
-            local hrp = char:WaitForChild("HumanoidRootPart", 9)
-            if not hrp then return end
-            
             getgenv().OrigCFrame = hrp.CFrame
+            getgenv().OrigHealth = hum.Health
+            getgenv().OrigMaxHealth = hum.MaxHealth
+            
+            hum.MaxHealth = math.huge
+            hum.Health = math.huge
             
             getgenv().DesyncConn = game:GetService("RunService").Heartbeat:Connect(function()
                 if not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") then return end
-                hrp.CFrame = CFrame.new(0, -9999, 0)
+                
+                local offset = CFrame.new(0, -3.5, -8) * CFrame.Angles(0, math.rad((tick() * 120) % 360), 0)
+                hrp.CFrame = getgenv().OrigCFrame * offset
+                
+                if hum.Health < math.huge then
+                    hum.Health = math.huge
+                end
+            end)
+            
+            hum:GetPropertyChangedSignal("Health"):Connect(function()
+                if hum.Health < math.huge then
+                    hum.Health = math.huge
+                end
             end)
         else
             if getgenv().DesyncConn then
                 getgenv().DesyncConn:Disconnect()
                 getgenv().DesyncConn = nil
                 
-                local plr = game.Players.LocalPlayer
-                local char = plr.Character
                 if char and char:FindFirstChild("HumanoidRootPart") and getgenv().OrigCFrame then
                     char.HumanoidRootPart.CFrame = getgenv().OrigCFrame
                 end
                 
+                if hum and getgenv().OrigHealth then
+                    hum.MaxHealth = getgenv().OrigMaxHealth
+                    hum.Health = getgenv().OrigHealth
+                end
+                
                 getgenv().OrigCFrame = nil
+                getgenv().OrigHealth = nil
+                getgenv().OrigMaxHealth = nil
             end
         end
     end
