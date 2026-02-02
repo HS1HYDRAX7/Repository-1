@@ -32,6 +32,7 @@ Window:Tag({
 
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
 local FPESTab = Window:Tab({ Title = "FPE Survival", Icon = "book" })
+local ExtensionsTab = Window:Tab({ Title = "Extensions", Icon = "external-link" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "link" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -397,6 +398,15 @@ FPESTab:Toggle({
 		end)
 	end
 })
+
+ExtensionsTab:Paragraph({
+    Title = "Coming soon",
+    Desc = "This will probably have some potentially interesting extensions.",
+    Thumbnail = "rbxassetid://71752817234921",
+    ThumbnailSize = 110,  
+    Locked = true,         
+})
+
 
 OthersTab:Button({
 	Title="Infinite Yield",
