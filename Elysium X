@@ -400,11 +400,46 @@ FPESTab:Toggle({
 })
 
 ExtensionsTab:Paragraph({
-    Title = "Coming Soon",
+    Title = "More Coming Soon",
     Desc = "This will probably have some potentially interesting extensions.",
     Thumbnail = "rbxassetid://75394740103564",
     ThumbnailSize = 110,  
     Locked = true,         
+})
+
+ExtensionsTab:Toggle({
+    Title = "Hitbox Desync",
+    Value = false,
+    Callback = function(v)
+        if v then
+            if getgenv().DesyncConn then return end
+            
+            local plr = game.Players.LocalPlayer
+            local char = plr.Character or plr.CharacterAdded:Wait()
+            local hrp = char:WaitForChild("HumanoidRootPart", 9)
+            if not hrp then return end
+            
+            getgenv().OrigCFrame = hrp.CFrame
+            
+            getgenv().DesyncConn = game:GetService("RunService").Heartbeat:Connect(function()
+                if not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") then return end
+                hrp.CFrame = CFrame.new(0, -9999, 0)
+            end)
+        else
+            if getgenv().DesyncConn then
+                getgenv().DesyncConn:Disconnect()
+                getgenv().DesyncConn = nil
+                
+                local plr = game.Players.LocalPlayer
+                local char = plr.Character
+                if char and char:FindFirstChild("HumanoidRootPart") and getgenv().OrigCFrame then
+                    char.HumanoidRootPart.CFrame = getgenv().OrigCFrame
+                end
+                
+                getgenv().OrigCFrame = nil
+            end
+        end
+    end
 })
 
 OthersTab:Button({
