@@ -402,7 +402,7 @@ FPESTab:Toggle({
 ExtensionsTab:Paragraph({
     Title = "Coming Soon",
     Desc = "This will probably have some potentially interesting extensions.",
-    Thumbnail = "rbxassetid://1590337188",
+    Thumbnail = "rbxassetid://75394740103564",
     ThumbnailSize = 110,  
     Locked = true,         
 })
