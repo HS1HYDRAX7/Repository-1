@@ -400,13 +400,105 @@ FPESTab:Toggle({
 })
 
 ExtensionsTab:Paragraph({
-    Title = "Coming soon",
+    Title = "More Coming Soon",
     Desc = "This will probably have some potentially interesting extensions.",
     Thumbnail = "rbxassetid://71752817234921",
     ThumbnailSize = 110,  
     Locked = true,         
 })
 
+OthersTab:Toggle({
+    Title = "Shaders",
+    Value = false,
+    Callback = function(v)
+        local Lighting = game:GetService("Lighting")
+        local TweenService = game:GetService("TweenService")
+        if v then
+            if not getgenv().UltraShader then
+                getgenv().UltraShaderBackup = {
+                    Sky = Lighting:FindFirstChildWhichIsA("Sky"),
+                    GlobalShadows = Lighting.GlobalShadows,
+                    Brightness = Lighting.Brightness,
+                    Ambient = Lighting.Ambient,
+                    OutdoorAmbient = Lighting.OutdoorAmbient
+                }
+
+                local hour = Lighting.ClockTime
+                local newSky = Instance.new("Sky")
+                newSky.SkyboxId = hour >= 6 and hour < 18 and "rbxassetid://9108837375" or "rbxassetid://6132454068"
+                newSky.Parent = Lighting
+
+                Lighting.GlobalShadows = true
+                Lighting.Brightness = 2
+                Lighting.Ambient = Color3.fromRGB(160, 160, 160)
+                Lighting.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
+
+                local reflectionPart = Instance.new("Part")
+                reflectionPart.Size = Vector3.new(2048, 1, 2048)
+                reflectionPart.Anchored = true
+                reflectionPart.CanCollide = false
+                reflectionPart.Position = Vector3.new(0, 0, 0)
+                reflectionPart.Material = Enum.Material.SmoothPlastic
+                reflectionPart.Reflectance = 0.35
+                reflectionPart.Color = Color3.fromRGB(220, 220, 220)
+                reflectionPart.Parent = workspace
+
+                local light = Instance.new("PointLight")
+                light.Brightness = 2
+                light.Range = 300
+                light.Color = Color3.fromRGB(255, 255, 255)
+                light.Shadows = true
+                light.Parent = reflectionPart
+
+                local reflectTween = TweenInfo.new(6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)
+                local reflectGoal = {Reflectance = 0.2}
+                local tween = TweenService:Create(reflectionPart, reflectTween, reflectGoal)
+                tween:Play()
+
+                local gradient = Instance.new("ColorCorrectionEffect")
+                gradient.Brightness = 0.05
+                gradient.Contrast = 0.05
+                gradient.Saturation = 0.1
+                gradient.TintColor = Color3.fromRGB(255, 230, 220)
+                gradient.Parent = Lighting
+
+                getgenv().UltraShader = {
+                    Sky = newSky,
+                    Reflection = reflectionPart,
+                    Light = light,
+                    Tween = tween,
+                    Gradient = gradient
+                }
+            end
+        else
+            if getgenv().UltraShader then
+                if getgenv().UltraShader.Sky then
+                    getgenv().UltraShader.Sky:Destroy()
+                end
+                if getgenv().UltraShader.Reflection then
+                    getgenv().UltraShader.Tween:Cancel()
+                    getgenv().UltraShader.Reflection:Destroy()
+                end
+                getgenv().UltraShader.Light:Destroy()
+                getgenv().UltraShader.Gradient:Destroy()
+
+                local backup = getgenv().UltraShaderBackup
+                if backup then
+                    Lighting.GlobalShadows = backup.GlobalShadows
+                    Lighting.Brightness = backup.Brightness
+                    Lighting.Ambient = backup.Ambient
+                    Lighting.OutdoorAmbient = backup.OutdoorAmbient
+                    if backup.Sky then
+                        backup.Sky.Parent = Lighting
+                    end
+                end
+
+                getgenv().UltraShader = nil
+                getgenv().UltraShaderBackup = nil
+            end
+        end
+    end
+})
 
 OthersTab:Button({
 	Title="Infinite Yield",
