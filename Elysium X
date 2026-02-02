@@ -407,24 +407,6 @@ ExtensionsTab:Paragraph({
     Locked = true,         
 })
 
-ExtensionsTab:Button({
-    Title = "Click",
-    Callback = (function()
-        local count = 0
-        local paragraph
-        return function()
-            if not paragraph then
-                paragraph = ExtensionsTab:Paragraph({
-                    Title = "Click Counter",
-                    Desc = tostring(count),
-                })
-            end
-            count = count + 1
-            paragraph:Update({ Desc = tostring(count) })
-        end
-    end)()
-})
-
 OthersTab:Button({
 	Title="Infinite Yield",
 	Callback=function()
