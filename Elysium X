@@ -412,7 +412,6 @@ OthersTab:Button({
     end
 })
 
-
 OthersTab:Button({
 	Title="FE Gazer Animation Editor",
 	Callback=function()
@@ -426,7 +425,6 @@ OthersTab:Button({
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/HS1HYDRAX7/Repository-1/refs/heads/main/T.E.S.T"))()
     end
 })
-
 
 OthersTab:Toggle({
 Title="Better Camera",
