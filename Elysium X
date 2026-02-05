@@ -396,15 +396,7 @@ FPESTab:Toggle({
 		scan.TileSize = UDim2.new(1,0,0,6)
 		scan.Parent = gui
 
-		local grain = Instance.new("ImageLabel")
-		grain.Size = UDim2.fromScale(1,1)
-		grain.BackgroundTransparency = 1
-		grain.Image = "rbxassetid://144347973"
-		grain.ImageTransparency = 0.65
-		grain.Parent = gui
-
 		state.conn = RunService.RenderStepped:Connect(function()
-			grain.ImageTransparency = 0.55 + math.random() * 0.25
 			scan.Position = UDim2.fromOffset(0, math.random(-2,2))
 		end)
 
@@ -415,7 +407,7 @@ FPESTab:Toggle({
 		state.sound1 = sound1
 
 		local sound2 = Instance.new("Sound", workspace)
-		sound2.SoundId = "rbxassetid://17548873081"
+		sound2.SoundId = "rbxassetid://116634437254886"
 		sound2.Volume = 1
 		sound2.Looped = true
 		state.sound2 = sound2
