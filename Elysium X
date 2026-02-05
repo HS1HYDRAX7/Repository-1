@@ -354,6 +354,81 @@ FPESTab:Toggle({
 })
 
 FPESTab:Toggle({
+	Title="Fake Blackout",
+	Value=false,
+	Callback=function(v)
+		if not CallbackState then CallbackState = {} end
+		local state = CallbackState
+
+		local Players = game:GetService("Players")
+		local RunService = game:GetService("RunService")
+		local lp = Players.LocalPlayer
+		local camera = workspace.CurrentCamera
+
+		if state.vfx then state.vfx:Destroy() state.vfx = nil end
+		if state.gui then state.gui:Destroy() state.gui = nil end
+		if state.conn then state.conn:Disconnect() state.conn = nil end
+		if state.sound1 then state.sound1:Stop() state.sound1:Destroy() state.sound1 = nil end
+		if state.sound2 then state.sound2:Stop() state.sound2:Destroy() state.sound2 = nil end
+
+		if not v then return end
+
+		local vfx = Instance.new("ColorCorrectionEffect")
+		vfx.TintColor = Color3.fromRGB(255,255,255)
+		vfx.Contrast = 0.25
+		vfx.Saturation = -1
+		vfx.Brightness = 0.03
+		vfx.Parent = camera
+		state.vfx = vfx
+
+		local gui = Instance.new("ScreenGui")
+		gui.IgnoreGuiInset = true
+		gui.ResetOnSpawn = false
+		gui.Parent = lp:WaitForChild("PlayerGui")
+		state.gui = gui
+
+		local scan = Instance.new("ImageLabel")
+		scan.Size = UDim2.fromScale(1,1)
+		scan.BackgroundTransparency = 1
+		scan.Image = "rbxassetid://1316045217"
+		scan.ImageTransparency = 0.88
+		scan.ScaleType = Enum.ScaleType.Tile
+		scan.TileSize = UDim2.new(1,0,0,6)
+		scan.Parent = gui
+
+		local grain = Instance.new("ImageLabel")
+		grain.Size = UDim2.fromScale(1,1)
+		grain.BackgroundTransparency = 1
+		grain.Image = "rbxassetid://144347973"
+		grain.ImageTransparency = 0.65
+		grain.Parent = gui
+
+		state.conn = RunService.RenderStepped:Connect(function()
+			grain.ImageTransparency = 0.55 + math.random() * 0.25
+			scan.Position = UDim2.fromOffset(0, math.random(-2,2))
+		end)
+
+		local sound1 = Instance.new("Sound", workspace)
+		sound1.SoundId = "rbxassetid://133703811807029"
+		sound1.Volume = 1
+		sound1:Play()
+		state.sound1 = sound1
+
+		local sound2 = Instance.new("Sound", workspace)
+		sound2.SoundId = "rbxassetid://17548873081"
+		sound2.Volume = 1
+		sound2.Looped = true
+		state.sound2 = sound2
+
+		task.delay(2, function()
+			if state.sound2 then
+				state.sound2:Play()
+			end
+		end)
+	end
+})
+
+FPESTab:Toggle({
 	Title="Proximity Alert",
 	Value=false,
 	Callback=function(v)
