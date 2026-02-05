@@ -307,12 +307,7 @@ FPESTab:Toggle({
 FPESTab:Toggle({
 	Title="Fake Miss Circle Enrage Mode",
 	Value=false,
-	Callback=function(v, Toggle)
-		if _G.FakeBlackoutActive then
-			Toggle:Lock()
-			return
-		end
-
+	Callback=function(v)
 		if not CallbackState then CallbackState = {} end
 		local state = CallbackState
 
@@ -361,14 +356,7 @@ FPESTab:Toggle({
 FPESTab:Toggle({
 	Title="Fake Blackout",
 	Value=false,
-	Callback=function(v, Toggle)
-		if _G.FakeMissCircleActive then
-			Toggle:Lock()
-			return
-		end
-
-		_G.FakeBlackoutActive = v
-
+	Callback=function(v)
 		if not CallbackState then CallbackState = {} end
 		local state = CallbackState
 
@@ -383,10 +371,7 @@ FPESTab:Toggle({
 		if state.sound1 then state.sound1:Stop() state.sound1:Destroy() state.sound1 = nil end
 		if state.sound2 then state.sound2:Stop() state.sound2:Destroy() state.sound2 = nil end
 
-		if not v then
-			Toggle:Unlock()
-			return
-		end
+		if not v then return end
 
 		local vfx = Instance.new("ColorCorrectionEffect")
 		vfx.TintColor = Color3.fromRGB(255,255,255)
