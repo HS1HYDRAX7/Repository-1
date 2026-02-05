@@ -386,7 +386,7 @@ FPESTab:Toggle({
 									Title="Proximity Alert",
 									Content = m.Name .. " is too close!",
 									Duration = 3,
-									Icon = "skull",
+									Icon = "rbxassetid://10653372143",
 								})
 							end
 							return true
