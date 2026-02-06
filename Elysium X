@@ -190,7 +190,7 @@ FPESTab:Toggle({
 		end
 
 		local function char()
-			return LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+			return LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
 		end
 
 		local function hrp(c)
@@ -212,9 +212,7 @@ FPESTab:Toggle({
 			local t = {}
 			for _, m in ipairs(f:GetChildren()) do
 				if m:IsA("Model") and m ~= char() and m:FindFirstChild("HumanoidRootPart") then
-					if not (_G.IgnoreFriendlyTA and _G.FriendlyTA and _G.FriendlyTA[m]) then
-						table.insert(t, m)
-					end
+					table.insert(t, m)
 				end
 			end
 			return t
@@ -231,6 +229,18 @@ FPESTab:Toggle({
 				end
 			end
 			return best
+		end
+
+		local function openNearbyDoors(root)
+			for _, d in ipairs(Workspace:GetDescendants()) do
+				if (d.Name == "RealDoubleDoor" or d.Name == "SingleDoor") then
+					local cd = d:FindFirstChildWhichIsA("ClickDetector")
+					local p = d:IsA("BasePart") and d.Position
+					if cd and p and (p - root.Position).Magnitude < 12 then
+						fireclickdetector(cd)
+					end
+				end
+			end
 		end
 
 		local function moveTo(c, dest)
@@ -256,20 +266,11 @@ FPESTab:Toggle({
 				if wp[i].Action == Enum.PathWaypointAction.Jump then
 					h.Jump = true
 				end
+				openNearbyDoors(r)
 				if (r.Position - wp[i].Position).Magnitude < 2 then
 					i += 1
 				end
 			end)
-		end
-
-		local function randomWander(c)
-			local r = hrp(c)
-			local offset = Vector3.new(
-				math.random(-40, 40),
-				0,
-				math.random(-40, 40)
-			)
-			moveTo(c, r.Position + offset)
 		end
 
 		autoConn = RunService.Heartbeat:Connect(function()
@@ -282,13 +283,10 @@ FPESTab:Toggle({
 				for _, m in ipairs(getModels("Alices")) do table.insert(threats, m) end
 
 				local t = nearest(r.Position, threats)
-				if t and (t.HumanoidRootPart.Position - r.Position).Magnitude < 50 then
-					local flee = r.Position + (r.Position - t.HumanoidRootPart.Position).Unit * 50
-					moveTo(c, flee)
-				else
-					if not pathConn then
-						randomWander(c)
-					end
+				if t then
+					local fleeDir = (r.Position - t.HumanoidRootPart.Position).Unit
+					local fleePos = r.Position + fleeDir * 80
+					moveTo(c, fleePos)
 				end
 			end
 
@@ -298,51 +296,6 @@ FPESTab:Toggle({
 					moveTo(c, target.HumanoidRootPart.Position)
 					VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
 					VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
-				end
-			end
-		end)
-	end
-})
-
-FPESTab:Toggle({
-	Title = "Ignore Friendly Teachers / Alices",
-	Value = false,
-	Callback = function(v)
-		_G.IgnoreFriendlyTA = v
-		if not v then
-			_G.FriendlyTA = {}
-			if _G.FriendlyConn then
-				_G.FriendlyConn:Disconnect()
-				_G.FriendlyConn = nil
-			end
-			return
-		end
-
-		_G.FriendlyTA = _G.FriendlyTA or {}
-
-		local RunService = game:GetService("RunService")
-		local Workspace = game:GetService("Workspace")
-
-		if _G.FriendlyConn then
-			_G.FriendlyConn:Disconnect()
-		end
-
-		_G.FriendlyConn = RunService.Heartbeat:Connect(function()
-			for _, folderName in ipairs({ "Teachers", "Alices" }) do
-				local folder = Workspace:FindFirstChild(folderName)
-				if folder then
-					for _, m in ipairs(folder:GetChildren()) do
-						local h = m:FindFirstChildOfClass("Humanoid")
-						if h and h.Jump then
-							_G.FriendlyTA[m] = tick()
-						end
-					end
-				end
-			end
-
-			for model, t in pairs(_G.FriendlyTA) do
-				if tick() - t > 5 then
-					_G.FriendlyTA[model] = nil
 				end
 			end
 		end)
