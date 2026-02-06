@@ -246,8 +246,8 @@ FPESTab:Slider({
 	Step = 1,
 	Value = {
 		Min = 1,
-		Max = 50,
-		Default = 5,
+		Max = 500,
+		Default = 100,
 	},
 	Callback = function(value)
 		local Character = Players.LocalPlayer.Character
