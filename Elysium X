@@ -30,6 +30,12 @@ Window:Tag({
 	Radius = 100,
 })
 
+Window:Tag({
+	Title = "Discontinued?",
+	Color = Color3.fromRGB(153,0,0),
+	Radius = 100,
+})
+
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
 local FPESTab = Window:Tab({ Title = "FPE Survival", Icon = "book" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "link" })
@@ -166,139 +172,6 @@ FPESTab:Toggle({
 				staminaConn = nil
 			end
 		end
-	end
-})
-
-FPESTab:Toggle({
-	Title = "Auto Play",
-	Value = false,
-	Callback = function(v)
-		local Players = game:GetService("Players")
-		local PathfindingService = game:GetService("PathfindingService")
-		local RunService = game:GetService("RunService")
-		local VirtualInputManager = game:GetService("VirtualInputManager")
-		local Workspace = game:GetService("Workspace")
-
-		local LocalPlayer = Players.LocalPlayer
-		local autoConn
-		local pathConn
-
-		if not v then
-			if autoConn then autoConn:Disconnect() autoConn = nil end
-			if pathConn then pathConn:Disconnect() pathConn = nil end
-			return
-		end
-
-		local function char()
-			return LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
-		end
-
-		local function hrp(c)
-			return c:WaitForChild("HumanoidRootPart")
-		end
-
-		local function hum(c)
-			return c:WaitForChild("Humanoid")
-		end
-
-		local function inFolder(c, name)
-			local f = Workspace:FindFirstChild(name)
-			return f and c:IsDescendantOf(f)
-		end
-
-		local function getModels(name)
-			local f = Workspace:FindFirstChild(name)
-			if not f then return {} end
-			local t = {}
-			for _, m in ipairs(f:GetChildren()) do
-				if m:IsA("Model") and m ~= char() and m:FindFirstChild("HumanoidRootPart") then
-					table.insert(t, m)
-				end
-			end
-			return t
-		end
-
-		local function nearest(pos, list)
-			local best, d
-			for _, m in ipairs(list) do
-				local p = m.HumanoidRootPart.Position
-				local dist = (p - pos).Magnitude
-				if not d or dist < d then
-					d = dist
-					best = m
-				end
-			end
-			return best
-		end
-
-		local function openNearbyDoors(root)
-			for _, d in ipairs(Workspace:GetDescendants()) do
-				if (d.Name == "RealDoubleDoor" or d.Name == "SingleDoor") then
-					local cd = d:FindFirstChildWhichIsA("ClickDetector")
-					local p = d:IsA("BasePart") and d.Position
-					if cd and p and (p - root.Position).Magnitude < 12 then
-						fireclickdetector(cd)
-					end
-				end
-			end
-		end
-
-		local function moveTo(c, dest)
-			if pathConn then pathConn:Disconnect() end
-			local h = hum(c)
-			local r = hrp(c)
-
-			local path = PathfindingService:CreatePath({
-				AgentRadius = 2,
-				AgentHeight = 5,
-				AgentCanJump = true
-			})
-
-			path:ComputeAsync(r.Position, dest)
-			if path.Status ~= Enum.PathStatus.Success then return end
-
-			local wp = path:GetWaypoints()
-			local i = 1
-
-			pathConn = RunService.Heartbeat:Connect(function()
-				if not wp[i] then return end
-				h:MoveTo(wp[i].Position)
-				if wp[i].Action == Enum.PathWaypointAction.Jump then
-					h.Jump = true
-				end
-				openNearbyDoors(r)
-				if (r.Position - wp[i].Position).Magnitude < 2 then
-					i += 1
-				end
-			end)
-		end
-
-		autoConn = RunService.Heartbeat:Connect(function()
-			local c = char()
-			local r = hrp(c)
-
-			if inFolder(c, "Students") then
-				local threats = {}
-				for _, m in ipairs(getModels("Teachers")) do table.insert(threats, m) end
-				for _, m in ipairs(getModels("Alices")) do table.insert(threats, m) end
-
-				local t = nearest(r.Position, threats)
-				if t then
-					local fleeDir = (r.Position - t.HumanoidRootPart.Position).Unit
-					local fleePos = r.Position + fleeDir * 80
-					moveTo(c, fleePos)
-				end
-			end
-
-			if inFolder(c, "Teachers") or inFolder(c, "Alices") then
-				local target = nearest(r.Position, getModels("Students"))
-				if target then
-					moveTo(c, target.HumanoidRootPart.Position)
-					VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
-					VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
-				end
-			end
-		end)
 	end
 })
 
