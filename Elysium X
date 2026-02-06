@@ -180,16 +180,12 @@ FPESTab:Toggle({
 		local Workspace = game:GetService("Workspace")
 
 		local LocalPlayer = Players.LocalPlayer
-		local Camera = Workspace.CurrentCamera
-
 		local autoConn
 		local pathConn
-		local camConn
 
 		if not v then
-			if autoConn then autoConn:Disconnect() end
-			if pathConn then pathConn:Disconnect() end
-			if camConn then camConn:Disconnect() end
+			if autoConn then autoConn:Disconnect() autoConn = nil end
+			if pathConn then pathConn:Disconnect() pathConn = nil end
 			return
 		end
 
@@ -216,42 +212,25 @@ FPESTab:Toggle({
 			local t = {}
 			for _, m in ipairs(f:GetChildren()) do
 				if m:IsA("Model") and m ~= char() and m:FindFirstChild("HumanoidRootPart") then
-					table.insert(t, m)
+					if not (_G.IgnoreFriendlyTA and _G.FriendlyTA and _G.FriendlyTA[m]) then
+						table.insert(t, m)
+					end
 				end
 			end
 			return t
-		end
-
-		local function inFOV(pos)
-			local dir = (pos - Camera.CFrame.Position).Unit
-			return Camera.CFrame.LookVector:Dot(dir) > 0.4
 		end
 
 		local function nearest(pos, list)
 			local best, d
 			for _, m in ipairs(list) do
 				local p = m.HumanoidRootPart.Position
-				if inFOV(p) then
-					local dist = (p - pos).Magnitude
-					if not d or dist < d then
-						d = dist
-						best = m
-					end
+				local dist = (p - pos).Magnitude
+				if not d or dist < d then
+					d = dist
+					best = m
 				end
 			end
 			return best
-		end
-
-		local function lookAt(pos)
-			if camConn then camConn:Disconnect() end
-			camConn = RunService.RenderStepped:Connect(function()
-				Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, pos), 0.15)
-			end)
-		end
-
-		local function click()
-			VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
-			VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
 		end
 
 		local function moveTo(c, dest)
@@ -283,6 +262,16 @@ FPESTab:Toggle({
 			end)
 		end
 
+		local function randomWander(c)
+			local r = hrp(c)
+			local offset = Vector3.new(
+				math.random(-40, 40),
+				0,
+				math.random(-40, 40)
+			)
+			moveTo(c, r.Position + offset)
+		end
+
 		autoConn = RunService.Heartbeat:Connect(function()
 			local c = char()
 			local r = hrp(c)
@@ -293,10 +282,13 @@ FPESTab:Toggle({
 				for _, m in ipairs(getModels("Alices")) do table.insert(threats, m) end
 
 				local t = nearest(r.Position, threats)
-				if t then
-					local flee = r.Position + (r.Position - t.HumanoidRootPart.Position).Unit * 45
+				if t and (t.HumanoidRootPart.Position - r.Position).Magnitude < 50 then
+					local flee = r.Position + (r.Position - t.HumanoidRootPart.Position).Unit * 50
 					moveTo(c, flee)
-					lookAt(flee)
+				else
+					if not pathConn then
+						randomWander(c)
+					end
 				end
 			end
 
@@ -304,8 +296,8 @@ FPESTab:Toggle({
 				local target = nearest(r.Position, getModels("Students"))
 				if target then
 					moveTo(c, target.HumanoidRootPart.Position)
-					lookAt(target.HumanoidRootPart.Position)
-					click()
+					VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+					VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
 				end
 			end
 		end)
@@ -316,41 +308,44 @@ FPESTab:Toggle({
 	Title = "Ignore Friendly Teachers / Alices",
 	Value = false,
 	Callback = function(v)
-		if not v then return end
+		_G.IgnoreFriendlyTA = v
+		if not v then
+			_G.FriendlyTA = {}
+			if _G.FriendlyConn then
+				_G.FriendlyConn:Disconnect()
+				_G.FriendlyConn = nil
+			end
+			return
+		end
 
-		local Players = game:GetService("Players")
+		_G.FriendlyTA = _G.FriendlyTA or {}
+
 		local RunService = game:GetService("RunService")
 		local Workspace = game:GetService("Workspace")
 
-		local friendly = {}
+		if _G.FriendlyConn then
+			_G.FriendlyConn:Disconnect()
+		end
 
-		RunService.Heartbeat:Connect(function()
+		_G.FriendlyConn = RunService.Heartbeat:Connect(function()
 			for _, folderName in ipairs({ "Teachers", "Alices" }) do
 				local folder = Workspace:FindFirstChild(folderName)
 				if folder then
 					for _, m in ipairs(folder:GetChildren()) do
 						local h = m:FindFirstChildOfClass("Humanoid")
-						if h then
-							if h.Jump then
-								friendly[m] = tick()
-							end
+						if h and h.Jump then
+							_G.FriendlyTA[m] = tick()
 						end
 					end
 				end
 			end
-		end)
 
-		Workspace.ChildAdded:Connect(function()
-			for m, t in pairs(friendly) do
+			for model, t in pairs(_G.FriendlyTA) do
 				if tick() - t > 5 then
-					friendly[m] = nil
+					_G.FriendlyTA[model] = nil
 				end
 			end
 		end)
-
-		_G.IsFriendly = function(model)
-			return friendly[model] ~= nil
-		end
 	end
 })
 
