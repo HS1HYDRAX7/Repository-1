@@ -170,86 +170,186 @@ FPESTab:Toggle({
 })
 
 FPESTab:Toggle({
-	Title = "Max Stamina",
+	Title = "Auto Play",
 	Value = false,
 	Callback = function(v)
-		local conn
+		local Players = game:GetService("Players")
+		local PathfindingService = game:GetService("PathfindingService")
+		local RunService = game:GetService("RunService")
+		local VirtualInputManager = game:GetService("VirtualInputManager")
+		local Workspace = game:GetService("Workspace")
+
+		local LocalPlayer = Players.LocalPlayer
+		local Camera = Workspace.CurrentCamera
+
+		local autoConn
+		local pathConn
+		local camConn
 
 		if not v then
-			if conn then conn:Disconnect() end
+			if autoConn then autoConn:Disconnect() end
+			if pathConn then pathConn:Disconnect() end
+			if camConn then camConn:Disconnect() end
 			return
 		end
 
-		local function apply(Character)
-			local value = Character:GetAttribute("MaxStaminaValue_Local") or 100
-			Character:SetAttribute("MaxStamina", value)
+		local function char()
+			return LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 		end
 
-		local Character = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
-		apply(Character)
+		local function hrp(c)
+			return c:WaitForChild("HumanoidRootPart")
+		end
 
-		conn = Players.LocalPlayer.CharacterAdded:Connect(function(char)
-			apply(char)
+		local function hum(c)
+			return c:WaitForChild("Humanoid")
+		end
+
+		local function inFolder(c, name)
+			local f = Workspace:FindFirstChild(name)
+			return f and c:IsDescendantOf(f)
+		end
+
+		local function getModels(name)
+			local f = Workspace:FindFirstChild(name)
+			if not f then return {} end
+			local t = {}
+			for _, m in ipairs(f:GetChildren()) do
+				if m:IsA("Model") and m ~= char() and m:FindFirstChild("HumanoidRootPart") then
+					table.insert(t, m)
+				end
+			end
+			return t
+		end
+
+		local function inFOV(pos)
+			local dir = (pos - Camera.CFrame.Position).Unit
+			return Camera.CFrame.LookVector:Dot(dir) > 0.4
+		end
+
+		local function nearest(pos, list)
+			local best, d
+			for _, m in ipairs(list) do
+				local p = m.HumanoidRootPart.Position
+				if inFOV(p) then
+					local dist = (p - pos).Magnitude
+					if not d or dist < d then
+						d = dist
+						best = m
+					end
+				end
+			end
+			return best
+		end
+
+		local function lookAt(pos)
+			if camConn then camConn:Disconnect() end
+			camConn = RunService.RenderStepped:Connect(function()
+				Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, pos), 0.15)
+			end)
+		end
+
+		local function click()
+			VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+			VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+		end
+
+		local function moveTo(c, dest)
+			if pathConn then pathConn:Disconnect() end
+			local h = hum(c)
+			local r = hrp(c)
+
+			local path = PathfindingService:CreatePath({
+				AgentRadius = 2,
+				AgentHeight = 5,
+				AgentCanJump = true
+			})
+
+			path:ComputeAsync(r.Position, dest)
+			if path.Status ~= Enum.PathStatus.Success then return end
+
+			local wp = path:GetWaypoints()
+			local i = 1
+
+			pathConn = RunService.Heartbeat:Connect(function()
+				if not wp[i] then return end
+				h:MoveTo(wp[i].Position)
+				if wp[i].Action == Enum.PathWaypointAction.Jump then
+					h.Jump = true
+				end
+				if (r.Position - wp[i].Position).Magnitude < 2 then
+					i += 1
+				end
+			end)
+		end
+
+		autoConn = RunService.Heartbeat:Connect(function()
+			local c = char()
+			local r = hrp(c)
+
+			if inFolder(c, "Students") then
+				local threats = {}
+				for _, m in ipairs(getModels("Teachers")) do table.insert(threats, m) end
+				for _, m in ipairs(getModels("Alices")) do table.insert(threats, m) end
+
+				local t = nearest(r.Position, threats)
+				if t then
+					local flee = r.Position + (r.Position - t.HumanoidRootPart.Position).Unit * 45
+					moveTo(c, flee)
+					lookAt(flee)
+				end
+			end
+
+			if inFolder(c, "Teachers") or inFolder(c, "Alices") then
+				local target = nearest(r.Position, getModels("Students"))
+				if target then
+					moveTo(c, target.HumanoidRootPart.Position)
+					lookAt(target.HumanoidRootPart.Position)
+					click()
+				end
+			end
 		end)
-	end
-})
-
-FPESTab:Slider({
-	Title = "Max Stamina Value",
-	Desc = "",
-	Step = 1,
-	Value = {
-		Min = 1,
-		Max = 500,
-		Default = 100,
-	},
-	Callback = function(value)
-		local Character = Players.LocalPlayer.Character
-		if Character then
-			Character:SetAttribute("MaxStaminaValue_Local", value)
-		end
 	end
 })
 
 FPESTab:Toggle({
-	Title = "Stamina Regen",
+	Title = "Ignore Friendly Teachers / Alices",
 	Value = false,
 	Callback = function(v)
-		local conn
+		if not v then return end
 
-		if not v then
-			if conn then conn:Disconnect() end
-			return
-		end
+		local Players = game:GetService("Players")
+		local RunService = game:GetService("RunService")
+		local Workspace = game:GetService("Workspace")
 
-		local Character = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+		local friendly = {}
 
-		conn = RunService.Heartbeat:Connect(function(dt)
-			if not Character or not Character.Parent then return end
-			if not Character:GetAttribute("StaminaRegenValue_Local") then return end
-
-			local stamina = Character:GetAttribute("Stamina") or 0
-			local max = Character:GetAttribute("MaxStamina") or 100
-			local regen = Character:GetAttribute("StaminaRegenValue_Local")
-
-			Character:SetAttribute("Stamina", math.clamp(stamina + regen * dt, 0, max))
+		RunService.Heartbeat:Connect(function()
+			for _, folderName in ipairs({ "Teachers", "Alices" }) do
+				local folder = Workspace:FindFirstChild(folderName)
+				if folder then
+					for _, m in ipairs(folder:GetChildren()) do
+						local h = m:FindFirstChildOfClass("Humanoid")
+						if h then
+							if h.Jump then
+								friendly[m] = tick()
+							end
+						end
+					end
+				end
+			end
 		end)
-	end
-})
 
-FPESTab:Slider({
-	Title = "Stamina Regen Value",
-	Desc = "",
-	Step = 1,
-	Value = {
-		Min = 1,
-		Max = 500,
-		Default = 100,
-	},
-	Callback = function(value)
-		local Character = Players.LocalPlayer.Character
-		if Character then
-			Character:SetAttribute("StaminaRegenValue_Local", value)
+		Workspace.ChildAdded:Connect(function()
+			for m, t in pairs(friendly) do
+				if tick() - t > 5 then
+					friendly[m] = nil
+				end
+			end
+		end)
+
+		_G.IsFriendly = function(model)
+			return friendly[model] ~= nil
 		end
 	end
 })
