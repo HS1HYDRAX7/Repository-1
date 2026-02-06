@@ -196,15 +196,19 @@ FPESTab:Toggle({
 
 FPESTab:Slider({
 	Title = "Max Stamina Value",
-	Min = 1,
-	Max = 500,
-	Default = 100,
-	Callback = function(v)
+	Desc = "",
+	Step = 1,
+	Value = {
+		Min = 1,
+		Max = 500,
+		Default = 100,
+	},
+	Callback = function(value)
 		local Character = Players.LocalPlayer.Character
 		if Character then
-			Character:SetAttribute("MaxStaminaValue_Local", v)
+			Character:SetAttribute("MaxStaminaValue_Local", value)
 			if Character:GetAttribute("MaxStamina") then
-				Character:SetAttribute("MaxStamina", v)
+				Character:SetAttribute("MaxStamina", value)
 			end
 		end
 	end
@@ -238,13 +242,17 @@ FPESTab:Toggle({
 
 FPESTab:Slider({
 	Title = "Stamina Regen Value",
-	Min = 1,
-	Max = 50,
-	Default = 5,
-	Callback = function(v)
+	Desc = "",
+	Step = 1,
+	Value = {
+		Min = 1,
+		Max = 50,
+		Default = 5,
+	},
+	Callback = function(value)
 		local Character = Players.LocalPlayer.Character
 		if Character then
-			Character:SetAttribute("StaminaRegenValue_Local", v)
+			Character:SetAttribute("StaminaRegenValue_Local", value)
 		end
 	end
 })
