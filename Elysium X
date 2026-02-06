@@ -170,6 +170,86 @@ FPESTab:Toggle({
 })
 
 FPESTab:Toggle({
+	Title = "Max Stamina",
+	Value = false,
+	Callback = function(v)
+		local conn
+
+		if not v then
+			if conn then conn:Disconnect() end
+			return
+		end
+
+		local function apply(Character)
+			local value = Character:GetAttribute("MaxStaminaValue_Local") or 100
+			Character:SetAttribute("MaxStamina", value)
+		end
+
+		local Character = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+		apply(Character)
+
+		conn = Players.LocalPlayer.CharacterAdded:Connect(function(char)
+			apply(char)
+		end)
+	end
+})
+
+FPESTab:Slider({
+	Title = "Max Stamina Value",
+	Min = 1,
+	Max = 500,
+	Default = 100,
+	Callback = function(v)
+		local Character = Players.LocalPlayer.Character
+		if Character then
+			Character:SetAttribute("MaxStaminaValue_Local", v)
+			if Character:GetAttribute("MaxStamina") then
+				Character:SetAttribute("MaxStamina", v)
+			end
+		end
+	end
+})
+
+FPESTab:Toggle({
+	Title = "Stamina Regen",
+	Value = false,
+	Callback = function(v)
+		local conn
+
+		if not v then
+			if conn then conn:Disconnect() end
+			return
+		end
+
+		local Character = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+
+		conn = RunService.Heartbeat:Connect(function(dt)
+			if not Character or not Character.Parent then return end
+			local regen = Character:GetAttribute("StaminaRegenValue_Local")
+			if not regen then return end
+
+			local stamina = Character:GetAttribute("Stamina") or 0
+			local max = Character:GetAttribute("MaxStamina") or 100
+
+			Character:SetAttribute("Stamina", math.clamp(stamina + regen * dt, 0, max))
+		end)
+	end
+})
+
+FPESTab:Slider({
+	Title = "Stamina Regen Value",
+	Min = 1,
+	Max = 50,
+	Default = 5,
+	Callback = function(v)
+		local Character = Players.LocalPlayer.Character
+		if Character then
+			Character:SetAttribute("StaminaRegenValue_Local", v)
+		end
+	end
+})
+
+FPESTab:Toggle({
 	Title="ESP Teachers",
 	Value=false,
 	Callback=function(v)
