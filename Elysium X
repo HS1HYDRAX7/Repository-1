@@ -207,9 +207,6 @@ FPESTab:Slider({
 		local Character = Players.LocalPlayer.Character
 		if Character then
 			Character:SetAttribute("MaxStaminaValue_Local", value)
-			if Character:GetAttribute("MaxStamina") then
-				Character:SetAttribute("MaxStamina", value)
-			end
 		end
 	end
 })
@@ -229,11 +226,11 @@ FPESTab:Toggle({
 
 		conn = RunService.Heartbeat:Connect(function(dt)
 			if not Character or not Character.Parent then return end
-			local regen = Character:GetAttribute("StaminaRegenValue_Local")
-			if not regen then return end
+			if not Character:GetAttribute("StaminaRegenValue_Local") then return end
 
 			local stamina = Character:GetAttribute("Stamina") or 0
 			local max = Character:GetAttribute("MaxStamina") or 100
+			local regen = Character:GetAttribute("StaminaRegenValue_Local")
 
 			Character:SetAttribute("Stamina", math.clamp(stamina + regen * dt, 0, max))
 		end)
