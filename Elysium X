@@ -25,15 +25,9 @@ Window = WindUI:CreateWindow({
 })
 
 Window:Tag({
-	Title = "BETA",
-	Color = Color3.fromRGB(0,71,171),
-	Radius = 100,
-})
-
-Window:Tag({
 	Title = "Discontinued?",
 	Color = Color3.fromRGB(153,0,0),
-	Radius = 100,
+	Radius = 50,
 })
 
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
