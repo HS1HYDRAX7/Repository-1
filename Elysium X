@@ -32,6 +32,7 @@ Window:Tag({
 
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
 local FPESTab = Window:Tab({ Title = "FPE Survival", Icon = "book" })
+local RandomAdminTab = Window:Tab({ Title = "Random Admin", Icon = "code-circle-outline" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "link" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -468,6 +469,75 @@ FPESTab:Toggle({
 	end
 })
 
+RandomAdmin:Input({
+    Title = "Random Admin",
+    Desc = "Enter password",
+    Value = "",
+    InputIcon = "lock",
+    Type = "Input",
+    Placeholder = "PASSWORD",
+    Callback = function(input)
+    end
+})
+
+RandomAdmin:Button({
+    Title = "Confirm",
+    Desc = "Validate password",
+    Callback = function()
+        local inputValue = RandomAdmin:GetInputValue("Random Admin")
+        if inputValue == "ONEMORETIME" then
+            RandomAdmin:Toggle({
+                Title = "Infinite Spiral",
+                Value = false,
+                Callback = function(state)
+                    local GeneratedParts = {}
+                    if state then
+                        local baseY = 0
+                        local radius = 20
+                        local heightStep = 6
+
+                        for i = 1, 500 do
+                            local angle = i * 0.3
+                            local step = Instance.new("Part")
+                            step.Size = Vector3.new(10, 1, 4)
+                            step.Anchored = true
+                            step.Position = Vector3.new(
+                                math.cos(angle) * radius,
+                                baseY - (i * heightStep),
+                                math.sin(angle) * radius
+                            )
+                            step.Parent = workspace
+                            table.insert(GeneratedParts, step)
+                        end
+
+                        local floor = Instance.new("Part")
+                        floor.Size = Vector3.new(500, 1, 500)
+                        floor.Anchored = true
+                        floor.Position = Vector3.new(0, baseY - 3000, 0)
+                        floor.Parent = workspace
+                        table.insert(GeneratedParts, floor)
+
+                        local water = Instance.new("Part")
+                        water.Size = Vector3.new(480, 200, 480)
+                        water.Anchored = true
+                        water.Material = Enum.Material.Water
+                        water.Position = Vector3.new(0, baseY - 3100, 0)
+                        water.Parent = workspace
+                        table.insert(GeneratedParts, water)
+                    else
+                        for _, part in ipairs(GeneratedParts) do
+                            if part and part.Parent then
+                                part:Destroy()
+                            end
+                        end
+                        table.clear(GeneratedParts)
+                    end
+                end
+            })
+        end
+    end
+})
+
 OthersTab:Button({
 	Title="Infinite Yield",
 	Callback=function()
@@ -866,33 +936,5 @@ InfoTab:Paragraph({
     ThumbnailSize = 140,  
     Locked = true,         
 })
-
-local paragraph = InfoTab:Paragraph({
-    Title = "Я чувствую себя...",
-    Locked = true,
-})
-
-task.spawn(function()
-    local texts = {
-        "Я чувствую себя...",
-        "ОДИНОКИЙ"
-    }
-
-    local function smoothSet(text, delayTime)
-        local current = ""
-        for i = 1, #text do
-            current = string.sub(text, 1, i)
-            paragraph:SetTitle(current)
-            task.wait(delayTime)
-        end
-    end
-
-    while true do
-        for _, text in ipairs(texts) do
-            smoothSet(text, 0.05)
-            task.wait(1)
-        end
-    end
-end)
 
 Window:Init()
