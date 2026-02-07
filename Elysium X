@@ -32,7 +32,7 @@ Window:Tag({
 
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
 local FPESTab = Window:Tab({ Title = "FPE Survival", Icon = "book" })
-local RandomAdminTab = Window:Tab({ Title = "Random Admin", Icon = "lock" })
+local RandomAdminTab = Window:Tab({ Title = "Random Admin", Icon = "cpu" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "link" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -486,7 +486,7 @@ RandomAdminTab:Button({
     Callback = function()
         local inputValue = RandomAdminTab:GetInputValue("Random Admin")
         if inputValue == "ONEMORETIME" then
-            RandomAdmin:Toggle({
+            RandomAdminTab:Toggle({
                 Title = "Infinite Spiral",
                 Value = false,
                 Callback = function(state)
