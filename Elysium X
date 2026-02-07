@@ -26,7 +26,7 @@ Window = WindUI:CreateWindow({
 
 Window:Tag({
 	Title = "Discontinued?",
-	Color = Color3.fromRGB(114,47,55),
+	Color = Color3.fromRGB(153,0,0),
 	Radius = 50,
 })
 
