@@ -469,85 +469,140 @@ FPESTab:Toggle({
 	end
 })
 
-RandomAdminTab:Input({
-    Title = "Random Admin",
-    Desc = "Enter password",
-    Value = "",
-    InputIcon = "lock",
-    Type = "Input",
-    Placeholder = "PASSWORD",
-    Callback = function(input)
-    end
-})
-
-RandomAdminTab:Button({
-    Title = "Confirm",
-    Desc = "Validate password",
-    Callback = function()
-        local inputValue = RandomAdminTab:GetInputValue("Random Admin")
-        if inputValue == "ONEMORETIME" then
-            RandomAdminTab:ToggleUnlock("Infinite Spiral")
-        end
-    end
-})
-
 RandomAdminTab:Toggle({
-    Title = "Infinite Spiral",
+    Title = "A Familiar Place",
     Value = false,
     Callback = function(state)
         local GeneratedParts = {}
-        if state then
-            local baseY = 0
+        local water
+        local player = game.Players.LocalPlayer
+        local started = false
+
+        local function createSpiral()
+            local baseY = player.Character and player.Character.HumanoidRootPart.Position.Y or 0
             local radius = 20
             local stepHeight = 6
-            local stepCount = 200
+            local stepCount = 500
 
             for i = 1, stepCount do
                 local angle = i * 0.3
+
                 local step = Instance.new("Part")
                 step.Size = Vector3.new(10, 1, 4)
                 step.Anchored = true
                 step.Position = Vector3.new(
                     math.cos(angle) * radius,
-                    baseY - (i * stepHeight),
+                    baseY + (i * stepHeight),
                     math.sin(angle) * radius
                 )
                 step.Parent = workspace
+
+                local stepDecal = Instance.new("Decal")
+                stepDecal.Texture = "rbxassetid://16319660529"
+                stepDecal.Face = Enum.NormalId.Top
+                stepDecal.Parent = step
+
+                local wall1 = Instance.new("Part")
+                wall1.Size = Vector3.new(1, 6, 4)
+                wall1.Anchored = true
+                wall1.Position = step.Position + Vector3.new(5,3,0)
+                wall1.Parent = workspace
+
+                local wall2 = Instance.new("Part")
+                wall2.Size = Vector3.new(1, 6, 4)
+                wall2.Anchored = true
+                wall2.Position = step.Position + Vector3.new(-5,3,0)
+                wall2.Parent = workspace
+
+                local wallDecal1 = Instance.new("Decal")
+                wallDecal1.Texture = "rbxassetid://16319660529"
+                wallDecal1.Face = Enum.NormalId.Front
+                wallDecal1.Parent = wall1
+
+                local wallDecal2 = Instance.new("Decal")
+                wallDecal2.Texture = "rbxassetid://16319660529"
+                wallDecal2.Face = Enum.NormalId.Front
+                wallDecal2.Parent = wall2
+
                 table.insert(GeneratedParts, step)
+                table.insert(GeneratedParts, wall1)
+                table.insert(GeneratedParts, wall2)
             end
+        end
 
-            local floor = Instance.new("Part")
-            floor.Size = Vector3.new(500, 1, 500)
-            floor.Anchored = true
-            floor.Position = Vector3.new(0, baseY - (stepCount * stepHeight) - 100, 0)
-            floor.Parent = workspace
-            table.insert(GeneratedParts, floor)
+        local function createBackrooms()
+            local baseY = player.Character and player.Character.HumanoidRootPart.Position.Y or 0
+            for i = 1, 50 do
+                local room = Instance.new("Part")
+                room.Size = Vector3.new(50, 20, 50)
+                room.Anchored = true
+                room.Position = Vector3.new(math.random(-100,100), baseY + (i*20), math.random(-100,100))
+                room.Parent = workspace
 
-            local water = Instance.new("Part")
-            water.Size = Vector3.new(480, 200, 480)
+                local wallDecal = Instance.new("Decal")
+                wallDecal.Texture = "rbxassetid://3255302928"
+                wallDecal.Face = Enum.NormalId.Front
+                wallDecal.Parent = room
+
+                local floor = Instance.new("Part")
+                floor.Size = Vector3.new(50,1,50)
+                floor.Anchored = true
+                floor.Position = room.Position - Vector3.new(0,10,0)
+                floor.Parent = workspace
+
+                local floorDecal = Instance.new("Decal")
+                floorDecal.Texture = "rbxassetid://9302607585"
+                floorDecal.Face = Enum.NormalId.Top
+                floorDecal.Parent = floor
+
+                table.insert(GeneratedParts, room)
+                table.insert(GeneratedParts, floor)
+            end
+        end
+
+        local function startWater()
+            water = Instance.new("Part")
+            water.Size = Vector3.new(200, 1, 200)
             water.Anchored = true
             water.Material = Enum.Material.Water
-            water.Position = Vector3.new(0, baseY - (stepCount * stepHeight) - 200, 0)
+            water.Position = player.Character.HumanoidRootPart.Position - Vector3.new(0,1,0)
             water.Parent = workspace
-            table.insert(GeneratedParts, water)
+
+            spawn(function()
+                while state and water do
+                    water.Position = water.Position + Vector3.new(0, 0.5, 0)
+                    wait(0.1)
+                end
+            end)
+        end
+
+        if state then
+            createSpiral()
+            createBackrooms()
+            started = true
+
+            spawn(function()
+                while state and started do
+                    if player.Character.HumanoidRootPart.Position.Y >= 300 then
+                        startWater()
+                        started = false
+                    end
+                    wait(0.2)
+                end
+            end)
         else
             for _, part in ipairs(GeneratedParts) do
                 if part and part.Parent then
                     part:Destroy()
                 end
             end
-            table.clear(GeneratedParts)
+            GeneratedParts = {}
+            if water then
+                water:Destroy()
+            end
+            started = false
         end
     end
-})
-
-RandomAdminTab:ToggleLock("Infinite Spiral")
-
-OthersTab:Button({
-	Title="Infinite Yield",
-	Callback=function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
-	end
 })
 
 OthersTab:Button({
