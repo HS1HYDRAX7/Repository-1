@@ -26,13 +26,12 @@ Window = WindUI:CreateWindow({
 
 Window:Tag({
 	Title = "Discontinued?",
-	Color = Color3.fromRGB(153,0,0),
+	Color = Color3.fromRGB(114,47,55),
 	Radius = 50,
 })
 
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
 local FPESTab = Window:Tab({ Title = "FPE Survival", Icon = "book" })
-local RandomAdminTab = Window:Tab({ Title = "Random Admin", Icon = "cpu" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "link" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -469,175 +468,11 @@ FPESTab:Toggle({
 	end
 })
 
-RandomAdminTab:Toggle({
-    Title = "A Familiar Place",
-    Value = false,
-    Callback = function(state)
-        local GeneratedParts = {}
-        local water
-        local player = game.Players.LocalPlayer
-        local started = false
-
-        local tileSize = 50
-        local roomHeight = 20
-        local rooms = {}
-
-        local function createSpiral()
-            local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-            if not root then return end
-
-            local basePos = root.Position
-            local radius = 20
-            local stepHeight = 6
-            local stepCount = 500
-
-            for i = 1, stepCount do
-                local angle = i * 0.3
-                local x = basePos.X + math.cos(angle) * radius
-                local y = basePos.Y + i * stepHeight
-                local z = basePos.Z + math.sin(angle) * radius
-
-                local step = Instance.new("Part")
-                step.Size = Vector3.new(10, 1, 4)
-                step.Anchored = true
-                step.Position = Vector3.new(x, y, z)
-                step.Orientation = Vector3.new(0, math.deg(angle)+90, 0)
-                step.Parent = workspace
-
-                local stepDecal = Instance.new("Decal")
-                stepDecal.Texture = "rbxassetid://16319660529"
-                stepDecal.Face = Enum.NormalId.Top
-                stepDecal.Parent = step
-
-                local wall1 = Instance.new("Part")
-                wall1.Size = Vector3.new(1, 6, 4)
-                wall1.Anchored = true
-                wall1.CFrame = step.CFrame * CFrame.new(5,3,0)
-                wall1.Parent = workspace
-
-                local wall2 = Instance.new("Part")
-                wall2.Size = Vector3.new(1, 6, 4)
-                wall2.Anchored = true
-                wall2.CFrame = step.CFrame * CFrame.new(-5,3,0)
-                wall2.Parent = workspace
-
-                local wallDecal1 = Instance.new("Decal")
-                wallDecal1.Texture = "rbxassetid://16319660529"
-                wallDecal1.Face = Enum.NormalId.Front
-                wallDecal1.Parent = wall1
-
-                local wallDecal2 = Instance.new("Decal")
-                wallDecal2.Texture = "rbxassetid://16319660529"
-                wallDecal2.Face = Enum.NormalId.Front
-                wallDecal2.Parent = wall2
-
-                table.insert(GeneratedParts, step)
-                table.insert(GeneratedParts, wall1)
-                table.insert(GeneratedParts, wall2)
-            end
-        end
-
-        local function createRoom(pos)
-            local room = Instance.new("Part")
-            room.Size = Vector3.new(tileSize, roomHeight, tileSize)
-            room.Anchored = true
-            room.Position = pos
-            room.Parent = workspace
-
-            local wallDecal = Instance.new("Decal")
-            wallDecal.Texture = "rbxassetid://3255302928"
-            wallDecal.Face = Enum.NormalId.Front
-            wallDecal.Parent = room
-
-            local floor = Instance.new("Part")
-            floor.Size = Vector3.new(tileSize,1,tileSize)
-            floor.Anchored = true
-            floor.Position = pos - Vector3.new(0, roomHeight/2, 0)
-            floor.Parent = workspace
-
-            local floorDecal = Instance.new("Decal")
-            floorDecal.Texture = "rbxassetid://9302607585"
-            floorDecal.Face = Enum.NormalId.Top
-            floorDecal.Parent = floor
-
-            table.insert(GeneratedParts, room)
-            table.insert(GeneratedParts, floor)
-            table.insert(rooms, pos)
-        end
-
-        local function generateBackrooms()
-            local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-            if not root then return end
-
-            local directions = {Vector3.new(tileSize,0,0), Vector3.new(-tileSize,0,0), Vector3.new(0,0,tileSize), Vector3.new(0,0,-tileSize)}
-            local queue = {root.Position + Vector3.new(0, -roomHeight, 0)}
-
-            while #queue > 0 do
-                local current = table.remove(queue,1)
-                local exists = false
-                for _, pos in ipairs(rooms) do
-                    if (pos - current).Magnitude < 1 then
-                        exists = true
-                        break
-                    end
-                end
-                if not exists then
-                    createRoom(current)
-                    for _, dir in ipairs(directions) do
-                        table.insert(queue, current + dir)
-                    end
-                end
-            end
-        end
-
-        local function startWater()
-            local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-            if not root then return end
-
-            water = Instance.new("Part")
-            water.Size = Vector3.new(200, 1, 200)
-            water.Anchored = true
-            water.Material = Enum.Material.Water
-            water.Position = root.Position - Vector3.new(0,1,0)
-            water.Parent = workspace
-
-            spawn(function()
-                while state and water do
-                    water.Position = water.Position + Vector3.new(0, 0.5, 0)
-                    wait(0.1)
-                end
-            end)
-        end
-
-        if state then
-            createSpiral()
-            generateBackrooms()
-            started = true
-
-            spawn(function()
-                while state and started do
-                    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                    if root and root.Position.Y >= 300 then
-                        startWater()
-                        started = false
-                    end
-                    wait(0.2)
-                end
-            end)
-        else
-            for _, part in ipairs(GeneratedParts) do
-                if part and part.Parent then
-                    part:Destroy()
-                end
-            end
-            GeneratedParts = {}
-            rooms = {}
-            if water then
-                water:Destroy()
-            end
-            started = false
-        end
-    end
+OthersTab:Button({
+	Title="Infinite Yield",
+	Callback=function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+	end
 })
 
 OthersTab:Button({
