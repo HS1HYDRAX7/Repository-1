@@ -867,4 +867,26 @@ InfoTab:Paragraph({
     Locked = true,         
 })
 
+local creatorsParagraph = InfoTab:Paragraph({
+    Title = "",
+    Desc = "Work Hard",
+    Locked = true,
+})
+
+task.spawn(function()
+    local texts = {
+        "Work Hard",
+        "Play Hard"
+    }
+    local i = 1
+    while true do
+        creatorsParagraph:SetDesc(texts[i])
+        i = i + 1
+        if i > #texts then
+            i = 1
+        end
+        task.wait(0.6)
+    end
+end)
+
 Window:Init()
