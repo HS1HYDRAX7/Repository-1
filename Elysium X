@@ -481,29 +481,35 @@ BWGTab:Toggle({
 		}
 
 		if not _G.__ESP_MONSTERS then
-			_G.__ESP_MONSTERS = {highlights={}}
+			_G.__ESP_MONSTERS = {highlights={}, conns={}}
 		end
 		local state = _G.__ESP_MONSTERS
 
-		for _,h in ipairs(state.highlights) do
-			if h then h:Destroy() end
-		end
+		for _,h in ipairs(state.highlights) do if h then h:Destroy() end end
+		for _,c in ipairs(state.conns) do if c then c:Disconnect() end end
 		state.highlights = {}
+		state.conns = {}
 
 		if not v then return end
 
-		for _,obj in ipairs(workspace:GetChildren()) do
+		local function apply(obj)
 			if MonstersList[obj.Name] then
 				local h = Instance.new("Highlight")
 				h.Adornee = obj
-				h.FillColor = Color3.fromRGB(255,0,0)
-				h.OutlineColor = Color3.fromRGB(255,0,0)
+				h.FillColor = Color3.fromRGB(152,6,6)
+				h.OutlineColor = Color3.fromRGB(132,5,5)
 				h.FillTransparency = 0.5
 				h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 				h.Parent = obj
 				table.insert(state.highlights, h)
 			end
 		end
+
+		for _,obj in ipairs(workspace:GetChildren()) do
+			apply(obj)
+		end
+
+		table.insert(state.conns, workspace.ChildAdded:Connect(apply))
 	end
 })
 
@@ -513,6 +519,7 @@ BWGTab:Toggle({
 	Callback=function(v)
 		local RunService = game:GetService("RunService")
 		local Camera = workspace.CurrentCamera
+		local Smoothness = 0.12
 		local MonstersList = {
 			SkinStealer=true,
 			Smiler=true,
@@ -545,7 +552,8 @@ BWGTab:Toggle({
 			end
 
 			if closest then
-				Camera.CFrame = CFrame.new(Camera.CFrame.Position, closest.Position)
+				local target = CFrame.new(Camera.CFrame.Position, closest.Position)
+				Camera.CFrame = Camera.CFrame:Lerp(target, Smoothness)
 			end
 		end)
 	end
