@@ -561,6 +561,26 @@ BWGTab:Toggle({
 	end
 })
 
+BWGTab:Toggle({
+	Title = "Inf Ammo",
+	Callback = function(state)
+		if not state then return end
+
+		task.spawn(function()
+			while state do
+				for _, v in pairs(getgc(true)) do
+					if type(v) == "table" and rawget(v, "Mag") then
+						if v.Mag ~= math.huge then
+							v.Mag = math.huge
+						end
+					end
+				end
+				task.wait(0.5)
+			end
+		end)
+	end
+})
+
 BWGTab:Button({
 	Title="Weapon Shop",
 	Callback=function()
