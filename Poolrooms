@@ -1,0 +1,103 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+
+Lighting.Ambient = Color3.fromRGB(90,110,120)
+Lighting.Brightness = 2
+Lighting.FogEnd = 120
+Lighting.FogColor = Color3.fromRGB(80,110,120)
+
+local WALL_TEXTURE = "rbxassetid://10417808411"
+local FLOOR_TEXTURE = "rbxassetid://10417808411"
+local CEILING_TEXTURE = "rbxassetid://10417808411"
+
+local CELL = 60
+local HEIGHT = 35
+local RADIUS = 3
+
+local generated = {}
+
+local function tex(p,id,face)
+	local t = Instance.new("Texture")
+	t.Texture = id
+	t.Face = face
+	t.StudsPerTileU = 6
+	t.StudsPerTileV = 6
+	t.Parent = p
+end
+
+local function part(size,pos,color,mat)
+	local p = Instance.new("Part")
+	p.Size = size
+	p.Position = pos
+	p.Anchored = true
+	p.Color = color or Color3.fromRGB(170,200,210)
+	p.Material = mat or Enum.Material.SmoothPlastic
+	p.Parent = workspace
+	return p
+end
+
+local function poolroom(origin)
+	local floor = part(Vector3.new(CELL,1,CELL),origin)
+	tex(floor,FLOOR_TEXTURE,Enum.NormalId.Top)
+
+	local ceil = part(Vector3.new(CELL,1,CELL),origin+Vector3.new(0,HEIGHT,0))
+	tex(ceil,CEILING_TEXTURE,Enum.NormalId.Bottom)
+
+	for _,v in ipairs({
+		Vector3.new(0,HEIGHT/2,CELL/2),
+		Vector3.new(0,HEIGHT/2,-CELL/2),
+		Vector3.new(CELL/2,HEIGHT/2,0),
+		Vector3.new(-CELL/2,HEIGHT/2,0)
+	}) do
+		if math.random() < 0.6 then
+			local w = part(Vector3.new(CELL,HEIGHT,1),origin+v)
+			if math.abs(v.X) > 0 then
+				w.Size = Vector3.new(1,HEIGHT,CELL)
+			end
+			tex(w,WALL_TEXTURE,Enum.NormalId.Front)
+			tex(w,WALL_TEXTURE,Enum.NormalId.Back)
+		end
+	end
+
+	if math.random() < 0.5 then
+		part(Vector3.new(CELL-6,6,CELL-6),origin+Vector3.new(0,3,0),Color3.fromRGB(60,120,140),Enum.Material.Water)
+	end
+end
+
+local function infinitePool(origin)
+	for i=1,180 do
+		part(Vector3.new(300,20,300),origin-Vector3.new(0,i*20,0),Color3.new(0,0,0))
+	end
+end
+
+local function gen(x,z)
+	local key = x..":"..z
+	if generated[key] then return end
+	generated[key] = true
+
+	local base = Vector3.new(x*CELL,0,z*CELL)
+
+	if math.random(1,90) == 1 then
+		infinitePool(base)
+	else
+		poolroom(base)
+	end
+end
+
+RunService.Heartbeat:Connect(function()
+	for _,p in pairs(Players:GetPlayers()) do
+		local c = p.Character
+		if c and c:FindFirstChild("HumanoidRootPart") then
+			local pos = c.HumanoidRootPart.Position
+			local cx = math.floor(pos.X/CELL)
+			local cz = math.floor(pos.Z/CELL)
+
+			for x=-RADIUS,RADIUS do
+				for z=-RADIUS,RADIUS do
+					gen(cx+x,cz+z)
+				end
+			end
+		end
+	end
+end)
