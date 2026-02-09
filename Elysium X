@@ -519,7 +519,9 @@ BWGTab:Toggle({
 	Value=false,
 	Callback=function(v)
 		local RunService = game:GetService("RunService")
+		local Players = game:GetService("Players")
 		local Camera = workspace.CurrentCamera
+		local LocalPlayer = Players.LocalPlayer
 		local Smoothness = 0.12
 		local MonstersList = {
 			SkinStealer=true,
@@ -536,73 +538,38 @@ BWGTab:Toggle({
 
 		if not v then return end
 
+		local rayParams = RaycastParams.new()
+		rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+
 		_G.__AIMBOT_MONSTERS = RunService.RenderStepped:Connect(function()
+			local character = LocalPlayer.Character
+			if character then
+				rayParams.FilterDescendantsInstances = {character}
+			end
+
 			local closest
 			local dist = math.huge
+			local camPos = Camera.CFrame.Position
 
 			for _,obj in ipairs(workspace:GetChildren()) do
 				if MonstersList[obj.Name] then
 					local part = obj:FindFirstChildWhichIsA("BasePart", true)
 					if part then
-						local d = (Camera.CFrame.Position - part.Position).Magnitude
-						if d < dist then
-							dist = d
-							closest = part
+						local dir = part.Position - camPos
+						local result = workspace:Raycast(camPos, dir, rayParams)
+						if result and result.Instance:IsDescendantOf(obj) then
+							local d = dir.Magnitude
+							if d < dist then
+								dist = d
+								closest = part
+							end
 						end
 					end
 				end
 			end
 
 			if closest then
-				local target = CFrame.new(Camera.CFrame.Position, closest.Position)
-				Camera.CFrame = Camera.CFrame:Lerp(target, Smoothness)
-			end
-		end)
-	end
-})
-
-BWGTab:Toggle({
-	Title="Proximity Aimbot (Requires Aimbot)",
-	Value=false,
-	Callback=function(v)
-		local RunService = game:GetService("RunService")
-		local Camera = workspace.CurrentCamera
-		local MaxDistance = 40
-		local Smoothness = 0.12
-		local MonstersList = {
-			SkinStealer=true,
-			Smiler=true,
-			Hound=true,
-			PartyGoer=true,
-			Insanity=true
-		}
-
-		if _G.__AIMBOT_CLOSE then
-			_G.__AIMBOT_CLOSE:Disconnect()
-			_G.__AIMBOT_CLOSE = nil
-		end
-
-		if not v then return end
-
-		_G.__AIMBOT_CLOSE = RunService.RenderStepped:Connect(function()
-			local closest
-			local dist = MaxDistance
-
-			for _,obj in ipairs(workspace:GetChildren()) do
-				if MonstersList[obj.Name] then
-					local part = obj:FindFirstChildWhichIsA("BasePart", true)
-					if part then
-						local d = (Camera.CFrame.Position - part.Position).Magnitude
-						if d < dist then
-							dist = d
-							closest = part
-						end
-					end
-				end
-			end
-
-			if closest then
-				local target = CFrame.new(Camera.CFrame.Position, closest.Position)
+				local target = CFrame.new(camPos, closest.Position)
 				Camera.CFrame = Camera.CFrame:Lerp(target, Smoothness)
 			end
 		end)
