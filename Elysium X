@@ -19,7 +19,7 @@ Window = WindUI:CreateWindow({
 
 	KeySystem = {
 		Key = { "260126" },
-		Note = "[H?ELP]",
+		Note = "Currently in Beta",
 		SaveKey = false,
 	},
 })
