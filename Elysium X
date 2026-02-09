@@ -473,54 +473,37 @@ BWGTab:Toggle({
 	Title="ESP Monsters",
 	Value=false,
 	Callback=function(v)
-		local Players = game:GetService("Players")
-		local LocalPlayer = Players.LocalPlayer
 		local MonstersList = {
-			["SkinStealer"]=true,
-			["Smiler"]=true,
-			["Hound"]=true,
-			["PartyGoer"]=true
+			SkinStealer=true,
+			Smiler=true,
+			Hound=true,
+			PartyGoer=true
 		}
 
 		if not _G.__ESP_MONSTERS then
-			_G.__ESP_MONSTERS = {highlights = {}, conns = {}}
+			_G.__ESP_MONSTERS = {highlights={}}
 		end
 		local state = _G.__ESP_MONSTERS
 
-		for _,h in ipairs(state.highlights) do if h then h:Destroy() end end
-		for _,c in ipairs(state.conns) do if c then c:Disconnect() end end
+		for _,h in ipairs(state.highlights) do
+			if h then h:Destroy() end
+		end
 		state.highlights = {}
-		state.conns = {}
 
 		if not v then return end
 
-		local folder = workspace:FindFirstChild("Monsters")
-		if not folder then return end
-
-		local function apply(model)
-			if not model:IsA("Model") then return end
-			if not MonstersList[model.Name] then return end
-			local h = Instance.new("Highlight")
-			h.Adornee = model
-			h.FillColor = Color3.fromRGB(255,0,0)
-			h.OutlineColor = Color3.fromRGB(255,0,0)
-			h.FillTransparency = 0.5
-			h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-			h.Parent = model
-			table.insert(state.highlights, h)
-		end
-
-		for _,m in ipairs(folder:GetChildren()) do apply(m) end
-		table.insert(state.conns, folder.ChildAdded:Connect(apply))
-		table.insert(state.conns, folder.ChildRemoved:Connect(function(m)
-			for i,h in ipairs(state.highlights) do
-				if h.Adornee == m then
-					h:Destroy()
-					table.remove(state.highlights,i)
-					break
-				end
+		for _,obj in ipairs(workspace:GetChildren()) do
+			if MonstersList[obj.Name] then
+				local h = Instance.new("Highlight")
+				h.Adornee = obj
+				h.FillColor = Color3.fromRGB(255,0,0)
+				h.OutlineColor = Color3.fromRGB(255,0,0)
+				h.FillTransparency = 0.5
+				h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+				h.Parent = obj
+				table.insert(state.highlights, h)
 			end
-		end))
+		end
 	end
 })
 
@@ -528,14 +511,13 @@ BWGTab:Toggle({
 	Title="Aimbot Monsters",
 	Value=false,
 	Callback=function(v)
-		local Players = game:GetService("Players")
 		local RunService = game:GetService("RunService")
 		local Camera = workspace.CurrentCamera
 		local MonstersList = {
-			["SkinStealer"]=true,
-			["Smiler"]=true,
-			["Hound"]=true,
-			["PartyGoer"]=true
+			SkinStealer=true,
+			Smiler=true,
+			Hound=true,
+			PartyGoer=true
 		}
 
 		if _G.__AIMBOT_MONSTERS then
@@ -545,16 +527,13 @@ BWGTab:Toggle({
 
 		if not v then return end
 
-		local folder = workspace:FindFirstChild("Monsters")
-		if not folder then return end
-
 		_G.__AIMBOT_MONSTERS = RunService.RenderStepped:Connect(function()
 			local closest
 			local dist = math.huge
 
-			for _,m in ipairs(folder:GetChildren()) do
-				if m:IsA("Model") and MonstersList[m.Name] then
-					local part = m:FindFirstChild("Head") or m.PrimaryPart
+			for _,obj in ipairs(workspace:GetChildren()) do
+				if MonstersList[obj.Name] then
+					local part = obj:FindFirstChildWhichIsA("BasePart", true)
 					if part then
 						local d = (Camera.CFrame.Position - part.Position).Magnitude
 						if d < dist then
