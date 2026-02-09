@@ -477,7 +477,8 @@ BWGTab:Toggle({
 			SkinStealer=true,
 			Smiler=true,
 			Hound=true,
-			PartyGoer=true
+			PartyGoer=true,
+			Insanity=true
 		}
 
 		if not _G.__ESP_MONSTERS then
@@ -524,7 +525,8 @@ BWGTab:Toggle({
 			SkinStealer=true,
 			Smiler=true,
 			Hound=true,
-			PartyGoer=true
+			PartyGoer=true,
+			Insanity=true
 		}
 
 		if _G.__AIMBOT_MONSTERS then
