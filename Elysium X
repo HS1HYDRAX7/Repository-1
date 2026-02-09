@@ -562,6 +562,54 @@ BWGTab:Toggle({
 })
 
 BWGTab:Toggle({
+	Title="Proximity Aimbot (Requires Aimbot)",
+	Value=false,
+	Callback=function(v)
+		local RunService = game:GetService("RunService")
+		local Camera = workspace.CurrentCamera
+		local MaxDistance = 40
+		local Smoothness = 0.12
+		local MonstersList = {
+			SkinStealer=true,
+			Smiler=true,
+			Hound=true,
+			PartyGoer=true,
+			Insanity=true
+		}
+
+		if _G.__AIMBOT_CLOSE then
+			_G.__AIMBOT_CLOSE:Disconnect()
+			_G.__AIMBOT_CLOSE = nil
+		end
+
+		if not v then return end
+
+		_G.__AIMBOT_CLOSE = RunService.RenderStepped:Connect(function()
+			local closest
+			local dist = MaxDistance
+
+			for _,obj in ipairs(workspace:GetChildren()) do
+				if MonstersList[obj.Name] then
+					local part = obj:FindFirstChildWhichIsA("BasePart", true)
+					if part then
+						local d = (Camera.CFrame.Position - part.Position).Magnitude
+						if d < dist then
+							dist = d
+							closest = part
+						end
+					end
+				end
+			end
+
+			if closest then
+				local target = CFrame.new(Camera.CFrame.Position, closest.Position)
+				Camera.CFrame = Camera.CFrame:Lerp(target, Smoothness)
+			end
+		end)
+	end
+})
+
+BWGTab:Toggle({
 	Title = "Inf Ammo",
 	Callback = function(state)
 		if not state then return end
