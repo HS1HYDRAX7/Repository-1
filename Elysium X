@@ -562,7 +562,7 @@ BWGTab:Toggle({
 })
 
 BWGTab:Button({
-	Title="Weapon Shop Teleport",
+	Title="Weapon Shop",
 	Callback=function()
 		local Players = game:GetService("Players")
 		local LocalPlayer = Players.LocalPlayer
