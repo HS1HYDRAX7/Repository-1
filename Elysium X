@@ -576,7 +576,7 @@ BWGTab:Toggle({
 	end
 })
 
-BWGTab:Toggle({
+BWGTab:Button({
 	Title = "Inf Ammo",
 	Icon = "infinity",
     Callback = function(state)
