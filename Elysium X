@@ -561,6 +561,27 @@ BWGTab:Toggle({
 	end
 })
 
+BWGTab:Button({
+	Title="Teleport To The Weapon Shop",
+	Callback=function()
+		local Players = game:GetService("Players")
+		local LocalPlayer = Players.LocalPlayer
+		local Character = LocalPlayer.Character
+		if not Character then return end
+		local HRP = Character:FindFirstChild("HumanoidRootPart")
+		if not HRP then return end
+
+		local store = workspace:FindFirstChild("StoreOwner")
+		if not store then return end
+
+		local part = store:IsA("BasePart") and store or store:FindFirstChildWhichIsA("BasePart", true)
+		if not part then return end
+
+		local cf = part.CFrame
+		HRP.CFrame = CFrame.new(cf.Position + cf.LookVector * 5, cf.Position)
+	end
+})
+
 OthersTab:Button({
 	Title="Infinite Yield",
 	Callback=function()
