@@ -19,7 +19,7 @@ Window = WindUI:CreateWindow({
 
 	KeySystem = {
 		Key = { "260126" },
-		Note = "Currently in beta",
+		Note = "One should not hate oneself, for every individual has value and deserves self-respect",
 		SaveKey = false,
 	},
 })
