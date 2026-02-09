@@ -576,14 +576,14 @@ BWGTab:Toggle({
 	end
 })
 
-BWGTab:Button({
+BWGTab:Toggle({
 	Title = "Inf Ammo",
-	Icon = "infinity",
-    Callback = function(state)
+	Callback = function(state)
+		_G.__INF_AMMO = state
 		if not state then return end
 
 		task.spawn(function()
-			while state do
+			while _G.__INF_AMMO do
 				for _, v in pairs(getgc(true)) do
 					if type(v) == "table" and rawget(v, "Mag") then
 						if v.Mag ~= math.huge then
