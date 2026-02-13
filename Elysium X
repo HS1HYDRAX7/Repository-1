@@ -578,7 +578,8 @@ BWGTab:Toggle({
 
 BWGTab:Button({
 	Title = "Inf Ammo",
-	Callback = function()
+	Locked = true,
+Callback = function()
 		task.spawn(function()
 			for _, v in pairs(getgc(true)) do
 				if type(v) == "table" and rawget(v, "Mag") then
