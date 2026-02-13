@@ -577,22 +577,6 @@ BWGTab:Toggle({
 })
 
 BWGTab:Button({
-	Title = "Inf Ammo",
-	Locked = true,
-Callback = function()
-		task.spawn(function()
-			for _, v in pairs(getgc(true)) do
-				if type(v) == "table" and rawget(v, "Mag") then
-					if v.Mag ~= math.huge then
-						v.Mag = math.huge
-					end
-				end
-			end
-		end)
-	end
-})
-
-BWGTab:Button({
 	Title="Weapon Shop",
 	Callback=function()
 		local Players = game:GetService("Players")
