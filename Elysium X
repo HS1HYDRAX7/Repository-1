@@ -502,13 +502,6 @@ OthersTab:Button({
     end
 })
 
-OthersTab:Button({
-	Title="Web Browser",
-	Callback=function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/HS1HYDRAX7/Repository-1/refs/heads/main/T.E.S.T"))()
-    end
-})
-
 OthersTab:Toggle({
 Title="Better Camera",
 Value=false,
