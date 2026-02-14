@@ -33,6 +33,7 @@ Window:Tag({
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
 local FPESTab = Window:Tab({ Title = "FPE Survival", Icon = "book" })
 local BWGTab = Window:Tab({ Title = "Backrooms with Guns", Icon = "layers" })
+local RandomTab = Window:Tab({ Title = "Random", Icon = "clipboard-plus" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "link" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -597,6 +598,126 @@ BWGTab:Button({
 	end
 })
 
+RandomTab:Input({
+Title = "TTPI",
+Desc = "Teleport To Game Using The Place Id",
+Value = "",
+InputIcon = "link",
+Type = "Input",
+Placeholder = "PLACE ID",
+Callback = function(input)
+local id = tonumber(input) or tonumber(string.match(input, "%d+"))
+getgenv().TargetPlaceId = id
+end
+})
+
+RandomTab:Button({
+Title = "Teleport",
+Callback = function()
+if getgenv().TargetPlaceId then
+WindUI:Notify({
+Title = "TTPI NOTIFICATION",
+Content = "TELEPORTING...",
+Duration = 5,
+Icon = "target",
+})
+task.wait(5)
+game:GetService("TeleportService"):Teleport(
+getgenv().TargetPlaceId,
+game:GetService("Players").LocalPlayer
+)
+end
+end
+})
+
+RandomTab:Input({
+Title = "Boombox",
+Desc = "Music ID",
+Value = "",
+InputIcon = "music",
+Type = "Input",
+Placeholder = "MUSIC ID",
+Callback = function(input)
+getgenv().MusicId = tonumber(input)
+end
+})
+
+local Paragraph = RandomTab:Paragraph({
+Title = "Now Playing",
+Desc = "00:00/00:00",
+Color = "Red",
+Image = "",
+ImageSize = 30,
+Thumbnail = "",
+ThumbnailSize = 80,
+Locked = false,
+})
+
+RandomTab:Toggle({
+Title="Reverb",
+Value=false,
+Callback=function(v)
+local sound=getgenv().Sound
+if not sound then return end
+if v then
+if not getgenv().Reverb then
+local reverb=Instance.new("ReverbSoundEffect")
+reverb.DecayTime=2
+reverb.Density=0.8
+reverb.Diffusion=0.9
+reverb.WetLevel=0.4
+reverb.DryLevel=1
+reverb.Parent=sound
+getgenv().Reverb=reverb
+end
+else
+if getgenv().Reverb then
+getgenv().Reverb:Destroy()
+getgenv().Reverb=nil
+end
+end
+end
+})
+
+RandomTab:Button({
+Title = "Play",
+Callback = function()
+if not getgenv().Sound then
+local sound = Instance.new("Sound")
+sound.Name = "EmbeddedBoombox"
+sound.Parent = game:GetService("SoundService")
+getgenv().Sound = sound
+end
+if getgenv().MusicId then
+local sound = getgenv().Sound
+sound.SoundId = "rbxassetid://" .. getgenv().MusicId
+sound:Play()
+task.spawn(function()
+while sound and sound.IsPlaying do
+local current = math.floor(sound.TimePosition)
+local total = math.floor(sound.TimeLength)
+local function fmt(t)
+return string.format("%02d:%02d", math.floor(t / 60), t % 60)
+end
+if Paragraph and Paragraph.SetDesc then
+Paragraph:SetDesc(fmt(current) .. "/" .. fmt(total))
+end
+task.wait(1)
+end
+end)
+end
+end
+})
+
+RandomTab:Button({
+Title = "Pause",
+Callback = function()
+if getgenv().Sound then
+getgenv().Sound:Pause()
+end
+end
+})
+
 OthersTab:Button({
 	Title="Infinite Yield",
 	Callback=function()
@@ -859,126 +980,6 @@ OthersTab:Toggle({
 			if gui then gui:Destroy() end
 		end
 	end
-})
-
-OthersTab:Input({
-Title = "TTPI",
-Desc = "Teleport To Game Using The Place Id",
-Value = "",
-InputIcon = "link",
-Type = "Input",
-Placeholder = "PLACE ID",
-Callback = function(input)
-local id = tonumber(input) or tonumber(string.match(input, "%d+"))
-getgenv().TargetPlaceId = id
-end
-})
-
-OthersTab:Button({
-Title = "Teleport",
-Callback = function()
-if getgenv().TargetPlaceId then
-WindUI:Notify({
-Title = "TTPI NOTIFICATION",
-Content = "TELEPORTING...",
-Duration = 5,
-Icon = "target",
-})
-task.wait(5)
-game:GetService("TeleportService"):Teleport(
-getgenv().TargetPlaceId,
-game:GetService("Players").LocalPlayer
-)
-end
-end
-})
-
-OthersTab:Input({
-Title = "Boombox",
-Desc = "Music ID",
-Value = "",
-InputIcon = "music",
-Type = "Input",
-Placeholder = "MUSIC ID",
-Callback = function(input)
-getgenv().MusicId = tonumber(input)
-end
-})
-
-local Paragraph = OthersTab:Paragraph({
-Title = "Now Playing",
-Desc = "00:00/00:00",
-Color = "Red",
-Image = "",
-ImageSize = 30,
-Thumbnail = "",
-ThumbnailSize = 80,
-Locked = false,
-})
-
-OthersTab:Toggle({
-Title="Reverb",
-Value=false,
-Callback=function(v)
-local sound=getgenv().Sound
-if not sound then return end
-if v then
-if not getgenv().Reverb then
-local reverb=Instance.new("ReverbSoundEffect")
-reverb.DecayTime=2
-reverb.Density=0.8
-reverb.Diffusion=0.9
-reverb.WetLevel=0.4
-reverb.DryLevel=1
-reverb.Parent=sound
-getgenv().Reverb=reverb
-end
-else
-if getgenv().Reverb then
-getgenv().Reverb:Destroy()
-getgenv().Reverb=nil
-end
-end
-end
-})
-
-OthersTab:Button({
-Title = "Play",
-Callback = function()
-if not getgenv().Sound then
-local sound = Instance.new("Sound")
-sound.Name = "EmbeddedBoombox"
-sound.Parent = game:GetService("SoundService")
-getgenv().Sound = sound
-end
-if getgenv().MusicId then
-local sound = getgenv().Sound
-sound.SoundId = "rbxassetid://" .. getgenv().MusicId
-sound:Play()
-task.spawn(function()
-while sound and sound.IsPlaying do
-local current = math.floor(sound.TimePosition)
-local total = math.floor(sound.TimeLength)
-local function fmt(t)
-return string.format("%02d:%02d", math.floor(t / 60), t % 60)
-end
-if Paragraph and Paragraph.SetDesc then
-Paragraph:SetDesc(fmt(current) .. "/" .. fmt(total))
-end
-task.wait(1)
-end
-end)
-end
-end
-})
-
-OthersTab:Button({
-Title = "Pause",
-Callback = function()
-if getgenv().Sound then
-getgenv().Sound:Pause()
-end
-end
 })
 
 local clockParagraph = InfoTab:Paragraph({ Title="Clock", Desc="--:--:--" })
