@@ -907,8 +907,6 @@ local Paragraph = OthersTab:Paragraph({
 Title = "Now Playing",
 Desc = "00:00/00:00",
 Color = "Red",
-Thumbnail = "rbxassetid://82261742945922",
-ThumbnailSize = 120,
 Locked = false,
 })
 
