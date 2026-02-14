@@ -171,45 +171,6 @@ FPESTab:Toggle({
 })
 
 FPESTab:Toggle({
-	Title = "Infinite Rage",
-	Value = false,
-	Callback = function(v)
-		infRage = v
-		if rageConn then
-			rageConn:Disconnect()
-			rageConn = nil
-		end
-
-		local function applyInfRage()
-			local Character_upvr = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
-			local max = Character_upvr:GetAttribute("MaxRage") or 100
-			Character_upvr:SetAttribute("Rage", max)
-
-			rageConn = RunService.Heartbeat:Connect(function()
-				if not infRage then return end
-				if Character_upvr and Character_upvr.Parent then
-					Character_upvr:SetAttribute("Rage", max)
-				end
-			end)
-		end
-
-		if v then
-			applyInfRage()
-			Players.LocalPlayer.CharacterAdded:Connect(function()
-				if infRage then
-					applyInfRage()
-				end
-			end)
-		else
-			if rageConn then
-				rageConn:Disconnect()
-				rageConn = nil
-			end
-		end
-	end
-})
-
-FPESTab:Toggle({
 	Title="ESP Teachers",
 	Value=false,
 	Callback=function(v)
