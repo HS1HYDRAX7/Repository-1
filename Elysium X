@@ -171,6 +171,45 @@ FPESTab:Toggle({
 })
 
 FPESTab:Toggle({
+	Title = "Infinite Rage",
+	Value = false,
+	Callback = function(v)
+		infRage = v
+		if rageConn then
+			rageConn:Disconnect()
+			rageConn = nil
+		end
+
+		local function applyInfRage()
+			local Character_upvr = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+			local max = Character_upvr:GetAttribute("MaxRage") or 100
+			Character_upvr:SetAttribute("Rage", max)
+
+			rageConn = RunService.Heartbeat:Connect(function()
+				if not infRage then return end
+				if Character_upvr and Character_upvr.Parent then
+					Character_upvr:SetAttribute("Rage", max)
+				end
+			end)
+		end
+
+		if v then
+			applyInfRage()
+			Players.LocalPlayer.CharacterAdded:Connect(function()
+				if infRage then
+					applyInfRage()
+				end
+			end)
+		else
+			if rageConn then
+				rageConn:Disconnect()
+				rageConn = nil
+			end
+		end
+	end
+})
+
+FPESTab:Toggle({
 	Title="ESP Teachers",
 	Value=false,
 	Callback=function(v)
@@ -302,122 +341,6 @@ FPESTab:Toggle({
 				if h.Adornee == m then h:Destroy() table.remove(state.highlights,i) break end
 			end
 		end))
-	end
-})
-
-FPESTab:Toggle({
-	Title="Fake Miss Circle Enrage Mode",
-	Value=false,
-	Callback=function(v)
-		if not CallbackState then CallbackState = {} end
-		local state = CallbackState
-
-		local Players = game:GetService("Players")
-		local lp = Players.LocalPlayer
-
-		if state.vfx then state.vfx:Destroy() state.vfx = nil end
-		if state.sound1 then state.sound1:Stop() state.sound1:Destroy() state.sound1 = nil end
-		if state.sound2 then state.sound2:Stop() state.sound2:Destroy() state.sound2 = nil end
-
-		if not v then return end
-
-		local vfx = Instance.new("ColorCorrectionEffect")
-		vfx.TintColor = Color3.fromRGB(255,50,50)
-		vfx.Contrast = 0.2
-		vfx.Saturation = -0.5
-		vfx.Parent = workspace.CurrentCamera
-		state.vfx = vfx
-
-		local sound1 = Instance.new("Sound", workspace)
-		sound1.SoundId = "rbxassetid://17548871120"
-		sound1.Volume = 1
-		sound1:Play()
-		state.sound1 = sound1
-
-		local sound2 = Instance.new("Sound", workspace)
-		sound2.SoundId = "rbxassetid://17548873081"
-		sound2.Volume = 1
-		state.sound2 = sound2
-
-		task.delay(2, function()
-			if state.sound2 then
-				state.sound2:Play()
-			end
-		end)
-
-		WindUI:Notify({
-			Title="Miss Circle",
-			Content="You failed",
-			Duration=2,
-			Icon="rbxassetid://17224686449"
-		})
-	end
-})
-
-FPESTab:Toggle({
-	Title="Fake Blackout",
-	Value=false,
-	Callback=function(v)
-		if not CallbackState then CallbackState = {} end
-		local state = CallbackState
-
-		local Players = game:GetService("Players")
-		local RunService = game:GetService("RunService")
-		local lp = Players.LocalPlayer
-		local camera = workspace.CurrentCamera
-
-		if state.vfx then state.vfx:Destroy() state.vfx = nil end
-		if state.gui then state.gui:Destroy() state.gui = nil end
-		if state.conn then state.conn:Disconnect() state.conn = nil end
-		if state.sound1 then state.sound1:Stop() state.sound1:Destroy() state.sound1 = nil end
-		if state.sound2 then state.sound2:Stop() state.sound2:Destroy() state.sound2 = nil end
-
-		if not v then return end
-
-		local vfx = Instance.new("ColorCorrectionEffect")
-		vfx.TintColor = Color3.fromRGB(255,255,255)
-		vfx.Contrast = 0.25
-		vfx.Saturation = -1
-		vfx.Brightness = 0.03
-		vfx.Parent = camera
-		state.vfx = vfx
-
-		local gui = Instance.new("ScreenGui")
-		gui.IgnoreGuiInset = true
-		gui.ResetOnSpawn = false
-		gui.Parent = lp:WaitForChild("PlayerGui")
-		state.gui = gui
-
-		local scan = Instance.new("ImageLabel")
-		scan.Size = UDim2.fromScale(1,1)
-		scan.BackgroundTransparency = 1
-		scan.Image = "rbxassetid://1316045217"
-		scan.ImageTransparency = 0.88
-		scan.ScaleType = Enum.ScaleType.Tile
-		scan.TileSize = UDim2.new(1,0,0,6)
-		scan.Parent = gui
-
-		state.conn = RunService.RenderStepped:Connect(function()
-			scan.Position = UDim2.fromOffset(0, math.random(-2,2))
-		end)
-
-		local sound1 = Instance.new("Sound", workspace)
-		sound1.SoundId = "rbxassetid://133703811807029"
-		sound1.Volume = 1
-		sound1:Play()
-		state.sound1 = sound1
-
-		local sound2 = Instance.new("Sound", workspace)
-		sound2.SoundId = "rbxassetid://116634437254886"
-		sound2.Volume = 1
-		sound2.Looped = true
-		state.sound2 = sound2
-
-		task.delay(2, function()
-			if state.sound2 then
-				state.sound2:Play()
-			end
-		end)
 	end
 })
 
