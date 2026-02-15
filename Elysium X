@@ -31,8 +31,8 @@ Window:Tag({
 })
 
 local PlayerTab = Window:Tab({ Title = "Player", Icon = "user-star" })
+local DoorsTab = Window:Tab({ Title = "Doors", Icon = "door-open" })
 local FPESTab = Window:Tab({ Title = "FPE Survival", Icon = "book" })
-local BWGTab = Window:Tab({ Title = "Backrooms with Guns", Icon = "layers" })
 local OthersTab = Window:Tab({ Title = "Others", Icon = "link" })
 local InfoTab = Window:Tab({ Title = "Information", Icon = "info" })
 
@@ -130,6 +130,118 @@ RunService.Heartbeat:Connect(function()
 		hrp.CFrame=hrp.CFrame+(dir*(cframeSpeed*0.08))
 	end
 end)
+
+DoorsTab:Toggle({
+	Title="ESP Doors",
+	Value=false,
+	Callback=function(v)
+		local Players = game:GetService("Players")
+		local LocalPlayer = Players.LocalPlayer
+
+		if not _G.__ESP_DOORS then
+			_G.__ESP_DOORS = {highlights = {}, conns = {}}
+		end
+		local state = _G.__ESP_DOORS
+
+		for _,h in ipairs(state.highlights) do if h then h:Destroy() end end
+		for _,c in ipairs(state.conns) do if c then c:Disconnect() end end
+		state.highlights = {}
+		state.conns = {}
+
+		if not v then return end
+
+		local function apply(obj)
+			if not obj:IsA("Model") and not obj:IsA("BasePart") then return end
+			if LocalPlayer.Character and obj == LocalPlayer.Character then return end
+			local h = Instance.new("Highlight")
+			h.Adornee = obj
+			h.FillColor = Color3.fromRGB(0,170,255)
+			h.OutlineColor = Color3.fromRGB(0,170,255)
+			h.FillTransparency = 0.5
+			h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+			h.Parent = obj
+			table.insert(state.highlights, h)
+		end
+
+		for _,d in ipairs(workspace:GetDescendants()) do
+			if d.Name == "Door" then
+				apply(d)
+			end
+		end
+
+		table.insert(state.conns, workspace.DescendantAdded:Connect(function(d)
+			if d.Name == "Door" then
+				apply(d)
+			end
+		end))
+
+		table.insert(state.conns, workspace.DescendantRemoving:Connect(function(d)
+			for i,h in ipairs(state.highlights) do
+				if h.Adornee == d then
+					h:Destroy()
+					table.remove(state.highlights,i)
+					break
+				end
+			end
+		end))
+	end
+})
+
+DoorsTab:Toggle({
+	Title="ESP Keys",
+	Value=false,
+	Callback=function(v)
+		local Players = game:GetService("Players")
+		local LocalPlayer = Players.LocalPlayer
+
+		if not _G.__ESP_KEYS then
+			_G.__ESP_KEYS = {highlights = {}, conns = {}}
+		end
+		local state = _G.__ESP_KEYS
+
+		for _,h in ipairs(state.highlights) do if h then h:Destroy() end end
+		for _,c in ipairs(state.conns) do if c then c:Disconnect() end end
+		state.highlights = {}
+		state.conns = {}
+
+		if not v then return end
+
+		local function apply(obj)
+			if not obj:IsA("Model") and not obj:IsA("BasePart") then return end
+			if LocalPlayer.Character and obj == LocalPlayer.Character then return end
+			local h = Instance.new("Highlight")
+			h.Adornee = obj
+			h.FillColor = Color3.fromRGB(255,215,0)
+			h.OutlineColor = Color3.fromRGB(255,215,0)
+			h.FillTransparency = 0.3
+			h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+			h.Parent = obj
+			table.insert(state.highlights, h)
+		end
+
+		for _,k in ipairs(workspace:GetDescendants()) do
+			if k.Name == "KeyObtain" then
+				apply(k)
+			end
+		end
+
+		table.insert(state.conns, workspace.DescendantAdded:Connect(function(k)
+			if k.Name == "KeyObtain" then
+				apply(k)
+			end
+		end))
+
+		table.insert(state.conns, workspace.DescendantRemoving:Connect(function(k)
+			for i,h in ipairs(state.highlights) do
+				if h.Adornee == k then
+					h:Destroy()
+					table.remove(state.highlights,i)
+					break
+				end
+			end
+		end))
+	end
+})
 
 FPESTab:Toggle({
 	Title = "Infinite Stamina",
@@ -302,134 +414,6 @@ FPESTab:Toggle({
 				if h.Adornee == m then h:Destroy() table.remove(state.highlights,i) break end
 			end
 		end))
-	end
-})
-
-BWGTab:Toggle({
-	Title="ESP Monsters",
-	Value=false,
-	Callback=function(v)
-		local MonstersList = {
-			SkinStealer=true,
-			Smiler=true,
-			Hound=true,
-			PartyGoer=true,
-			Insanity=true
-		}
-
-		if not _G.__ESP_MONSTERS then
-			_G.__ESP_MONSTERS = {highlights={}, conns={}}
-		end
-		local state = _G.__ESP_MONSTERS
-
-		for _,h in ipairs(state.highlights) do if h then h:Destroy() end end
-		for _,c in ipairs(state.conns) do if c then c:Disconnect() end end
-		state.highlights = {}
-		state.conns = {}
-
-		if not v then return end
-
-		local function apply(obj)
-			if MonstersList[obj.Name] then
-				local h = Instance.new("Highlight")
-				h.Adornee = obj
-				h.FillColor = Color3.fromRGB(152,6,6)
-				h.OutlineColor = Color3.fromRGB(132,5,5)
-				h.FillTransparency = 0.5
-				h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-				h.Parent = obj
-				table.insert(state.highlights, h)
-			end
-		end
-
-		for _,obj in ipairs(workspace:GetChildren()) do
-			apply(obj)
-		end
-
-		table.insert(state.conns, workspace.ChildAdded:Connect(apply))
-	end
-})
-
-BWGTab:Toggle({
-	Title="Aimbot Monsters",
-	Value=false,
-	Callback=function(v)
-		local RunService = game:GetService("RunService")
-		local Players = game:GetService("Players")
-		local Camera = workspace.CurrentCamera
-		local LocalPlayer = Players.LocalPlayer
-		local Smoothness = 0.12
-		local MonstersList = {
-			SkinStealer=true,
-			Smiler=true,
-			Hound=true,
-			PartyGoer=true,
-			Insanity=true
-		}
-
-		if _G.__AIMBOT_MONSTERS then
-			_G.__AIMBOT_MONSTERS:Disconnect()
-			_G.__AIMBOT_MONSTERS = nil
-		end
-
-		if not v then return end
-
-		local rayParams = RaycastParams.new()
-		rayParams.FilterType = Enum.RaycastFilterType.Blacklist
-
-		_G.__AIMBOT_MONSTERS = RunService.RenderStepped:Connect(function()
-			local character = LocalPlayer.Character
-			if character then
-				rayParams.FilterDescendantsInstances = {character}
-			end
-
-			local closest
-			local dist = math.huge
-			local camPos = Camera.CFrame.Position
-
-			for _,obj in ipairs(workspace:GetChildren()) do
-				if MonstersList[obj.Name] then
-					local part = obj:FindFirstChildWhichIsA("BasePart", true)
-					if part then
-						local dir = part.Position - camPos
-						local result = workspace:Raycast(camPos, dir, rayParams)
-						if result and result.Instance:IsDescendantOf(obj) then
-							local d = dir.Magnitude
-							if d < dist then
-								dist = d
-								closest = part
-							end
-						end
-					end
-				end
-			end
-
-			if closest then
-				local target = CFrame.new(camPos, closest.Position)
-				Camera.CFrame = Camera.CFrame:Lerp(target, Smoothness)
-			end
-		end)
-	end
-})
-
-BWGTab:Button({
-	Title="Weapon Shop",
-	Callback=function()
-		local Players = game:GetService("Players")
-		local LocalPlayer = Players.LocalPlayer
-		local Character = LocalPlayer.Character
-		if not Character then return end
-		local HRP = Character:FindFirstChild("HumanoidRootPart")
-		if not HRP then return end
-
-		local store = workspace:FindFirstChild("StoreOwner")
-		if not store then return end
-
-		local part = store:IsA("BasePart") and store or store:FindFirstChildWhichIsA("BasePart", true)
-		if not part then return end
-
-		local cf = part.CFrame
-		HRP.CFrame = CFrame.new(cf.Position + cf.LookVector * 5, cf.Position)
 	end
 })
 
