@@ -53,7 +53,7 @@ dragHandle.Size = UDim2.new(1,0,0,8)
 dragHandle.BackgroundTransparency = 1
 
 local textBox = Instance.new("TextBox", main)
-textBox.Size = UDim2.new(0.58,0,0,38)
+textBox.Size = UDim2.new(0.66,0,0,38)
 textBox.Position = UDim2.new(0.04,0,0.5,-19)
 textBox.BackgroundColor3 = Color3.fromRGB(18,18,18)
 textBox.TextColor3 = Color3.fromRGB(235,235,235)
@@ -66,23 +66,13 @@ Instance.new("UICorner", textBox).CornerRadius = UDim.new(0,22)
 
 local searchButton = Instance.new("TextButton", main)
 searchButton.Size = UDim2.new(0,42,0,42)
-searchButton.Position = UDim2.new(0.64,0,0.5,-21)
+searchButton.Position = UDim2.new(0.73,0,0.5,-21)
 searchButton.Text = "↗"
 searchButton.Font = Enum.Font.GothamBold
 searchButton.TextSize = 20
 searchButton.TextColor3 = Color3.fromRGB(255,180,180)
 searchButton.BackgroundColor3 = Color3.fromRGB(30,0,0)
 Instance.new("UICorner", searchButton).CornerRadius = UDim.new(1,0)
-
-local musicButton = Instance.new("TextButton", main)
-musicButton.Size = UDim2.new(0,42,0,42)
-musicButton.Position = UDim2.new(0.73,0,0.5,-21)
-musicButton.Text = "🔊"
-musicButton.Font = Enum.Font.GothamBold
-musicButton.TextSize = 18
-musicButton.TextColor3 = Color3.fromRGB(255,180,180)
-musicButton.BackgroundColor3 = Color3.fromRGB(20,20,20)
-Instance.new("UICorner", musicButton).CornerRadius = UDim.new(1,0)
 
 local tabsButton = Instance.new("TextButton", main)
 tabsButton.Size = UDim2.new(0,42,0,42)
@@ -93,6 +83,35 @@ tabsButton.TextSize = 26
 tabsButton.TextColor3 = Color3.fromRGB(255,180,180)
 tabsButton.BackgroundColor3 = Color3.fromRGB(20,20,20)
 Instance.new("UICorner", tabsButton).CornerRadius = UDim.new(1,0)
+
+local musicButton = Instance.new("TextButton", main)
+musicButton.Size = UDim2.new(0,42,0,42)
+musicButton.Position = UDim2.new(0.91,0,0.5,-21)
+musicButton.Text = "🔊"
+musicButton.Font = Enum.Font.GothamBold
+musicButton.TextSize = 18
+musicButton.TextColor3 = Color3.fromRGB(255,180,180)
+musicButton.BackgroundColor3 = Color3.fromRGB(20,20,20)
+Instance.new("UICorner", musicButton).CornerRadius = UDim.new(1,0)
+
+local tabsGui = Instance.new("Frame", screenGui)
+tabsGui.Size = UDim2.new(0,420,0,260)
+tabsGui.Position = UDim2.new(0.5,-210,1,0)
+tabsGui.BackgroundColor3 = Color3.fromRGB(14,14,14)
+tabsGui.Visible = false
+tabsGui.BorderSizePixel = 0
+Instance.new("UICorner", tabsGui).CornerRadius = UDim.new(0,26)
+Instance.new("UIStroke", tabsGui).Color = Color3.fromRGB(200,40,40)
+
+local closeTabs = Instance.new("TextButton", tabsGui)
+closeTabs.Size = UDim2.new(0,36,0,36)
+closeTabs.Position = UDim2.new(1,-44,0,8)
+closeTabs.Text = "X"
+closeTabs.Font = Enum.Font.GothamBold
+closeTabs.TextSize = 18
+closeTabs.TextColor3 = Color3.fromRGB(255,200,200)
+closeTabs.BackgroundColor3 = Color3.fromRGB(40,0,0)
+Instance.new("UICorner", closeTabs).CornerRadius = UDim.new(1,0)
 
 local musicGui = Instance.new("Frame", screenGui)
 musicGui.Size = UDim2.new(0,420,0,300)
@@ -114,7 +133,7 @@ closeMusic.BackgroundColor3 = Color3.fromRGB(40,0,0)
 Instance.new("UICorner", closeMusic).CornerRadius = UDim.new(1,0)
 
 local musicBox = Instance.new("TextBox", musicGui)
-musicBox.Size = UDim2.new(0.9,0,0,38)
+musicBox.Size = UDim2.new(0.9,0,0,36)
 musicBox.Position = UDim2.new(0.05,0,0.18,0)
 musicBox.BackgroundColor3 = Color3.fromRGB(18,18,18)
 musicBox.TextColor3 = Color3.fromRGB(235,235,235)
@@ -126,59 +145,66 @@ Instance.new("UICorner", musicBox)
 
 local infoLabel = Instance.new("TextLabel", musicGui)
 infoLabel.Size = UDim2.new(0.9,0,0,30)
-infoLabel.Position = UDim2.new(0.05,0,0.33,0)
-infoLabel.BackgroundTransparency = 1
-infoLabel.TextColor3 = Color3.fromRGB(220,220,220)
+infoLabel.Position = UDim2.new(0.05,0,0.32,0)
+infoLabel.Text = "00:00 / Music"
 infoLabel.Font = Enum.Font.Gotham
 infoLabel.TextSize = 13
-infoLabel.Text = "--:-- | --"
-
-local backBtn = Instance.new("TextButton", musicGui)
-backBtn.Size = UDim2.new(0.2,0,0,36)
-backBtn.Position = UDim2.new(0.2,0,0.45,0)
-backBtn.Text = "⏪"
-backBtn.Font = Enum.Font.GothamBold
-backBtn.TextSize = 20
-backBtn.BackgroundColor3 = Color3.fromRGB(25,25,25)
-Instance.new("UICorner", backBtn)
-
-local forwardBtn = Instance.new("TextButton", musicGui)
-forwardBtn.Size = UDim2.new(0.2,0,0,36)
-forwardBtn.Position = UDim2.new(0.6,0,0.45,0)
-forwardBtn.Text = "⏩"
-forwardBtn.Font = Enum.Font.GothamBold
-forwardBtn.TextSize = 20
-forwardBtn.BackgroundColor3 = Color3.fromRGB(25,25,25)
-Instance.new("UICorner", forwardBtn)
-
-local playBtn = Instance.new("TextButton", musicGui)
-playBtn.Size = UDim2.new(0.3,0,0,36)
-playBtn.Position = UDim2.new(0.1,0,0.62,0)
-playBtn.Text = "▶️"
-playBtn.Font = Enum.Font.GothamBold
-playBtn.TextSize = 18
-playBtn.BackgroundColor3 = Color3.fromRGB(30,0,0)
-Instance.new("UICorner", playBtn)
-
-local pauseBtn = Instance.new("TextButton", musicGui)
-pauseBtn.Size = UDim2.new(0.3,0,0,36)
-pauseBtn.Position = UDim2.new(0.6,0,0.62,0)
-pauseBtn.Text = "⏹️"
-pauseBtn.Font = Enum.Font.GothamBold
-pauseBtn.TextSize = 18
-pauseBtn.BackgroundColor3 = Color3.fromRGB(30,0,0)
-Instance.new("UICorner", pauseBtn)
+infoLabel.TextColor3 = Color3.fromRGB(220,220,220)
+infoLabel.BackgroundTransparency = 1
 
 local reverbToggle = Instance.new("TextButton", musicGui)
-reverbToggle.Size = UDim2.new(0.6,0,0,32)
-reverbToggle.Position = UDim2.new(0.2,0,0.8,0)
+reverbToggle.Size = UDim2.new(0.9,0,0,30)
+reverbToggle.Position = UDim2.new(0.05,0,0.45,0)
 reverbToggle.Text = "Reverb: OFF"
 reverbToggle.Font = Enum.Font.Gotham
 reverbToggle.TextSize = 13
+reverbToggle.TextColor3 = Color3.fromRGB(230,230,230)
 reverbToggle.BackgroundColor3 = Color3.fromRGB(25,25,25)
 Instance.new("UICorner", reverbToggle)
 
+local backBtn = Instance.new("TextButton", musicGui)
+backBtn.Size = UDim2.new(0.42,0,0,32)
+backBtn.Position = UDim2.new(0.05,0,0.6,0)
+backBtn.Text = "⏪"
+backBtn.Font = Enum.Font.GothamBold
+backBtn.TextSize = 18
+backBtn.TextColor3 = Color3.fromRGB(230,230,230)
+backBtn.BackgroundColor3 = Color3.fromRGB(25,25,25)
+Instance.new("UICorner", backBtn)
+
+local nextBtn = Instance.new("TextButton", musicGui)
+nextBtn.Size = UDim2.new(0.42,0,0,32)
+nextBtn.Position = UDim2.new(0.53,0,0.6,0)
+nextBtn.Text = "⏩"
+nextBtn.Font = Enum.Font.GothamBold
+nextBtn.TextSize = 18
+nextBtn.TextColor3 = Color3.fromRGB(230,230,230)
+nextBtn.BackgroundColor3 = Color3.fromRGB(25,25,25)
+Instance.new("UICorner", nextBtn)
+
+local playBtn = Instance.new("TextButton", musicGui)
+playBtn.Size = UDim2.new(0.42,0,0,32)
+playBtn.Position = UDim2.new(0.05,0,0.75,0)
+playBtn.Text = "▶️"
+playBtn.Font = Enum.Font.GothamBold
+playBtn.TextSize = 18
+playBtn.TextColor3 = Color3.fromRGB(230,230,230)
+playBtn.BackgroundColor3 = Color3.fromRGB(25,25,25)
+Instance.new("UICorner", playBtn)
+
+local pauseBtn = Instance.new("TextButton", musicGui)
+pauseBtn.Size = UDim2.new(0.42,0,0,32)
+pauseBtn.Position = UDim2.new(0.53,0,0.75,0)
+pauseBtn.Text = "⏹️"
+pauseBtn.Font = Enum.Font.GothamBold
+pauseBtn.TextSize = 18
+pauseBtn.TextColor3 = Color3.fromRGB(230,230,230)
+pauseBtn.BackgroundColor3 = Color3.fromRGB(25,25,25)
+Instance.new("UICorner", pauseBtn)
+
 local sound = Instance.new("Sound", SoundService)
+sound.Looped = false
+
 local reverb = Instance.new("ReverbSoundEffect", sound)
 reverb.Enabled = false
 
@@ -211,7 +237,7 @@ backBtn.MouseButton1Click:Connect(function()
 	sound.TimePosition = math.max(0,sound.TimePosition-10)
 end)
 
-forwardBtn.MouseButton1Click:Connect(function()
+nextBtn.MouseButton1Click:Connect(function()
 	sound.TimePosition = sound.TimePosition+10
 end)
 
@@ -220,21 +246,8 @@ reverbToggle.MouseButton1Click:Connect(function()
 	reverbToggle.Text = reverb.Enabled and "Reverb: ON" or "Reverb: OFF"
 end)
 
-task.spawn(function()
-	while true do
-		if sound.IsPlaying then
-			infoLabel.Text = string.format("%02d:%02d | %s",
-				math.floor(sound.TimePosition/60),
-				math.floor(sound.TimePosition%60),
-				sound.Name
-			)
-		end
-		task.wait(0.5)
-	end
-end)
-
-searchButton.MouseButton1Click:Connect(function()
-	open_browser(formatUrl(textBox.Text))
+sound.TimePositionChanged:Connect(function()
+	infoLabel.Text = string.format("%02d:%02d / Music",math.floor(sound.TimePosition/60),math.floor(sound.TimePosition%60))
 end)
 
 local dragging,dragStart,startPos=false
