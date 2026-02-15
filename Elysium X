@@ -435,6 +435,82 @@ Callback=function(v)
 end
 })
 
+OthersTab:Toggle({
+Title="Rainbow Trail",
+Icon = "coins",
+Value=false,
+Callback=function(v)
+	local Players=game:GetService("Players")
+	local RunService=game:GetService("RunService")
+	local player=Players.LocalPlayer
+
+	getgenv()._RainbowTrailState=getgenv()._RainbowTrailState or {
+		trails={},
+		conn=nil,
+		hue=0
+	}
+
+	local state=getgenv()._RainbowTrailState
+
+	local function clear()
+		if state.conn then
+			state.conn:Disconnect()
+			state.conn=nil
+		end
+		for _,t in ipairs(state.trails) do
+			if t and t.Parent then
+				t:Destroy()
+			end
+		end
+		state.trails={}
+	end
+
+	if v then
+		if not player.Character then return end
+		clear()
+		for _,part in ipairs(player.Character:GetDescendants()) do
+			if part:IsA("BasePart") and part.Name~="HumanoidRootPart" then
+				local a0=Instance.new("Attachment")
+				a0.Position=Vector3.new(0,part.Size.Y/2,0)
+				a0.Parent=part
+
+				local a1=Instance.new("Attachment")
+				a1.Position=Vector3.new(0,-part.Size.Y/2,0)
+				a1.Parent=part
+
+				local trail=Instance.new("Trail")
+				trail.Attachment0=a0
+				trail.Attachment1=a1
+				trail.Lifetime=0.25
+				trail.MinLength=0.05
+				trail.FaceCamera=true
+				trail.LightEmission=1
+				trail.Transparency=NumberSequence.new({
+					NumberSequenceKeypoint.new(0,0),
+					NumberSequenceKeypoint.new(0.7,0.4),
+					NumberSequenceKeypoint.new(1,1)
+				})
+				trail.Parent=part
+
+				table.insert(state.trails,trail)
+			end
+		end
+
+		state.conn=RunService.RenderStepped:Connect(function(dt)
+			state.hue=(state.hue+dt*0.4)%1
+			local seq=ColorSequence.new(Color3.fromHSV(state.hue,1,1))
+			for _,t in ipairs(state.trails) do
+				if t then
+					t.Color=seq
+				end
+			end
+		end)
+	else
+		clear()
+	end
+end
+})
+
 OthersTab:Input({
 Title = "Boombox",
 Value = "",
