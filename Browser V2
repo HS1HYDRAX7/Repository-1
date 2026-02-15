@@ -15,7 +15,7 @@ local function open_browser(url)
 	GuiService:BroadcastNotification(HttpService:JSONEncode({
 		presentationStyle = 2,
 		url = tostring(url),
-		title = "Startpage Browser",
+		title = "Browser V2 |By Fusion|",
 		visible = true
 	}), 20)
 end
