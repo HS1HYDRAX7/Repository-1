@@ -240,39 +240,6 @@ musicBox.TextSize = 14
 musicBox.Text = ""
 Instance.new("UICorner", musicBox)
 
-local function formatTime(t)
-	local m = math.floor(t / 60)
-	local s = math.floor(t % 60)
-	return string.format("%02d:%02d", m, s)
-end
-
-local infoLabel = Instance.new("TextLabel", musicGui)
-infoLabel.Size = UDim2.new(1,-40,0,36)
-infoLabel.Position = UDim2.new(0,20,0,64)
-infoLabel.BackgroundTransparency = 1
-infoLabel.TextWrapped = true
-infoLabel.TextTruncate = Enum.TextTruncate.AtEnd
-infoLabel.TextXAlignment = Enum.TextXAlignment.Center
-infoLabel.TextYAlignment = Enum.TextYAlignment.Center
-infoLabel.TextColor3 = Color3.fromRGB(230,230,230)
-infoLabel.Font = Enum.Font.Gotham
-infoLabel.TextSize = 14
-infoLabel.Text = "00:00 / 00:00 | Unknown"
-
-task.spawn(function()
-	while true do
-		if sound and sound.IsLoaded then
-			infoLabel.Text =
-				formatTime(sound.TimePosition)
-				.. " / "
-				.. formatTime(sound.TimeLength)
-				.. " | "
-				.. (sound.Name ~= "" and sound.Name or "Unknown")
-		end
-		task.wait(0.5)
-	end
-end)
-
 local backBtn = Instance.new("TextButton", musicGui)
 backBtn.Size = UDim2.new(0.42,0,0,32)
 backBtn.Position = UDim2.new(0.05,0,0.55,0)
