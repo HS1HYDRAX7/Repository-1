@@ -612,163 +612,6 @@ Callback=function(v)
 end
 })
 
-OthersTab:Toggle({
-	Title = "Shiftlock",
-	Value = false,
-	Callback = function(v)
-		local Players = game:GetService("Players")
-		local RunService = game:GetService("RunService")
-		local UserInputService = game:GetService("UserInputService")
-
-		local Player = Players.LocalPlayer
-		local Camera = workspace.CurrentCamera
-
-		if v then
-			if getgenv().MobileShiftlockLoaded then return end
-			getgenv().MobileShiftlockLoaded = true
-
-			getgenv().ShiftlockEnabled = false
-
-			local ScreenGui = Instance.new("ScreenGui")
-			ScreenGui.Name = "MobileShiftlockGUI"
-			ScreenGui.ResetOnSpawn = false
-			ScreenGui.Parent = Player:WaitForChild("PlayerGui")
-
-			local ToggleButton = Instance.new("ImageButton")
-			ToggleButton.Name = "ShiftlockButton"
-			ToggleButton.Parent = ScreenGui
-			ToggleButton.BackgroundTransparency = 1
-			ToggleButton.Size = UDim2.new(0, 60, 0, 60)
-			ToggleButton.Position = UDim2.new(0.85, -30, 0.5, -30)
-			ToggleButton.Image = "rbxassetid://80450981243325"
-
-			local dragging = false
-			local dragInput
-			local dragStart
-			local startPos
-
-			local function update(input)
-				local delta = input.Position - dragStart
-				ToggleButton.Position = UDim2.new(
-					startPos.X.Scale,
-					startPos.X.Offset + delta.X,
-					startPos.Y.Scale,
-					startPos.Y.Offset + delta.Y
-				)
-			end
-
-			ToggleButton.InputBegan:Connect(function(input)
-				if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-					dragging = true
-					dragStart = input.Position
-					startPos = ToggleButton.Position
-					input.Changed:Connect(function()
-						if input.UserInputState == Enum.UserInputState.End then
-							dragging = false
-						end
-					end)
-				end
-			end)
-
-			ToggleButton.InputChanged:Connect(function(input)
-				if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-					dragInput = input
-				end
-			end)
-
-			getgenv().ShiftlockDragConn = UserInputService.InputChanged:Connect(function(input)
-				if input == dragInput and dragging then
-					update(input)
-				end
-			end)
-
-			local CameraOffset = Vector3.new(1.7, 0.5, 0)
-
-			ToggleButton.Activated:Connect(function()
-				getgenv().ShiftlockEnabled = not getgenv().ShiftlockEnabled
-				if getgenv().ShiftlockEnabled then
-					ToggleButton.Image = "rbxassetid://101910992099753"
-					if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-						Player.Character.Humanoid.AutoRotate = false
-					end
-				else
-					ToggleButton.Image = "rbxassetid://80450981243325"
-					if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-						Player.Character.Humanoid.AutoRotate = true
-						Player.Character.Humanoid.CameraOffset = Vector3.zero
-					end
-				end
-			end)
-
-			getgenv().ShiftlockRender = RunService.RenderStepped:Connect(function()
-				if not getgenv().ShiftlockEnabled then return end
-				local char = Player.Character
-				if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") then
-					char.Humanoid.CameraOffset = CameraOffset
-					local root = char.HumanoidRootPart
-					local look = Camera.CFrame.LookVector
-					root.CFrame = CFrame.new(
-						root.Position,
-						root.Position + Vector3.new(look.X, 0, look.Z)
-					)
-				end
-			end)
-		else
-			getgenv().MobileShiftlockLoaded = false
-			getgenv().ShiftlockEnabled = false
-
-			if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-				Player.Character.Humanoid.AutoRotate = true
-				Player.Character.Humanoid.CameraOffset = Vector3.zero
-			end
-
-			if getgenv().ShiftlockRender then
-				pcall(function() getgenv().ShiftlockRender:Disconnect() end)
-				getgenv().ShiftlockRender = nil
-			end
-
-			if getgenv().ShiftlockDragConn then
-				pcall(function() getgenv().ShiftlockDragConn:Disconnect() end)
-				getgenv().ShiftlockDragConn = nil
-			end
-
-			local gui = Player.PlayerGui:FindFirstChild("MobileShiftlockGUI")
-			if gui then gui:Destroy() end
-		end
-	end
-})
-
-OthersTab:Input({
-Title = "TTPI",
-Value = "",
-InputIcon = "link",
-Type = "Input",
-Placeholder = "PLACE ID",
-Callback = function(input)
-local id = tonumber(input) or tonumber(string.match(input, "%d+"))
-getgenv().TargetPlaceId = id
-end
-})
-
-OthersTab:Button({
-Title = "Teleport",
-Callback = function()
-if getgenv().TargetPlaceId then
-WindUI:Notify({
-Title = "TTPI NOTIFICATION",
-Content = "TELEPORTING...",
-Duration = 5,
-Icon = "target",
-})
-task.wait(5)
-game:GetService("TeleportService"):Teleport(
-getgenv().TargetPlaceId,
-game:GetService("Players").LocalPlayer
-)
-end
-end
-})
-
 OthersTab:Input({
 Title = "Boombox",
 Value = "",
@@ -808,6 +651,48 @@ else
 if getgenv().Reverb then
 getgenv().Reverb:Destroy()
 getgenv().Reverb=nil
+end
+end
+end
+})
+
+OthersTab:Toggle({
+Title="HoodTrap",
+Value=false,
+Callback=function(v)
+local sound=getgenv().Sound
+if not sound then return end
+if v then
+if not getgenv().HoodTrap then
+local reverb=Instance.new("ReverbSoundEffect")
+reverb.DecayTime=3.5
+reverb.Density=1
+reverb.Diffusion=1
+reverb.WetLevel=0.6
+reverb.DryLevel=0.8
+reverb.Parent=sound
+
+local distortion=Instance.new("DistortionSoundEffect")
+distortion.Level=0.35
+distortion.Parent=sound
+
+local eq=Instance.new("EqualizerSoundEffect")
+eq.LowGain=10
+eq.MidGain=-2
+eq.HighGain=-6
+eq.Parent=sound
+
+sound.PlaybackSpeed=0.9
+
+getgenv().HoodTrap={reverb,distortion,eq}
+end
+else
+if getgenv().HoodTrap then
+for _,e in pairs(getgenv().HoodTrap) do
+e:Destroy()
+end
+getgenv().HoodTrap=nil
+sound.PlaybackSpeed=1
 end
 end
 end
