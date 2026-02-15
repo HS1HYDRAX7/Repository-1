@@ -100,7 +100,7 @@ destroyButton.Position = UDim2.new(0.88,0,0.5,-21)
 destroyButton.Text = "✖"
 destroyButton.Font = Enum.Font.GothamBold
 destroyButton.TextSize = 20
-destroyButton.TextColor3 = Color3.fromRGB(255,180,180)
+destroyButton.TextColor3 = Color3.fromRGB(0,0,0)
 destroyButton.BackgroundColor3 = Color3.fromRGB(200,40,40)
 Instance.new("UICorner", destroyButton).CornerRadius = UDim.new(1,0)
 
