@@ -113,7 +113,7 @@ list.Padding = UDim.new(0,8)
 
 local buttonsFrame = Instance.new("Frame", tabsGui)
 buttonsFrame.Size = UDim2.new(0.9,0,0,90)
-buttonsFrame.Position = UDim2.new(0.05,0,0.65,0)
+buttonsFrame.Position = UDim2.new(0.05,0,0.52,0)
 buttonsFrame.BackgroundTransparency = 1
 
 local function makeBtn(txt,y)
