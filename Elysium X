@@ -496,9 +496,9 @@ OthersTab:Button({
 })
 
 OthersTab:Button({
-	Title="FE Gazer Animation Editor",
+	Title="Browser V2",
 	Callback=function()
-		loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Gazer-FE-Animation-Editor-14508"))()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/HS1HYDRAX7/Repository-1/refs/heads/main/Browser%20V2"))()
     end
 })
 
