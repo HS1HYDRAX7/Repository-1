@@ -5,19 +5,16 @@ local UserInputService = game:GetService("UserInputService")
 
 local function formatUrl(input)
 	input = input:match("^%s*(.-)%s*$")
-	if input == "" then
-		return nil, "Enter a URL or search term."
-	end
-	if input:match("^https?://") then
-		return input, nil
-	end
-	return "https://www.startpage.com/search?q=" .. input:gsub(" ", "+"), nil
+	if input == "" then return nil end
+	if input:match("^https?://") then return input end
+	return "https://www.startpage.com/search?q=" .. input:gsub(" ", "+")
 end
 
 local function open_browser(url)
+	if not url then return end
 	local info = {
 		presentationStyle = 2,
-		url = tostring(url or ""),
+		url = tostring(url),
 		title = "Startpage Browser",
 		visible = true
 	}
@@ -27,264 +24,203 @@ end
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "BrowserGui"
+local screenGui = Instance.new("ScreenGui", playerGui)
 screenGui.ResetOnSpawn = false
-screenGui.Parent = playerGui
 
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 520, 0, 70)
-frame.Position = UDim2.new(0.5, -260, 1, 100)
-frame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-frame.BorderSizePixel = 0
-frame.Parent = screenGui
+local main = Instance.new("Frame", screenGui)
+main.Size = UDim2.new(0,520,0,70)
+main.Position = UDim2.new(0.5,-260,1,120)
+main.BackgroundColor3 = Color3.fromRGB(12,12,12)
+main.BorderSizePixel = 0
+Instance.new("UICorner", main).CornerRadius = UDim.new(0,30)
 
-local frameCorner = Instance.new("UICorner")
-frameCorner.CornerRadius = UDim.new(0, 30)
-frameCorner.Parent = frame
+local stroke = Instance.new("UIStroke", main)
+stroke.Color = Color3.fromRGB(200,40,40)
+stroke.Thickness = 2
 
-local frameStroke = Instance.new("UIStroke")
-frameStroke.Thickness = 2
-frameStroke.Color = Color3.fromRGB(200, 40, 40)
-frameStroke.Transparency = 0.2
-frameStroke.Parent = frame
-
-local glow = Instance.new("UIStroke")
+local glow = Instance.new("UIStroke", main)
+glow.Color = Color3.fromRGB(255,60,60)
 glow.Thickness = 6
-glow.Color = Color3.fromRGB(255, 60, 60)
 glow.Transparency = 0.85
-glow.Parent = frame
 
-TweenService:Create(
-	glow,
-	TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
-	{Transparency = 0.65}
-):Play()
+TweenService:Create(glow,TweenInfo.new(2,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut,-1,true),{Transparency=0.6}):Play()
 
-local uiGradient = Instance.new("UIGradient")
-uiGradient.Color = ColorSequence.new{
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 0, 0)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 5, 5))
-}
-uiGradient.Rotation = 90
-uiGradient.Parent = frame
+TweenService:Create(main,TweenInfo.new(0.6,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{
+	Position = UDim2.new(0.5,-260,0.85,-35)
+}):Play()
 
-local dragHandle = Instance.new("Frame")
-dragHandle.Size = UDim2.new(1, 0, 0, 8)
+local dragHandle = Instance.new("Frame", main)
+dragHandle.Size = UDim2.new(1,0,0,8)
 dragHandle.BackgroundTransparency = 1
-dragHandle.Parent = frame
 
-local textBox = Instance.new("TextBox")
-textBox.Size = UDim2.new(0.68, 0, 0, 38)
-textBox.Position = UDim2.new(0.04, 0, 0.5, -19)
-textBox.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
-textBox.TextColor3 = Color3.fromRGB(235, 235, 235)
+local textBox = Instance.new("TextBox", main)
+textBox.Size = UDim2.new(0.66,0,0,38)
+textBox.Position = UDim2.new(0.04,0,0.5,-19)
+textBox.BackgroundColor3 = Color3.fromRGB(18,18,18)
+textBox.TextColor3 = Color3.fromRGB(235,235,235)
 textBox.PlaceholderText = "Search or paste URL"
-textBox.PlaceholderColor3 = Color3.fromRGB(140, 140, 140)
 textBox.Font = Enum.Font.Gotham
 textBox.TextSize = 15
-textBox.TextXAlignment = Enum.TextXAlignment.Left
 textBox.ClearTextOnFocus = false
-textBox.Parent = frame
+Instance.new("UICorner", textBox).CornerRadius = UDim.new(0,22)
 
-local textCorner = Instance.new("UICorner")
-textCorner.CornerRadius = UDim.new(0, 22)
-textCorner.Parent = textBox
-
-local searchButton = Instance.new("TextButton")
-searchButton.Size = UDim2.new(0, 42, 0, 42)
-searchButton.Position = UDim2.new(0.75, 0, 0.5, -21)
-searchButton.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
+local searchButton = Instance.new("TextButton", main)
+searchButton.Size = UDim2.new(0,42,0,42)
+searchButton.Position = UDim2.new(0.73,0,0.5,-21)
 searchButton.Text = "↗"
 searchButton.Font = Enum.Font.GothamBold
 searchButton.TextSize = 20
-searchButton.TextColor3 = Color3.fromRGB(255, 180, 180)
-searchButton.Parent = frame
+searchButton.TextColor3 = Color3.fromRGB(255,180,180)
+searchButton.BackgroundColor3 = Color3.fromRGB(30,0,0)
+Instance.new("UICorner", searchButton).CornerRadius = UDim.new(1,0)
 
-local searchCorner = Instance.new("UICorner")
-searchCorner.CornerRadius = UDim.new(1, 0)
-searchCorner.Parent = searchButton
+searchButton.MouseEnter:Connect(function()
+	TweenService:Create(searchButton,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(60,0,0)}):Play()
+end)
+searchButton.MouseLeave:Connect(function()
+	TweenService:Create(searchButton,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(30,0,0)}):Play()
+end)
 
-local searchStroke = Instance.new("UIStroke")
-searchStroke.Thickness = 2
-searchStroke.Color = Color3.fromRGB(255, 60, 60)
-searchStroke.Transparency = 0.25
-searchStroke.Parent = searchButton
-
-local tabsButton = Instance.new("ImageButton")
-tabsButton.Size = UDim2.new(0, 42, 0, 42)
-tabsButton.Position = UDim2.new(0.84, 0, 0.5, -21)
-tabsButton.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+local tabsButton = Instance.new("ImageButton", main)
+tabsButton.Size = UDim2.new(0,32,0,32)
+tabsButton.Position = UDim2.new(0.82,0,0.5,-21)
 tabsButton.Image = "rbxassetid://140267785051233"
-tabsButton.Parent = frame
+tabsButton.BackgroundColor3 = Color3.fromRGB(20,20,20)
+Instance.new("UICorner", tabsButton).CornerRadius = UDim.new(1,0)
 
-local tabsCorner = Instance.new("UICorner")
-tabsCorner.CornerRadius = UDim.new(1, 0)
-tabsCorner.Parent = tabsButton
-
-local tabsStroke = Instance.new("UIStroke")
-tabsStroke.Thickness = 2
-tabsStroke.Color = Color3.fromRGB(255, 60, 60)
-tabsStroke.Transparency = 0.35
-tabsStroke.Parent = tabsButton
-
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, -40, 0, 18)
-statusLabel.Position = UDim2.new(0.04, 0, 1, -20)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Text = ""
-statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.TextSize = 12
-statusLabel.TextXAlignment = Enum.TextXAlignment.Left
-statusLabel.Parent = frame
-
-TweenService:Create(
-	frame,
-	TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-	{Position = UDim2.new(0.5, -260, 0.85, -35)}
-):Play()
-
-local tabsGui = Instance.new("Frame")
-tabsGui.Size = UDim2.new(0, 480, 0, 300)
-tabsGui.Position = UDim2.new(0.5, -240, 0.5, -150)
-tabsGui.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+local tabsGui = Instance.new("Frame", screenGui)
+tabsGui.Size = UDim2.new(0,520,0,340)
+tabsGui.Position = UDim2.new(0.5,-260,1,0)
+tabsGui.BackgroundColor3 = Color3.fromRGB(14,14,14)
 tabsGui.Visible = false
-tabsGui.Parent = screenGui
+tabsGui.BorderSizePixel = 0
+Instance.new("UICorner", tabsGui).CornerRadius = UDim.new(0,30)
+Instance.new("UIStroke", tabsGui).Color = Color3.fromRGB(200,40,40)
 
-local tabsCornerMain = Instance.new("UICorner")
-tabsCornerMain.CornerRadius = UDim.new(0, 28)
-tabsCornerMain.Parent = tabsGui
+local closeTabs = Instance.new("TextButton", tabsGui)
+closeTabs.Size = UDim2.new(0,40,0,40)
+closeTabs.Position = UDim2.new(1,-50,0,10)
+closeTabs.Text = "X"
+closeTabs.Font = Enum.Font.GothamBold
+closeTabs.TextSize = 18
+closeTabs.TextColor3 = Color3.fromRGB(255,200,200)
+closeTabs.BackgroundColor3 = Color3.fromRGB(40,0,0)
+Instance.new("UICorner", closeTabs).CornerRadius = UDim.new(1,0)
 
-local tabsStrokeMain = Instance.new("UIStroke")
-tabsStrokeMain.Thickness = 2
-tabsStrokeMain.Color = Color3.fromRGB(200, 40, 40)
-tabsStrokeMain.Parent = tabsGui
+local sliderFrame = Instance.new("ScrollingFrame", tabsGui)
+sliderFrame.Size = UDim2.new(0.9,0,0,160)
+sliderFrame.Position = UDim2.new(0.05,0,0.18,0)
+sliderFrame.CanvasSize = UDim2.new(0,0,0,0)
+sliderFrame.ScrollBarImageTransparency = 1
+sliderFrame.BackgroundTransparency = 1
 
-local closeTabsGui = Instance.new("TextButton")
-closeTabsGui.Size = UDim2.new(0, 36, 0, 36)
-closeTabsGui.Position = UDim2.new(1, -44, 0, 8)
-closeTabsGui.Text = "X"
-closeTabsGui.Font = Enum.Font.GothamBold
-closeTabsGui.TextSize = 18
-closeTabsGui.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
-closeTabsGui.TextColor3 = Color3.fromRGB(255, 200, 200)
-closeTabsGui.Parent = tabsGui
-Instance.new("UICorner", closeTabsGui).CornerRadius = UDim.new(1, 0)
+local list = Instance.new("UIListLayout", sliderFrame)
+list.Padding = UDim.new(0,8)
 
-local addTabButton = Instance.new("TextButton")
-addTabButton.Size = UDim2.new(0.9, 0, 0, 42)
-addTabButton.Position = UDim2.new(0.05, 0, 0.25, 0)
-addTabButton.Text = "Adicionar Guia"
-addTabButton.Font = Enum.Font.Gotham
-addTabButton.TextSize = 14
-addTabButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-addTabButton.TextColor3 = Color3.fromRGB(220, 220, 220)
-addTabButton.Parent = tabsGui
-Instance.new("UICorner", addTabButton)
+local buttonsFrame = Instance.new("Frame", tabsGui)
+buttonsFrame.Size = UDim2.new(0.9,0,0,120)
+buttonsFrame.Position = UDim2.new(0.05,0,0.7,0)
+buttonsFrame.BackgroundTransparency = 1
 
-local openTabButton = Instance.new("TextButton")
-openTabButton.Size = UDim2.new(0.9, 0, 0, 42)
-openTabButton.Position = UDim2.new(0.05, 0, 0.45, 0)
-openTabButton.Text = "Abrir Guia"
-openTabButton.Font = Enum.Font.Gotham
-openTabButton.TextSize = 14
-openTabButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-openTabButton.TextColor3 = Color3.fromRGB(220, 220, 220)
-openTabButton.Parent = tabsGui
-Instance.new("UICorner", openTabButton)
+local function makeBtn(txt,y)
+	local b = Instance.new("TextButton", buttonsFrame)
+	b.Size = UDim2.new(1,0,0,36)
+	b.Position = UDim2.new(0,0,y,0)
+	b.Text = txt
+	b.Font = Enum.Font.Gotham
+	b.TextSize = 14
+	b.TextColor3 = Color3.fromRGB(230,230,230)
+	b.BackgroundColor3 = Color3.fromRGB(25,25,25)
+	Instance.new("UICorner", b)
+	return b
+end
 
-local closeTabButton = Instance.new("TextButton")
-closeTabButton.Size = UDim2.new(0.9, 0, 0, 42)
-closeTabButton.Position = UDim2.new(0.05, 0, 0.65, 0)
-closeTabButton.Text = "Fechar Guia"
-closeTabButton.Font = Enum.Font.Gotham
-closeTabButton.TextSize = 14
-closeTabButton.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-closeTabButton.TextColor3 = Color3.fromRGB(220, 220, 220)
-closeTabButton.Parent = tabsGui
-Instance.new("UICorner", closeTabButton)
+local addTab = makeBtn("Adicionar Guia",0)
+local openTab = makeBtn("Abrir Guia",0.33)
+local closeTab = makeBtn("Fechar Guia",0.66)
 
 local tabs = {}
-local selectedTab
+local selected
+
+local function refreshTabs()
+	for _,v in ipairs(sliderFrame:GetChildren()) do
+		if v:IsA("TextButton") then v:Destroy() end
+	end
+	for i,text in ipairs(tabs) do
+		local b = Instance.new("TextButton", sliderFrame)
+		b.Size = UDim2.new(1,0,0,36)
+		b.Text = text
+		b.Font = Enum.Font.Gotham
+		b.TextSize = 14
+		b.TextColor3 = Color3.fromRGB(220,220,220)
+		b.BackgroundColor3 = i==selected and Color3.fromRGB(60,0,0) or Color3.fromRGB(25,25,25)
+		Instance.new("UICorner", b)
+		b.MouseButton1Click:Connect(function()
+			selected = i
+			refreshTabs()
+		end)
+	end
+	task.wait()
+	sliderFrame.CanvasSize = UDim2.new(0,0,0,list.AbsoluteContentSize.Y+10)
+end
 
 tabsButton.MouseButton1Click:Connect(function()
 	tabsGui.Visible = true
+	TweenService:Create(tabsGui,TweenInfo.new(0.5,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{
+		Position = UDim2.new(0.5,-260,0.5,-170)
+	}):Play()
 end)
 
-closeTabsGui.MouseButton1Click:Connect(function()
-	tabsGui.Visible = false
+closeTabs.MouseButton1Click:Connect(function()
+	TweenService:Create(tabsGui,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.In),{
+		Position = UDim2.new(0.5,-260,1,0)
+	}):Play()
+	task.delay(0.4,function() tabsGui.Visible=false end)
 end)
 
-addTabButton.MouseButton1Click:Connect(function()
-	if textBox.Text ~= "" then
-		table.insert(tabs, textBox.Text)
-		selectedTab = #tabs
+addTab.MouseButton1Click:Connect(function()
+	if textBox.Text~="" then
+		table.insert(tabs,textBox.Text)
+		selected=#tabs
+		refreshTabs()
 	end
 end)
 
-openTabButton.MouseButton1Click:Connect(function()
-	if selectedTab and tabs[selectedTab] then
-		local url = formatUrl(tabs[selectedTab])
-		if url then
-			open_browser(url)
-		end
+openTab.MouseButton1Click:Connect(function()
+	if selected and tabs[selected] then
+		open_browser(formatUrl(tabs[selected]))
 	end
 end)
 
-closeTabButton.MouseButton1Click:Connect(function()
-	if selectedTab then
-		table.remove(tabs, selectedTab)
-		selectedTab = #tabs
+closeTab.MouseButton1Click:Connect(function()
+	if selected then
+		table.remove(tabs,selected)
+		selected=nil
+		refreshTabs()
 	end
 end)
 
 searchButton.MouseButton1Click:Connect(function()
-	local url, err = formatUrl(textBox.Text)
-	if err then
-		statusLabel.Text = err
-		statusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-		task.delay(2, function() statusLabel.Text = "" end)
-		return
-	end
-	statusLabel.Text = "Opening..."
-	statusLabel.TextColor3 = Color3.fromRGB(120, 220, 120)
-	open_browser(url)
-	task.delay(2, function() statusLabel.Text = "" end)
+	open_browser(formatUrl(textBox.Text))
 end)
 
-local dragging = false
-local dragStart
-local startPos
+local dragging,dragStart,startPos=false
 
-dragHandle.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		dragging = true
-		dragStart = input.Position
-		startPos = frame.Position
+dragHandle.InputBegan:Connect(function(i)
+	if i.UserInputType==Enum.UserInputType.MouseButton1 then
+		dragging=true
+		dragStart=i.Position
+		startPos=main.Position
 	end
 end)
 
-UserInputService.InputChanged:Connect(function(input)
-	if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-		local delta = input.Position - dragStart
-		frame.Position = UDim2.new(
-			startPos.X.Scale,
-			startPos.X.Offset + delta.X,
-			startPos.Y.Scale,
-			startPos.Y.Offset + delta.Y
-		)
+UserInputService.InputChanged:Connect(function(i)
+	if dragging and i.UserInputType==Enum.UserInputType.MouseMovement then
+		local d=i.Position-dragStart
+		main.Position=UDim2.new(startPos.X.Scale,startPos.X.Offset+d.X,startPos.Y.Scale,startPos.Y.Offset+d.Y)
 	end
 end)
 
-UserInputService.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		dragging = false
-	end
-end)
-
-textBox.FocusLost:Connect(function(enterPressed)
-	if enterPressed then
-		searchButton.MouseButton1Click:Fire()
-	end
+UserInputService.InputEnded:Connect(function(i)
+	if i.UserInputType==Enum.UserInputType.MouseButton1 then dragging=false end
 end)
