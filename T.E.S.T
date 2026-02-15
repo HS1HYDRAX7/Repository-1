@@ -35,8 +35,8 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 520, 0, 70)
-frame.Position = UDim2.new(0.5, -260, 1, 100)
+frame.Size = UDim2.new(0, 560, 0, 70)
+frame.Position = UDim2.new(0.5, -280, 1, 100)
 frame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 frame.BorderSizePixel = 0
 frame.Parent = screenGui
@@ -47,9 +47,15 @@ uiCornerFrame.Parent = frame
 
 local uiStrokeFrame = Instance.new("UIStroke")
 uiStrokeFrame.Thickness = 2
-uiStrokeFrame.Color = Color3.fromRGB(180, 30, 30)
+uiStrokeFrame.Color = Color3.fromRGB(200, 40, 40)
 uiStrokeFrame.Transparency = 0.2
 uiStrokeFrame.Parent = frame
+
+local glow = Instance.new("UIStroke")
+glow.Thickness = 6
+glow.Color = Color3.fromRGB(255, 60, 60)
+glow.Transparency = 0.85
+glow.Parent = frame
 
 local uiGradient = Instance.new("UIGradient")
 uiGradient.Color = ColorSequence.new{
@@ -59,19 +65,13 @@ uiGradient.Color = ColorSequence.new{
 uiGradient.Rotation = 90
 uiGradient.Parent = frame
 
-local glow = Instance.new("UIStroke")
-glow.Thickness = 6
-glow.Color = Color3.fromRGB(255, 60, 60)
-glow.Transparency = 0.85
-glow.Parent = frame
-
 local dragHandle = Instance.new("Frame")
 dragHandle.Size = UDim2.new(1, 0, 0, 8)
 dragHandle.BackgroundTransparency = 1
 dragHandle.Parent = frame
 
 local textBox = Instance.new("TextBox")
-textBox.Size = UDim2.new(0.78, 0, 0, 38)
+textBox.Size = UDim2.new(0.68, 0, 0, 38)
 textBox.Position = UDim2.new(0.04, 0, 0.5, -19)
 textBox.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
 textBox.TextColor3 = Color3.fromRGB(235, 235, 235)
@@ -81,53 +81,57 @@ textBox.Font = Enum.Font.Gotham
 textBox.TextSize = 15
 textBox.ClearTextOnFocus = false
 textBox.TextXAlignment = Enum.TextXAlignment.Left
+textBox.BorderSizePixel = 0
 textBox.Parent = frame
 
 local uiCornerTextBox = Instance.new("UICorner")
 uiCornerTextBox.CornerRadius = UDim.new(0, 22)
 uiCornerTextBox.Parent = textBox
 
-local uiStrokeTextBox = Instance.new("UIStroke")
-uiStrokeTextBox.Thickness = 1.5
-uiStrokeTextBox.Color = Color3.fromRGB(200, 40, 40)
-uiStrokeTextBox.Transparency = 0.4
-uiStrokeTextBox.Parent = textBox
+local searchButton = Instance.new("TextButton")
+searchButton.Size = UDim2.new(0, 42, 0, 42)
+searchButton.Position = UDim2.new(0.75, 0, 0.5, -21)
+searchButton.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
+searchButton.Text = "↗"
+searchButton.Font = Enum.Font.GothamBold
+searchButton.TextSize = 20
+searchButton.TextColor3 = Color3.fromRGB(255, 200, 200)
+searchButton.Parent = frame
 
-local sendButton = Instance.new("TextButton")
-sendButton.Size = UDim2.new(0, 42, 0, 42)
-sendButton.Position = UDim2.new(0.85, 0, 0.5, -21)
-sendButton.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
-sendButton.Text = "↗"
-sendButton.Font = Enum.Font.GothamBold
-sendButton.TextSize = 20
-sendButton.TextColor3 = Color3.fromRGB(255, 180, 180)
-sendButton.Parent = frame
+local uiCornerSearch = Instance.new("UICorner")
+uiCornerSearch.CornerRadius = UDim.new(1, 0)
+uiCornerSearch.Parent = searchButton
 
-local uiCornerButton = Instance.new("UICorner")
-uiCornerButton.CornerRadius = UDim.new(1, 0)
-uiCornerButton.Parent = sendButton
+local uiStrokeSearch = Instance.new("UIStroke")
+uiStrokeSearch.Thickness = 2
+uiStrokeSearch.Color = Color3.fromRGB(255, 70, 70)
+uiStrokeSearch.Transparency = 0.25
+uiStrokeSearch.Parent = searchButton
 
-local uiStrokeButton = Instance.new("UIStroke")
-uiStrokeButton.Thickness = 2
-uiStrokeButton.Color = Color3.fromRGB(255, 60, 60)
-uiStrokeButton.Transparency = 0.25
-uiStrokeButton.Parent = sendButton
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 42, 0, 42)
+closeButton.Position = UDim2.new(0.84, 0, 0.5, -21)
+closeButton.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
+closeButton.Text = "X"
+closeButton.Font = Enum.Font.GothamBlack
+closeButton.TextSize = 18
+closeButton.TextColor3 = Color3.fromRGB(255, 220, 220)
+closeButton.Parent = frame
 
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, -40, 0, 18)
-statusLabel.Position = UDim2.new(0.04, 0, 1, -20)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Text = ""
-statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.TextSize = 12
-statusLabel.TextXAlignment = Enum.TextXAlignment.Left
-statusLabel.Parent = frame
+local uiCornerClose = Instance.new("UICorner")
+uiCornerClose.CornerRadius = UDim.new(1, 0)
+uiCornerClose.Parent = closeButton
+
+local uiStrokeClose = Instance.new("UIStroke")
+uiStrokeClose.Thickness = 2
+uiStrokeClose.Color = Color3.fromRGB(255, 0, 0)
+uiStrokeClose.Transparency = 0.15
+uiStrokeClose.Parent = closeButton
 
 TweenService:Create(
 	frame,
 	TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-	{Position = UDim2.new(0.5, -260, 0.85, -35)}
+	{Position = UDim2.new(0.5, -280, 0.85, -35)}
 ):Play()
 
 TweenService:Create(
@@ -136,30 +140,29 @@ TweenService:Create(
 	{Transparency = 0.65}
 ):Play()
 
-sendButton.MouseEnter:Connect(function()
-	TweenService:Create(sendButton, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(60, 0, 0)}):Play()
-end)
-
-sendButton.MouseLeave:Connect(function()
-	TweenService:Create(sendButton, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(30, 0, 0)}):Play()
-end)
-
-sendButton.MouseButton1Click:Connect(function()
+searchButton.MouseButton1Click:Connect(function()
 	local input = textBox.Text
 	local url, errorMsg = formatUrl(input)
 	if errorMsg then
-		statusLabel.Text = errorMsg
-		statusLabel.TextColor3 = Color3.fromRGB(255, 90, 90)
 		return
 	end
-	statusLabel.Text = "Opening..."
-	statusLabel.TextColor3 = Color3.fromRGB(120, 220, 120)
-	TweenService:Create(frame, TweenInfo.new(0.15), {Size = UDim2.new(0, 520, 0, 74)}):Play()
 	open_browser(url, true)
-	task.delay(2, function()
-		statusLabel.Text = ""
-		TweenService:Create(frame, TweenInfo.new(0.15), {Size = UDim2.new(0, 520, 0, 70)}):Play()
-	end)
+end)
+
+textBox.FocusLost:Connect(function(enterPressed)
+	if enterPressed then
+		searchButton.MouseButton1Click:Fire()
+	end
+end)
+
+closeButton.MouseButton1Click:Connect(function()
+	TweenService:Create(
+		frame,
+		TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
+		{Position = UDim2.new(0.5, -280, 1, 120)}
+	):Play()
+	task.wait(0.3)
+	screenGui:Destroy()
 end)
 
 local dragging = false
@@ -189,11 +192,5 @@ end)
 UserInputService.InputEnded:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 		dragging = false
-	end
-end)
-
-textBox.FocusLost:Connect(function(enterPressed)
-	if enterPressed then
-		sendButton.MouseButton1Click:Fire()
 	end
 end)
