@@ -139,7 +139,11 @@ DoorsTab:Toggle({
 		local LocalPlayer = Players.LocalPlayer
 
 		if not _G.__ESP_DOORS then
-			_G.__ESP_DOORS = {highlights = {}, conns = {}}
+			_G.__ESP_DOORS = {
+				highlights = {},
+				conns = {},
+				color = Color3.fromRGB(255,215,0)
+			}
 		end
 		local state = _G.__ESP_DOORS
 
@@ -155,8 +159,8 @@ DoorsTab:Toggle({
 			if LocalPlayer.Character and obj == LocalPlayer.Character then return end
 			local h = Instance.new("Highlight")
 			h.Adornee = obj
-			h.FillColor = Color3.fromRGB(0,170,255)
-			h.OutlineColor = Color3.fromRGB(0,170,255)
+			h.FillColor = state.color
+			h.OutlineColor = state.color
 			h.FillTransparency = 0.5
 			h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 			h.Parent = obj
@@ -164,26 +168,36 @@ DoorsTab:Toggle({
 		end
 
 		for _,d in ipairs(workspace:GetDescendants()) do
-			if d.Name == "Door" then
-				apply(d)
-			end
+			if d.Name == "Door" then apply(d) end
 		end
 
 		table.insert(state.conns, workspace.DescendantAdded:Connect(function(d)
-			if d.Name == "Door" then
-				apply(d)
-			end
+			if d.Name == "Door" then apply(d) end
 		end))
 
 		table.insert(state.conns, workspace.DescendantRemoving:Connect(function(d)
 			for i,h in ipairs(state.highlights) do
-				if h.Adornee == d then
-					h:Destroy()
-					table.remove(state.highlights,i)
-					break
-				end
+				if h.Adornee == d then h:Destroy() table.remove(state.highlights,i) break end
 			end
 		end))
+	end
+})
+
+DoorsTab:Colorpicker({
+	Title="ESP Color",
+	Default=Color3.fromRGB(255,215,0),
+	Transparency=0,
+	Locked=false,
+	Callback=function(color)
+		if _G.__ESP_DOORS then
+			_G.__ESP_DOORS.color = color
+			for _,h in ipairs(_G.__ESP_DOORS.highlights) do
+				if h then
+					h.FillColor = color
+					h.OutlineColor = color
+				end
+			end
+		end
 	end
 })
 
@@ -195,7 +209,11 @@ DoorsTab:Toggle({
 		local LocalPlayer = Players.LocalPlayer
 
 		if not _G.__ESP_KEYS then
-			_G.__ESP_KEYS = {highlights = {}, conns = {}}
+			_G.__ESP_KEYS = {
+				highlights = {},
+				conns = {},
+				color = Color3.fromRGB(0,170,255)
+			}
 		end
 		local state = _G.__ESP_KEYS
 
@@ -211,8 +229,8 @@ DoorsTab:Toggle({
 			if LocalPlayer.Character and obj == LocalPlayer.Character then return end
 			local h = Instance.new("Highlight")
 			h.Adornee = obj
-			h.FillColor = Color3.fromRGB(255,215,0)
-			h.OutlineColor = Color3.fromRGB(255,215,0)
+			h.FillColor = state.color
+			h.OutlineColor = state.color
 			h.FillTransparency = 0.3
 			h.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 			h.Parent = obj
@@ -220,26 +238,36 @@ DoorsTab:Toggle({
 		end
 
 		for _,k in ipairs(workspace:GetDescendants()) do
-			if k.Name == "KeyObtain" then
-				apply(k)
-			end
+			if k.Name == "KeyObtain" then apply(k) end
 		end
 
 		table.insert(state.conns, workspace.DescendantAdded:Connect(function(k)
-			if k.Name == "KeyObtain" then
-				apply(k)
-			end
+			if k.Name == "KeyObtain" then apply(k) end
 		end))
 
 		table.insert(state.conns, workspace.DescendantRemoving:Connect(function(k)
 			for i,h in ipairs(state.highlights) do
-				if h.Adornee == k then
-					h:Destroy()
-					table.remove(state.highlights,i)
-					break
-				end
+				if h.Adornee == k then h:Destroy() table.remove(state.highlights,i) break end
 			end
 		end))
+	end
+})
+
+DoorsTab:Colorpicker({
+	Title="ESP Color",
+	Default=Color3.fromRGB(0,170,255),
+	Transparency=0,
+	Locked=false,
+	Callback=function(color)
+		if _G.__ESP_KEYS then
+			_G.__ESP_KEYS.color = color
+			for _,h in ipairs(_G.__ESP_KEYS.highlights) do
+				if h then
+					h.FillColor = color
+					h.OutlineColor = color
+				end
+			end
+		end
 	end
 })
 
