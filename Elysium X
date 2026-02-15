@@ -306,49 +306,57 @@ FPESTab:Toggle({
 })
 
 FPESTab:Toggle({
-	Title="Proximity Alert",
+	Title="Miss Bloomie Aimbot",
 	Value=false,
 	Callback=function(v)
-		if not CallbackState then CallbackState = {} end
-		local state = CallbackState
-		if state.conn then state.conn:Disconnect() state.conn = nil end
+		local RunService = game:GetService("RunService")
+		local Players = game:GetService("Players")
+		local Camera = workspace.CurrentCamera
+		local LocalPlayer = Players.LocalPlayer
+		local Smoothness = 0.12
+		local StudentsFolder = workspace:WaitForChild("Students")
+
+		if _G.__AIMBOT_STUDENTS then
+			_G.__AIMBOT_STUDENTS:Disconnect()
+			_G.__AIMBOT_STUDENTS = nil
+		end
+
 		if not v then return end
 
-		local Players = game:GetService("Players")
-		local RunService = game:GetService("RunService")
-		local lp = Players.LocalPlayer
-		local last = 0
+		local rayParams = RaycastParams.new()
+		rayParams.FilterType = Enum.RaycastFilterType.Blacklist
 
-		state.conn = RunService.Heartbeat:Connect(function()
-			local char = lp.Character
-			local hrp = char and char:FindFirstChild("HumanoidRootPart")
-			if not hrp then return end
+		_G.__AIMBOT_STUDENTS = RunService.RenderStepped:Connect(function()
+			local character = LocalPlayer.Character
+			if character then
+				rayParams.FilterDescendantsInstances = {character}
+			end
 
-			local function checkFolder(folder)
-				if not folder then return end
-				if char.Parent == folder then return end
+			local closest
+			local dist = math.huge
+			local camPos = Camera.CFrame.Position
 
-				for _,m in ipairs(folder:GetChildren()) do
-					if m:IsA("Model") then
-						local root = m:FindFirstChild("HumanoidRootPart")
-						if root and (root.Position - hrp.Position).Magnitude <= 15 then
-							if os.clock() - last >= 3 then
-								last = os.clock()
-								WindUI:Notify({
-									Title="Proximity Alert",
-									Content = m.Name .. " is too close!",
-									Duration = 3,
-									Icon = "rbxassetid://10653372143",
-								})
+			for _,student in ipairs(StudentsFolder:GetChildren()) do
+				if student:IsA("Model") then
+					local head = student:FindFirstChild("Head", true)
+					if head and head:IsA("BasePart") then
+						local dir = head.Position - camPos
+						local result = workspace:Raycast(camPos, dir, rayParams)
+						if result and result.Instance:IsDescendantOf(student) then
+							local d = dir.Magnitude
+							if d < dist then
+								dist = d
+								closest = head
 							end
-							return true
 						end
 					end
 				end
 			end
 
-			if checkFolder(workspace:FindFirstChild("Teachers")) then return end
-			checkFolder(workspace:FindFirstChild("Alices"))
+			if closest then
+				local target = CFrame.new(camPos, closest.Position)
+				Camera.CFrame = Camera.CFrame:Lerp(target, Smoothness)
+			end
 		end)
 	end
 })
@@ -651,48 +659,6 @@ else
 if getgenv().Reverb then
 getgenv().Reverb:Destroy()
 getgenv().Reverb=nil
-end
-end
-end
-})
-
-OthersTab:Toggle({
-Title="HoodTrap",
-Value=false,
-Callback=function(v)
-local sound=getgenv().Sound
-if not sound then return end
-if v then
-if not getgenv().HoodTrap then
-local reverb=Instance.new("ReverbSoundEffect")
-reverb.DecayTime=3.5
-reverb.Density=1
-reverb.Diffusion=1
-reverb.WetLevel=0.6
-reverb.DryLevel=0.8
-reverb.Parent=sound
-
-local distortion=Instance.new("DistortionSoundEffect")
-distortion.Level=0.35
-distortion.Parent=sound
-
-local eq=Instance.new("EqualizerSoundEffect")
-eq.LowGain=10
-eq.MidGain=-2
-eq.HighGain=-6
-eq.Parent=sound
-
-sound.PlaybackSpeed=0.9
-
-getgenv().HoodTrap={reverb,distortion,eq}
-end
-else
-if getgenv().HoodTrap then
-for _,e in pairs(getgenv().HoodTrap) do
-e:Destroy()
-end
-getgenv().HoodTrap=nil
-sound.PlaybackSpeed=1
 end
 end
 end
