@@ -12,13 +12,12 @@ end
 
 local function open_browser(url)
 	if not url then return end
-	local info = {
+	GuiService:BroadcastNotification(HttpService:JSONEncode({
 		presentationStyle = 2,
 		url = tostring(url),
 		title = "Startpage Browser",
 		visible = true
-	}
-	GuiService:BroadcastNotification(HttpService:JSONEncode(info), 20)
+	}), 20)
 end
 
 local player = game.Players.LocalPlayer
@@ -42,7 +41,6 @@ local glow = Instance.new("UIStroke", main)
 glow.Color = Color3.fromRGB(255,60,60)
 glow.Thickness = 6
 glow.Transparency = 0.85
-
 TweenService:Create(glow,TweenInfo.new(2,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut,-1,true),{Transparency=0.6}):Play()
 
 TweenService:Create(main,TweenInfo.new(0.6,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{
@@ -74,32 +72,28 @@ searchButton.TextColor3 = Color3.fromRGB(255,180,180)
 searchButton.BackgroundColor3 = Color3.fromRGB(30,0,0)
 Instance.new("UICorner", searchButton).CornerRadius = UDim.new(1,0)
 
-searchButton.MouseEnter:Connect(function()
-	TweenService:Create(searchButton,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(60,0,0)}):Play()
-end)
-searchButton.MouseLeave:Connect(function()
-	TweenService:Create(searchButton,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(30,0,0)}):Play()
-end)
-
-local tabsButton = Instance.new("ImageButton", main)
-tabsButton.Size = UDim2.new(0,32,0,32)
+local tabsButton = Instance.new("TextButton", main)
+tabsButton.Size = UDim2.new(0,42,0,42)
 tabsButton.Position = UDim2.new(0.82,0,0.5,-21)
-tabsButton.Image = "rbxassetid://140267785051233"
+tabsButton.Text = "+"
+tabsButton.Font = Enum.Font.GothamBold
+tabsButton.TextSize = 26
+tabsButton.TextColor3 = Color3.fromRGB(255,180,180)
 tabsButton.BackgroundColor3 = Color3.fromRGB(20,20,20)
 Instance.new("UICorner", tabsButton).CornerRadius = UDim.new(1,0)
 
 local tabsGui = Instance.new("Frame", screenGui)
-tabsGui.Size = UDim2.new(0,520,0,340)
-tabsGui.Position = UDim2.new(0.5,-260,1,0)
+tabsGui.Size = UDim2.new(0,420,0,260)
+tabsGui.Position = UDim2.new(0.5,-210,1,0)
 tabsGui.BackgroundColor3 = Color3.fromRGB(14,14,14)
 tabsGui.Visible = false
 tabsGui.BorderSizePixel = 0
-Instance.new("UICorner", tabsGui).CornerRadius = UDim.new(0,30)
+Instance.new("UICorner", tabsGui).CornerRadius = UDim.new(0,26)
 Instance.new("UIStroke", tabsGui).Color = Color3.fromRGB(200,40,40)
 
 local closeTabs = Instance.new("TextButton", tabsGui)
-closeTabs.Size = UDim2.new(0,40,0,40)
-closeTabs.Position = UDim2.new(1,-50,0,10)
+closeTabs.Size = UDim2.new(0,36,0,36)
+closeTabs.Position = UDim2.new(1,-44,0,8)
 closeTabs.Text = "X"
 closeTabs.Font = Enum.Font.GothamBold
 closeTabs.TextSize = 18
@@ -108,7 +102,7 @@ closeTabs.BackgroundColor3 = Color3.fromRGB(40,0,0)
 Instance.new("UICorner", closeTabs).CornerRadius = UDim.new(1,0)
 
 local sliderFrame = Instance.new("ScrollingFrame", tabsGui)
-sliderFrame.Size = UDim2.new(0.9,0,0,160)
+sliderFrame.Size = UDim2.new(0.9,0,0,120)
 sliderFrame.Position = UDim2.new(0.05,0,0.18,0)
 sliderFrame.CanvasSize = UDim2.new(0,0,0,0)
 sliderFrame.ScrollBarImageTransparency = 1
@@ -118,17 +112,17 @@ local list = Instance.new("UIListLayout", sliderFrame)
 list.Padding = UDim.new(0,8)
 
 local buttonsFrame = Instance.new("Frame", tabsGui)
-buttonsFrame.Size = UDim2.new(0.9,0,0,120)
-buttonsFrame.Position = UDim2.new(0.05,0,0.7,0)
+buttonsFrame.Size = UDim2.new(0.9,0,0,90)
+buttonsFrame.Position = UDim2.new(0.05,0,0.65,0)
 buttonsFrame.BackgroundTransparency = 1
 
 local function makeBtn(txt,y)
 	local b = Instance.new("TextButton", buttonsFrame)
-	b.Size = UDim2.new(1,0,0,36)
+	b.Size = UDim2.new(1,0,0,28)
 	b.Position = UDim2.new(0,0,y,0)
 	b.Text = txt
 	b.Font = Enum.Font.Gotham
-	b.TextSize = 14
+	b.TextSize = 13
 	b.TextColor3 = Color3.fromRGB(230,230,230)
 	b.BackgroundColor3 = Color3.fromRGB(25,25,25)
 	Instance.new("UICorner", b)
@@ -136,8 +130,8 @@ local function makeBtn(txt,y)
 end
 
 local addTab = makeBtn("Adicionar Guia",0)
-local openTab = makeBtn("Abrir Guia",0.33)
-local closeTab = makeBtn("Fechar Guia",0.66)
+local openTab = makeBtn("Abrir Guia",0.34)
+local closeTab = makeBtn("Fechar Guia",0.68)
 
 local tabs = {}
 local selected
@@ -148,10 +142,10 @@ local function refreshTabs()
 	end
 	for i,text in ipairs(tabs) do
 		local b = Instance.new("TextButton", sliderFrame)
-		b.Size = UDim2.new(1,0,0,36)
+		b.Size = UDim2.new(1,0,0,30)
 		b.Text = text
 		b.Font = Enum.Font.Gotham
-		b.TextSize = 14
+		b.TextSize = 13
 		b.TextColor3 = Color3.fromRGB(220,220,220)
 		b.BackgroundColor3 = i==selected and Color3.fromRGB(60,0,0) or Color3.fromRGB(25,25,25)
 		Instance.new("UICorner", b)
@@ -161,27 +155,27 @@ local function refreshTabs()
 		end)
 	end
 	task.wait()
-	sliderFrame.CanvasSize = UDim2.new(0,0,0,list.AbsoluteContentSize.Y+10)
+	sliderFrame.CanvasSize = UDim2.new(0,0,0,list.AbsoluteContentSize.Y+8)
 end
 
 tabsButton.MouseButton1Click:Connect(function()
 	tabsGui.Visible = true
-	TweenService:Create(tabsGui,TweenInfo.new(0.5,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{
-		Position = UDim2.new(0.5,-260,0.5,-170)
+	TweenService:Create(tabsGui,TweenInfo.new(0.45,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{
+		Position = UDim2.new(0.5,-210,0.5,-130)
 	}):Play()
 end)
 
 closeTabs.MouseButton1Click:Connect(function()
-	TweenService:Create(tabsGui,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.In),{
-		Position = UDim2.new(0.5,-260,1,0)
+	TweenService:Create(tabsGui,TweenInfo.new(0.35,Enum.EasingStyle.Quint,Enum.EasingDirection.In),{
+		Position = UDim2.new(0.5,-210,1,0)
 	}):Play()
-	task.delay(0.4,function() tabsGui.Visible=false end)
+	task.delay(0.35,function() tabsGui.Visible=false end)
 end)
 
 addTab.MouseButton1Click:Connect(function()
-	if textBox.Text~="" then
+	if textBox.Text ~= "" then
 		table.insert(tabs,textBox.Text)
-		selected=#tabs
+		selected = #tabs
 		refreshTabs()
 	end
 end)
@@ -195,7 +189,7 @@ end)
 closeTab.MouseButton1Click:Connect(function()
 	if selected then
 		table.remove(tabs,selected)
-		selected=nil
+		selected = nil
 		refreshTabs()
 	end
 end)
