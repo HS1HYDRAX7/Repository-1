@@ -59,8 +59,8 @@ textBox.TextColor3 = Color3.fromRGB(235,235,235)
 textBox.PlaceholderText = "Search or paste URL"
 textBox.Font = Enum.Font.Gotham
 textBox.TextSize = 15
-textBox.ClearTextOnFocus = false
-Instance.new("UICorner", textBox).CornerRadius = UDim.new(0,22)
+textBox.ClearTextOnFocus = true
+textBox.Text = ""
 
 local searchButton = Instance.new("TextButton", main)
 searchButton.Size = UDim2.new(0,42,0,42)
