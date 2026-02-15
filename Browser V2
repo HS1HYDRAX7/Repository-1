@@ -102,7 +102,7 @@ closeTabs.BackgroundColor3 = Color3.fromRGB(40,0,0)
 Instance.new("UICorner", closeTabs).CornerRadius = UDim.new(1,0)
 
 local sliderFrame = Instance.new("ScrollingFrame", tabsGui)
-sliderFrame.Size = UDim2.new(0.9,0,0,120)
+sliderFrame.Size = UDim2.new(0.9,0,0,100)
 sliderFrame.Position = UDim2.new(0.05,0,0.18,0)
 sliderFrame.CanvasSize = UDim2.new(0,0,0,0)
 sliderFrame.ScrollBarImageTransparency = 1
@@ -129,9 +129,9 @@ local function makeBtn(txt,y)
 	return b
 end
 
-local addTab = makeBtn("Adicionar Guia",0)
-local openTab = makeBtn("Abrir Guia",0.34)
-local closeTab = makeBtn("Fechar Guia",0.68)
+local addTab  = makeBtn("Add Tab",0)
+local openTab = makeBtn("Open Tab",0.34)
+local closeTab= makeBtn("Close Tab",0.68)
 
 local tabs = {}
 local selected
