@@ -437,7 +437,6 @@ end
 
 OthersTab:Toggle({
 Title="Rainbow Trail",
-Icon = "coins",
 Value=false,
 Callback=function(v)
 	local Players=game:GetService("Players")
@@ -447,6 +446,7 @@ Callback=function(v)
 	getgenv()._RainbowTrailState=getgenv()._RainbowTrailState or {
 		trails={},
 		conn=nil,
+		charConn=nil,
 		hue=0
 	}
 
@@ -457,6 +457,10 @@ Callback=function(v)
 			state.conn:Disconnect()
 			state.conn=nil
 		end
+		if state.charConn then
+			state.charConn:Disconnect()
+			state.charConn=nil
+		end
 		for _,t in ipairs(state.trails) do
 			if t and t.Parent then
 				t:Destroy()
@@ -465,10 +469,8 @@ Callback=function(v)
 		state.trails={}
 	end
 
-	if v then
-		if not player.Character then return end
-		clear()
-		for _,part in ipairs(player.Character:GetDescendants()) do
+	local function apply(character)
+		for _,part in ipairs(character:GetDescendants()) do
 			if part:IsA("BasePart") and part.Name~="HumanoidRootPart" then
 				local a0=Instance.new("Attachment")
 				a0.Position=Vector3.new(0,part.Size.Y/2,0)
@@ -495,6 +497,20 @@ Callback=function(v)
 				table.insert(state.trails,trail)
 			end
 		end
+	end
+
+	if v then
+		clear()
+
+		if player.Character then
+			apply(player.Character)
+		end
+
+		state.charConn=player.CharacterAdded:Connect(function(char)
+			task.wait(0.1)
+			clear()
+			apply(char)
+		end)
 
 		state.conn=RunService.RenderStepped:Connect(function(dt)
 			state.hue=(state.hue+dt*0.4)%1
