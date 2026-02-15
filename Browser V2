@@ -28,8 +28,8 @@ local screenGui = Instance.new("ScreenGui", playerGui)
 screenGui.ResetOnSpawn = false
 
 local main = Instance.new("Frame", screenGui)
-main.Size = UDim2.new(0,520,0,70)
-main.Position = UDim2.new(0.5,-260,1,120)
+main.Size = UDim2.new(0,600,0,70)
+main.Position = UDim2.new(0.5,-300,1,120)
 main.BackgroundColor3 = Color3.fromRGB(12,12,12)
 main.BorderSizePixel = 0
 Instance.new("UICorner", main).CornerRadius = UDim.new(0,30)
@@ -45,7 +45,7 @@ glow.Transparency = 0.85
 TweenService:Create(glow,TweenInfo.new(2,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut,-1,true),{Transparency=0.6}):Play()
 
 TweenService:Create(main,TweenInfo.new(0.6,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{
-	Position = UDim2.new(0.5,-260,0.85,-35)
+	Position = UDim2.new(0.5,-300,0.85,-35)
 }):Play()
 
 local dragHandle = Instance.new("Frame", main)
@@ -53,7 +53,7 @@ dragHandle.Size = UDim2.new(1,0,0,8)
 dragHandle.BackgroundTransparency = 1
 
 local textBox = Instance.new("TextBox", main)
-textBox.Size = UDim2.new(0.66,0,0,38)
+textBox.Size = UDim2.new(0.55,0,0,38)
 textBox.Position = UDim2.new(0.04,0,0.5,-19)
 textBox.BackgroundColor3 = Color3.fromRGB(18,18,18)
 textBox.TextColor3 = Color3.fromRGB(235,235,235)
@@ -66,7 +66,7 @@ Instance.new("UICorner", textBox).CornerRadius = UDim.new(0,22)
 
 local searchButton = Instance.new("TextButton", main)
 searchButton.Size = UDim2.new(0,42,0,42)
-searchButton.Position = UDim2.new(0.73,0,0.5,-21)
+searchButton.Position = UDim2.new(0.61,0,0.5,-21)
 searchButton.Text = "↗"
 searchButton.Font = Enum.Font.GothamBold
 searchButton.TextSize = 20
@@ -76,7 +76,7 @@ Instance.new("UICorner", searchButton).CornerRadius = UDim.new(1,0)
 
 local tabsButton = Instance.new("TextButton", main)
 tabsButton.Size = UDim2.new(0,42,0,42)
-tabsButton.Position = UDim2.new(0.82,0,0.5,-21)
+tabsButton.Position = UDim2.new(0.70,0,0.5,-21)
 tabsButton.Text = "+"
 tabsButton.Font = Enum.Font.GothamBold
 tabsButton.TextSize = 26
@@ -86,7 +86,7 @@ Instance.new("UICorner", tabsButton).CornerRadius = UDim.new(1,0)
 
 local musicButton = Instance.new("TextButton", main)
 musicButton.Size = UDim2.new(0,42,0,42)
-musicButton.Position = UDim2.new(0.91,0,0.5,-21)
+musicButton.Position = UDim2.new(0.79,0,0.5,-21)
 musicButton.Text = "🔊"
 musicButton.Font = Enum.Font.GothamBold
 musicButton.TextSize = 18
@@ -113,141 +113,101 @@ closeTabs.TextColor3 = Color3.fromRGB(255,200,200)
 closeTabs.BackgroundColor3 = Color3.fromRGB(40,0,0)
 Instance.new("UICorner", closeTabs).CornerRadius = UDim.new(1,0)
 
-local musicGui = Instance.new("Frame", screenGui)
-musicGui.Size = UDim2.new(0,420,0,300)
-musicGui.Position = UDim2.new(0.5,-210,1,0)
-musicGui.BackgroundColor3 = Color3.fromRGB(14,14,14)
-musicGui.Visible = false
-musicGui.BorderSizePixel = 0
-Instance.new("UICorner", musicGui).CornerRadius = UDim.new(0,26)
-Instance.new("UIStroke", musicGui).Color = Color3.fromRGB(200,40,40)
+local sliderFrame = Instance.new("ScrollingFrame", tabsGui)
+sliderFrame.Size = UDim2.new(0.9,0,0,120)
+sliderFrame.Position = UDim2.new(0.05,0,0.18,0)
+sliderFrame.CanvasSize = UDim2.new(0,0,0,0)
+sliderFrame.ScrollBarImageTransparency = 1
+sliderFrame.BackgroundTransparency = 1
 
-local closeMusic = Instance.new("TextButton", musicGui)
-closeMusic.Size = UDim2.new(0,36,0,36)
-closeMusic.Position = UDim2.new(1,-44,0,8)
-closeMusic.Text = "X"
-closeMusic.Font = Enum.Font.GothamBold
-closeMusic.TextSize = 18
-closeMusic.TextColor3 = Color3.fromRGB(255,200,200)
-closeMusic.BackgroundColor3 = Color3.fromRGB(40,0,0)
-Instance.new("UICorner", closeMusic).CornerRadius = UDim.new(1,0)
+local list = Instance.new("UIListLayout", sliderFrame)
+list.Padding = UDim.new(0,8)
 
-local musicBox = Instance.new("TextBox", musicGui)
-musicBox.Size = UDim2.new(0.9,0,0,36)
-musicBox.Position = UDim2.new(0.05,0,0.18,0)
-musicBox.BackgroundColor3 = Color3.fromRGB(18,18,18)
-musicBox.TextColor3 = Color3.fromRGB(235,235,235)
-musicBox.PlaceholderText = "SoundId"
-musicBox.Font = Enum.Font.Gotham
-musicBox.TextSize = 14
-musicBox.Text = ""
-Instance.new("UICorner", musicBox)
+local buttonsFrame = Instance.new("Frame", tabsGui)
+buttonsFrame.Size = UDim2.new(0.9,0,0,90)
+buttonsFrame.Position = UDim2.new(0.05,0,0.6,0)
+buttonsFrame.BackgroundTransparency = 1
 
-local infoLabel = Instance.new("TextLabel", musicGui)
-infoLabel.Size = UDim2.new(0.9,0,0,30)
-infoLabel.Position = UDim2.new(0.05,0,0.32,0)
-infoLabel.Text = "00:00 / Music"
-infoLabel.Font = Enum.Font.Gotham
-infoLabel.TextSize = 13
-infoLabel.TextColor3 = Color3.fromRGB(220,220,220)
-infoLabel.BackgroundTransparency = 1
+local function makeBtn(txt,y)
+	local b = Instance.new("TextButton", buttonsFrame)
+	b.Size = UDim2.new(1,0,0,28)
+	b.Position = UDim2.new(0,0,y,0)
+	b.Text = txt
+	b.Font = Enum.Font.Gotham
+	b.TextSize = 13
+	b.TextColor3 = Color3.fromRGB(230,230,230)
+	b.BackgroundColor3 = Color3.fromRGB(25,25,25)
+	Instance.new("UICorner", b)
+	return b
+end
 
-local reverbToggle = Instance.new("TextButton", musicGui)
-reverbToggle.Size = UDim2.new(0.9,0,0,30)
-reverbToggle.Position = UDim2.new(0.05,0,0.45,0)
-reverbToggle.Text = "Reverb: OFF"
-reverbToggle.Font = Enum.Font.Gotham
-reverbToggle.TextSize = 13
-reverbToggle.TextColor3 = Color3.fromRGB(230,230,230)
-reverbToggle.BackgroundColor3 = Color3.fromRGB(25,25,25)
-Instance.new("UICorner", reverbToggle)
+local addTab  = makeBtn("Add Tab",0)
+local openTab = makeBtn("Open Tab",0.34)
+local closeTab= makeBtn("Close Tab",0.68)
 
-local backBtn = Instance.new("TextButton", musicGui)
-backBtn.Size = UDim2.new(0.42,0,0,32)
-backBtn.Position = UDim2.new(0.05,0,0.6,0)
-backBtn.Text = "⏪"
-backBtn.Font = Enum.Font.GothamBold
-backBtn.TextSize = 18
-backBtn.TextColor3 = Color3.fromRGB(230,230,230)
-backBtn.BackgroundColor3 = Color3.fromRGB(25,25,25)
-Instance.new("UICorner", backBtn)
+local tabs = {}
+local selected
 
-local nextBtn = Instance.new("TextButton", musicGui)
-nextBtn.Size = UDim2.new(0.42,0,0,32)
-nextBtn.Position = UDim2.new(0.53,0,0.6,0)
-nextBtn.Text = "⏩"
-nextBtn.Font = Enum.Font.GothamBold
-nextBtn.TextSize = 18
-nextBtn.TextColor3 = Color3.fromRGB(230,230,230)
-nextBtn.BackgroundColor3 = Color3.fromRGB(25,25,25)
-Instance.new("UICorner", nextBtn)
+local function refreshTabs()
+	for _,v in ipairs(sliderFrame:GetChildren()) do
+		if v:IsA("TextButton") then v:Destroy() end
+	end
+	for i,text in ipairs(tabs) do
+		local b = Instance.new("TextButton", sliderFrame)
+		b.Size = UDim2.new(1,0,0,30)
+		b.Text = text
+		b.Font = Enum.Font.Gotham
+		b.TextSize = 13
+		b.TextColor3 = Color3.fromRGB(220,220,220)
+		b.BackgroundColor3 = i==selected and Color3.fromRGB(60,0,0) or Color3.fromRGB(25,25,25)
+		Instance.new("UICorner", b)
+		b.MouseButton1Click:Connect(function()
+			selected = i
+			refreshTabs()
+		end)
+	end
+	task.wait()
+	sliderFrame.CanvasSize = UDim2.new(0,0,0,list.AbsoluteContentSize.Y+8)
+end
 
-local playBtn = Instance.new("TextButton", musicGui)
-playBtn.Size = UDim2.new(0.42,0,0,32)
-playBtn.Position = UDim2.new(0.05,0,0.75,0)
-playBtn.Text = "▶️"
-playBtn.Font = Enum.Font.GothamBold
-playBtn.TextSize = 18
-playBtn.TextColor3 = Color3.fromRGB(230,230,230)
-playBtn.BackgroundColor3 = Color3.fromRGB(25,25,25)
-Instance.new("UICorner", playBtn)
-
-local pauseBtn = Instance.new("TextButton", musicGui)
-pauseBtn.Size = UDim2.new(0.42,0,0,32)
-pauseBtn.Position = UDim2.new(0.53,0,0.75,0)
-pauseBtn.Text = "⏹️"
-pauseBtn.Font = Enum.Font.GothamBold
-pauseBtn.TextSize = 18
-pauseBtn.TextColor3 = Color3.fromRGB(230,230,230)
-pauseBtn.BackgroundColor3 = Color3.fromRGB(25,25,25)
-Instance.new("UICorner", pauseBtn)
-
-local sound = Instance.new("Sound", SoundService)
-sound.Looped = false
-
-local reverb = Instance.new("ReverbSoundEffect", sound)
-reverb.Enabled = false
-
-musicButton.MouseButton1Click:Connect(function()
-	musicGui.Visible = true
-	TweenService:Create(musicGui,TweenInfo.new(0.45,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{
-		Position = UDim2.new(0.5,-210,0.5,-150)
+tabsButton.MouseButton1Click:Connect(function()
+	tabsGui.Visible = true
+	TweenService:Create(tabsGui,TweenInfo.new(0.45,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{
+		Position = UDim2.new(0.5,-210,0.5,-130)
 	}):Play()
 end)
 
-closeMusic.MouseButton1Click:Connect(function()
-	TweenService:Create(musicGui,TweenInfo.new(0.35,Enum.EasingStyle.Quint,Enum.EasingDirection.In),{
+closeTabs.MouseButton1Click:Connect(function()
+	TweenService:Create(tabsGui,TweenInfo.new(0.35,Enum.EasingStyle.Quint,Enum.EasingDirection.In),{
 		Position = UDim2.new(0.5,-210,1,0)
 	}):Play()
-	task.delay(0.35,function() musicGui.Visible=false end)
+	task.delay(0.35,function() tabsGui.Visible=false end)
 end)
 
-playBtn.MouseButton1Click:Connect(function()
-	if musicBox.Text ~= "" then
-		sound.SoundId = "rbxassetid://"..musicBox.Text
-		sound:Play()
+addTab.MouseButton1Click:Connect(function()
+	if textBox.Text ~= "" then
+		table.insert(tabs,textBox.Text)
+		selected = #tabs
+		refreshTabs()
 	end
 end)
 
-pauseBtn.MouseButton1Click:Connect(function()
-	sound:Pause()
+openTab.MouseButton1Click:Connect(function()
+	if selected and tabs[selected] then
+		open_browser(formatUrl(tabs[selected]))
+	end
 end)
 
-backBtn.MouseButton1Click:Connect(function()
-	sound.TimePosition = math.max(0,sound.TimePosition-10)
+closeTab.MouseButton1Click:Connect(function()
+	if selected then
+		table.remove(tabs,selected)
+		selected = nil
+		refreshTabs()
+	end
 end)
 
-nextBtn.MouseButton1Click:Connect(function()
-	sound.TimePosition = sound.TimePosition+10
-end)
-
-reverbToggle.MouseButton1Click:Connect(function()
-	reverb.Enabled = not reverb.Enabled
-	reverbToggle.Text = reverb.Enabled and "Reverb: ON" or "Reverb: OFF"
-end)
-
-sound.TimePositionChanged:Connect(function()
-	infoLabel.Text = string.format("%02d:%02d / Music",math.floor(sound.TimePosition/60),math.floor(sound.TimePosition%60))
+searchButton.MouseButton1Click:Connect(function()
+	open_browser(formatUrl(textBox.Text))
 end)
 
 local dragging,dragStart,startPos=false
