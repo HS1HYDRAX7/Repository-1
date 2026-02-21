@@ -57,15 +57,24 @@ searchButton.TextColor3 = Color3.fromRGB(255,180,180)
 searchButton.BackgroundColor3 = Color3.fromRGB(30,0,0)
 Instance.new("UICorner", searchButton).CornerRadius = UDim.new(1,0)
 
-local clearButton = Instance.new("TextButton", main)
-clearButton.Size = UDim2.new(0,42,0,42)
-clearButton.Position = UDim2.new(0.80,0,0.5,-21)
-clearButton.Text = "X"
-clearButton.Font = Enum.Font.GothamBold
-clearButton.TextSize = 18
-clearButton.TextColor3 = Color3.fromRGB(255,255,255)
-clearButton.BackgroundColor3 = Color3.fromRGB(200,40,40)
-Instance.new("UICorner", clearButton).CornerRadius = UDim.new(1,0)
+local destroyButton = Instance.new("TextButton", main)
+destroyButton.Size = UDim2.new(0,42,0,42)
+destroyButton.Position = UDim2.new(0.80,0,0.5,-21)
+destroyButton.Text = "X"
+destroyButton.Font = Enum.Font.GothamBold
+destroyButton.TextSize = 18
+destroyButton.TextColor3 = Color3.fromRGB(255,255,255)
+destroyButton.BackgroundColor3 = Color3.fromRGB(200,40,40)
+Instance.new("UICorner", destroyButton).CornerRadius = UDim.new(1,0)
+
+destroyButton.MouseButton1Click:Connect(function()
+	TweenService:Create(main, TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+		Position = UDim2.new(0.5, -280, 1, 0)
+	}):Play()
+	task.delay(0.35, function()
+		screenGui:Destroy()
+	end)
+end)
 
 local resultsGui = Instance.new("Frame", screenGui)
 resultsGui.Size = UDim2.new(0,460,0,320)
@@ -188,11 +197,6 @@ searchButton.MouseButton1Click:Connect(function()
 		}):Play()
 		searchScripts(textBox.Text)
 	end
-end)
-
-clearButton.MouseButton1Click:Connect(function()
-	textBox.Text = ""
-	clearResults()
 end)
 
 closeResults.MouseButton1Click:Connect(function()
