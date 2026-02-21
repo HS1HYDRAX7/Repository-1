@@ -36,7 +36,7 @@ dragHandle.Size = UDim2.new(1,0,0,8)
 dragHandle.BackgroundTransparency = 1
 
 local textBox = Instance.new("TextBox", main)
-textBox.Size = UDim2.new(0.65,0,0,38)
+textBox.Size = UDim2.new(0.75,0,0,38)
 textBox.Position = UDim2.new(0.04,0,0.5,-19)
 textBox.BackgroundColor3 = Color3.fromRGB(18,18,18)
 textBox.TextColor3 = Color3.fromRGB(235,235,235)
@@ -49,7 +49,7 @@ Instance.new("UICorner", textBox).CornerRadius = UDim.new(0,22)
 
 local searchButton = Instance.new("TextButton", main)
 searchButton.Size = UDim2.new(0,42,0,42)
-searchButton.Position = UDim2.new(0.72,0,0.5,-21)
+searchButton.Position = UDim2.new(0.70,0,0.5,-21)
 searchButton.Text = "🔎"
 searchButton.Font = Enum.Font.GothamBold
 searchButton.TextSize = 18
@@ -59,7 +59,7 @@ Instance.new("UICorner", searchButton).CornerRadius = UDim.new(1,0)
 
 local destroyButton = Instance.new("TextButton", main)
 destroyButton.Size = UDim2.new(0,42,0,42)
-destroyButton.Position = UDim2.new(0.80,0,0.5,-21)
+destroyButton.Position = UDim2.new(0.88,0,0.5,-21)
 destroyButton.Text = "X"
 destroyButton.Font = Enum.Font.GothamBold
 destroyButton.TextSize = 18
