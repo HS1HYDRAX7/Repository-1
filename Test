@@ -1,0 +1,240 @@
+local GuiService = game:GetService("GuiService")
+local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local SoundService = game:GetService("SoundService")
+
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+local screenGui = Instance.new("ScreenGui", playerGui)
+screenGui.ResetOnSpawn = false
+
+local main = Instance.new("Frame", screenGui)
+main.Size = UDim2.new(0,520,0,70)
+main.Position = UDim2.new(0.5,-270,1,120)
+main.BackgroundColor3 = Color3.fromRGB(12,12,12)
+main.BorderSizePixel = 0
+Instance.new("UICorner", main).CornerRadius = UDim.new(0,30)
+
+local stroke = Instance.new("UIStroke", main)
+stroke.Color = Color3.fromRGB(200,40,40)
+stroke.Thickness = 2
+
+local glow = Instance.new("UIStroke", main)
+glow.Color = Color3.fromRGB(255,60,60)
+glow.Thickness = 6
+glow.Transparency = 0.85
+TweenService:Create(glow,TweenInfo.new(2,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut,-1,true),{Transparency=0.6}):Play()
+
+TweenService:Create(main,TweenInfo.new(0.6,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{
+	Position = UDim2.new(0.5,-270,0.85,-35)
+}):Play()
+
+local dragHandle = Instance.new("Frame", main)
+dragHandle.Size = UDim2.new(1,0,0,8)
+dragHandle.BackgroundTransparency = 1
+
+local textBox = Instance.new("TextBox", main)
+textBox.Size = UDim2.new(0.55,0,0,38)
+textBox.Position = UDim2.new(0.04,0,0.5,-19)
+textBox.BackgroundColor3 = Color3.fromRGB(18,18,18)
+textBox.TextColor3 = Color3.fromRGB(235,235,235)
+textBox.PlaceholderText = "Search script..."
+textBox.Font = Enum.Font.Gotham
+textBox.TextSize = 15
+textBox.ClearTextOnFocus = false
+textBox.Text = ""
+Instance.new("UICorner", textBox).CornerRadius = UDim.new(0,22)
+
+local searchButton = Instance.new("TextButton", main)
+searchButton.Size = UDim2.new(0,42,0,42)
+searchButton.Position = UDim2.new(0.61,0,0.5,-21)
+searchButton.Text = "🔎"
+searchButton.Font = Enum.Font.GothamBold
+searchButton.TextSize = 18
+searchButton.TextColor3 = Color3.fromRGB(255,180,180)
+searchButton.BackgroundColor3 = Color3.fromRGB(30,0,0)
+Instance.new("UICorner", searchButton).CornerRadius = UDim.new(1,0)
+
+local resultsGui = Instance.new("Frame", screenGui)
+resultsGui.Size = UDim2.new(0,420,0,300)
+resultsGui.Position = UDim2.new(0.5,-210,1,0)
+resultsGui.BackgroundColor3 = Color3.fromRGB(14,14,14)
+resultsGui.Visible = false
+resultsGui.BorderSizePixel = 0
+Instance.new("UICorner", resultsGui).CornerRadius = UDim.new(0,26)
+Instance.new("UIStroke", resultsGui).Color = Color3.fromRGB(200,40,40)
+
+local closeResults = Instance.new("TextButton", resultsGui)
+closeResults.Size = UDim2.new(0,36,0,36)
+closeResults.Position = UDim2.new(1,-44,0,8)
+closeResults.Text = "X"
+closeResults.Font = Enum.Font.GothamBold
+closeResults.TextSize = 18
+closeResults.TextColor3 = Color3.fromRGB(255,200,200)
+closeResults.BackgroundColor3 = Color3.fromRGB(40,0,0)
+Instance.new("UICorner", closeResults).CornerRadius = UDim.new(1,0)
+
+local loading = Instance.new("TextLabel", resultsGui)
+loading.Size = UDim2.new(1,0,0,30)
+loading.Position = UDim2.new(0,0,0.1,0)
+loading.BackgroundTransparency = 1
+loading.Text = "Loading..."
+loading.Font = Enum.Font.GothamBold
+loading.TextSize = 16
+loading.TextColor3 = Color3.fromRGB(255,180,180)
+loading.Visible = false
+
+local sliderBar = Instance.new("Frame", resultsGui)
+sliderBar.Size = UDim2.new(0.8,0,0,6)
+sliderBar.Position = UDim2.new(0.1,0,0.22,0)
+sliderBar.BackgroundColor3 = Color3.fromRGB(30,30,30)
+Instance.new("UICorner", sliderBar).CornerRadius = UDim.new(1,0)
+
+local sliderFill = Instance.new("Frame", sliderBar)
+sliderFill.Size = UDim2.new(0.3,0,1,0)
+sliderFill.BackgroundColor3 = Color3.fromRGB(200,40,40)
+Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(1,0)
+
+local limit = 5
+local draggingSlider = false
+
+sliderBar.InputBegan:Connect(function(i)
+	if i.UserInputType==Enum.UserInputType.MouseButton1 then
+		draggingSlider=true
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(i)
+	if draggingSlider and i.UserInputType==Enum.UserInputType.MouseMovement then
+		local percent = math.clamp((i.Position.X-sliderBar.AbsolutePosition.X)/sliderBar.AbsoluteSize.X,0,1)
+		sliderFill.Size = UDim2.new(percent,0,1,0)
+		limit = math.floor(1 + percent*19)
+	end
+end)
+
+UserInputService.InputEnded:Connect(function(i)
+	if i.UserInputType==Enum.UserInputType.MouseButton1 then
+		draggingSlider=false
+	end
+end)
+
+local scroll = Instance.new("ScrollingFrame", resultsGui)
+scroll.Size = UDim2.new(0.9,0,0.6,0)
+scroll.Position = UDim2.new(0.05,0,0.32,0)
+scroll.CanvasSize = UDim2.new(0,0,0,0)
+scroll.ScrollBarImageTransparency = 0.5
+scroll.BackgroundTransparency = 1
+
+local layout = Instance.new("UIListLayout", scroll)
+layout.Padding = UDim.new(0,10)
+
+layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	scroll.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y+10)
+end)
+
+local function clearResults()
+	for _,v in ipairs(scroll:GetChildren()) do
+		if v:IsA("Frame") then
+			v:Destroy()
+		end
+	end
+end
+
+local function createCard(data)
+	local card = Instance.new("Frame", scroll)
+	card.Size = UDim2.new(1,0,0,90)
+	card.BackgroundColor3 = Color3.fromRGB(22,22,22)
+	Instance.new("UICorner", card).CornerRadius = UDim.new(0,16)
+
+	local views = Instance.new("TextLabel", card)
+	views.Size = UDim2.new(1,-20,0,25)
+	views.Position = UDim2.new(0,10,0,5)
+	views.BackgroundTransparency = 1
+	views.Text = "Visualizações: "..tostring(data.views or 0)
+	views.Font = Enum.Font.Gotham
+	views.TextSize = 13
+	views.TextColor3 = Color3.fromRGB(255,180,180)
+	views.TextXAlignment = Enum.TextXAlignment.Left
+
+	local title = Instance.new("TextLabel", card)
+	title.Size = UDim2.new(1,-20,0,30)
+	title.Position = UDim2.new(0,10,0,30)
+	title.BackgroundTransparency = 1
+	title.Text = data.title or "No Name"
+	title.Font = Enum.Font.GothamBold
+	title.TextSize = 14
+	title.TextColor3 = Color3.fromRGB(230,230,230)
+	title.TextWrapped = true
+	title.TextXAlignment = Enum.TextXAlignment.Left
+
+	local author = Instance.new("TextLabel", card)
+	author.Size = UDim2.new(1,-20,0,20)
+	author.Position = UDim2.new(0,10,1,-25)
+	author.BackgroundTransparency = 1
+	author.Text = "Autor: "..(data.user and data.user.username or "Unknown")
+	author.Font = Enum.Font.Gotham
+	author.TextSize = 12
+	author.TextColor3 = Color3.fromRGB(180,180,180)
+	author.TextXAlignment = Enum.TextXAlignment.Left
+end
+
+local function searchScripts(query)
+	clearResults()
+	loading.Visible = true
+	local url = "https://scriptblox.com/api/script/search?q="..HttpService:UrlEncode(query)
+	local success,response = pcall(function()
+		return game:HttpGet(url)
+	end)
+	if success then
+		local decoded = HttpService:JSONDecode(response)
+		if decoded and decoded.result and decoded.result.scripts then
+			for i,v in ipairs(decoded.result.scripts) do
+				if i>limit then break end
+				createCard(v)
+			end
+		end
+	end
+	loading.Visible = false
+end
+
+searchButton.MouseButton1Click:Connect(function()
+	if textBox.Text~="" then
+		resultsGui.Visible=true
+		TweenService:Create(resultsGui,TweenInfo.new(0.4,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{
+			Position=UDim2.new(0.5,-210,0.5,-150)
+		}):Play()
+		searchScripts(textBox.Text)
+	end
+end)
+
+closeResults.MouseButton1Click:Connect(function()
+	TweenService:Create(resultsGui,TweenInfo.new(0.35,Enum.EasingStyle.Quint,Enum.EasingDirection.In),{
+		Position=UDim2.new(0.5,-210,1,0)
+	}):Play()
+	task.delay(0.35,function()
+		resultsGui.Visible=false
+	end)
+end)
+
+local dragging,dragStart,startPos=false
+
+dragHandle.InputBegan:Connect(function(i)
+	if i.UserInputType==Enum.UserInputType.MouseButton1 then
+		dragging=true
+		dragStart=i.Position
+		startPos=main.Position
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(i)
+	if dragging and i.UserInputType==Enum.UserInputType.MouseMovement then
+		local d=i.Position-dragStart
+		main.Position=UDim2.new(startPos.X.Scale,startPos.X.Offset+d.X,startPos.Y.Scale,startPos.Y.Offset+d.Y)
+	end
+end)
+
+UserInputService.InputEnded:Connect(function(i)
+	if i.UserInputType==Enum.UserInputType.MouseButton1 then dragging=false end
+end)
