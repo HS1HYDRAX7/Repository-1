@@ -36,20 +36,20 @@ dragHandle.Size = UDim2.new(1,0,0,8)
 dragHandle.BackgroundTransparency = 1
 
 local textBox = Instance.new("TextBox", main)
-textBox.Size = UDim2.new(0.75,0,0,38)
+textBox.Size = UDim2.new(0.85,0,0,38)
 textBox.Position = UDim2.new(0.04,0,0.5,-19)
 textBox.BackgroundColor3 = Color3.fromRGB(18,18,18)
 textBox.TextColor3 = Color3.fromRGB(235,235,235)
 textBox.PlaceholderText = "Search script..."
 textBox.Font = Enum.Font.Gotham
 textBox.TextSize = 16
-textBox.ClearTextOnFocus = false
+textBox.ClearTextOnFocus = true
 textBox.Text = ""
 Instance.new("UICorner", textBox).CornerRadius = UDim.new(0,22)
 
 local searchButton = Instance.new("TextButton", main)
 searchButton.Size = UDim2.new(0,42,0,42)
-searchButton.Position = UDim2.new(0.70,0,0.5,-21)
+searchButton.Position = UDim2.new(0.79,0,0.5,-21)
 searchButton.Text = "🔎"
 searchButton.Font = Enum.Font.GothamBold
 searchButton.TextSize = 18
